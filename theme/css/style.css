@@ -165,6 +165,10 @@ article {
   float: left;
 }
 
+.read-more a {
+  margin-left: 5px;
+}
+
 .icon-social-facebook-rect {
   position: relative;
   left: 2px;
