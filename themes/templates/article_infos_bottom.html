@@ -1,0 +1,8 @@
+<p class="subheader">
+{% if article.tags %}
+    Tagged: 
+    {% for tag in article.tags %}
+    <a href="{{ SITEURL }}/{{ tag.url }}">{{ tag }} </a>
+    {% endfor %}
+{% endif %}
+</p>

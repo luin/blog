@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title|striptags }} | {{ SITENAME }}{% endblock %}
+{% block content %}
+<article>
+  <header>
+    <p class="article-meta" title="{{ article.date.isoformat() }}">{{ article.locale_date }}</p>
+    <h2 class="article-title"><a href="{{ SITEURL }}/{{ article.url }}" rel="bookmark"
+    title="Permalink to {{ article.title|striptags }}">{{ article.title}}</a></h3>
+    {% include 'twitter.html' %}
+  </header>
+  <div class="typo article-body">
+    {{ article.content }}
+  </div>
+  <div class="hr"></div>
+  <section class="article-share clearfix">
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <div class="about-blog">
+      <h4>关于此博客</h4>
+      <p>Luin 的个人博客，主要关注互联网技术。</p>
+      <a href="https://twitter.com/luinlee" class="twitter-follow-button" data-show-count="false" data-lang="en">Follow @luinlee</a>
+    </div>
+    <div class="share">
+      <h4>分享这篇文章</h4>
+      <a class="icon-social icon-social-twitter-bird" href="http://twitter.com/share?text={{ article.title }}&url={{ SITEURL }}/{{ article.url }}" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+      </a>
+      <a class="icon-social icon-social-weibo" href="http://service.weibo.com/share/share.php?title={{ article.title }}&url={{ SITEURL }}/{{ article.url }}" onclick="window.open(this.href, 'weibo-share', 'width=550,height=435');return false;">
+        <span class="hidden">微博</span>
+      </a>
+    </div>
+  </section>
+  {% if DISQUS_SITENAME and SITEURL and article.status != "draft" %}
+  <div class="hr"></div>
+  {% include 'disqus_script.html' %}
+  {% endif %}
+</article>
+{% endblock %}
