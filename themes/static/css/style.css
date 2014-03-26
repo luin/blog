@@ -13,6 +13,10 @@ a:link, a:visited, a:hover, a:active {
   text-decoration: none;
 }
 
+.pull-right {
+  text-align: right;
+}
+
 .hidden {
   display: none;
 }
@@ -447,6 +451,19 @@ body {-webkit-tap-highlight-color: #90cc67;}
     .article-body .right {
       width: 50%;
     }
+    .article-share .about-blog > p {
+      margin-bottom: 4px;
+    }
+    .article-share .about-blog,
+    .article-share .about-blog > p,
+    .article-share .about-blog > a,
+    .article-share .about-blog > iframe {
+      float: none;
+    }
+    .article-share .share {
+      margin-top: 10px;
+      float: none;
+    }
   }
 
 
@@ -463,5 +480,13 @@ body {-webkit-tap-highlight-color: #90cc67;}
 
     .l-content > .inner {
       padding: 50px 25px;
+    }
+    .article-share .about-blog,
+    .article-share .about-blog > a {
+      float: left;
+    }
+    .article-share .share {
+      margin-top: 0;
+      float: right;
     }
   }
