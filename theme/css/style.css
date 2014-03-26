@@ -451,6 +451,15 @@ body {-webkit-tap-highlight-color: #90cc67;}
     .article-body .right {
       width: 50%;
     }
+    .article-share .about-blog,
+    .article-share .about-blog > p,
+    .article-share .about-blog > a,
+    .article-share .about-blog > iframe {
+      float: none;
+    }
+    .article-share .share {
+      float: none;
+    }
   }
 
 
@@ -467,5 +476,14 @@ body {-webkit-tap-highlight-color: #90cc67;}
 
     .l-content > .inner {
       padding: 50px 25px;
+    }
+    .article-share .about-blog,
+    .article-share .about-blog > p,
+    .article-share .about-blog > a,
+    .article-share .about-blog > iframe {
+      float: left;
+    }
+    .article-share .share {
+      float: right;
     }
   }
