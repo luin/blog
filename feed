@@ -170,8 +170,8 @@
   &lt;div class="left"&gt;
     最近在做一个产品列表页面，布局如右图所示。页面中有若干个 item，其中每个 item 都向左浮动，并包含在自适应浏览器窗口宽度的父元素中。
   &lt;/div&gt;
-  &lt;aside class="right"&gt;
-    &lt;img src="http://zihua.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" /&gt;
+  &lt;aside class="right pull-right"&gt;
+    &lt;img style="float:right" src="http://zihua.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" /&gt;
   &lt;/aside&gt;
 &lt;/div&gt;
 

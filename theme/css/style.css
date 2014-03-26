@@ -13,6 +13,10 @@ a:link, a:visited, a:hover, a:active {
   text-decoration: none;
 }
 
+.pull-right {
+  text-align: right;
+}
+
 .hidden {
   display: none;
 }
@@ -446,6 +450,10 @@ body {-webkit-tap-highlight-color: #90cc67;}
 
     .article-body .right {
       width: 50%;
+    }
+
+    .pull-right {
+      text-align: left;
     }
   }
 
