@@ -458,6 +458,7 @@ body {-webkit-tap-highlight-color: #90cc67;}
       float: none;
     }
     .article-share .share {
+      margin-top: 10px;
       float: none;
     }
   }
@@ -479,8 +480,7 @@ body {-webkit-tap-highlight-color: #90cc67;}
     }
     .article-share .about-blog,
     .article-share .about-blog > p,
-    .article-share .about-blog > a,
-    .article-share .about-blog > iframe {
+    .article-share .about-blog > a {
       float: left;
     }
     .article-share .share {
