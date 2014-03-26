@@ -65,4 +65,3 @@ PLUGIN_PATH = 'plugins'
 PLUGINS = ['summary']
 
 STATIC_PATHS = ['images', 'extra/CNAME']
-EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'},}
