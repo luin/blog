@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Zihua Li - php</title>
+      <link href="http://blog.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
+    <link href='http://fonts.googleapis.com/css?family=Noto+Serif|Montserrat:700' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet'  href='http://blog.li/theme/css/normalize.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://blog.li/theme/css/style.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://blog.li/theme/css/highlight.css' type='text/css' media='all' />
+</head>
+<body>
+  <section class="l-cover">
+    <header id="banner" class="body">
+      <h1 class="site-name"><a href="http://blog.li/">Zihua Li</a></h1>
+      <p class="description">
+        设计师、全栈工程师（Web, iOS）<br>90 后，法号 Luin<br />
+        [<a href="http://blog.li/pages/about/">关于</a>, <a href="http://blog.li/pages/novel/">小说</a>]
+      </p>
+      <ul class="social-links">
+        <li><a href="https://twitter.com/luinlee">Twitter</a></li>
+        <li><a href="https://github.com/luin">Github</a></li>
+        <li><a href="http://dribbble.com/luin">Dribbble</a></li>
+      </ul>
+    </header>
+  </section>
+  <section class="l-content">
+    <div class="inner">
+  <article class="index-article">
+    <header>
+      <a href="http://blog.li/2012/03/utf-8-with-bom-headers-already-sent/">
+        <h2 class="article-title">编码问题导致的 Headers already sent 错误</h2>
+      </a>
+      <p class="article-meta" title="2012-03-05T00:00:00">05 Mar 2012</p>
+    </header>
+    <div class="typo article-body">
+      <p>前些日子同学找我来说我帮他做的网站的注册功能失效了。我看了一下发现是由于301跳转失败导致的。
+查看日志错误内容为：</p>
+<blockquote>
+<p>Warning: Cannot modify header information - headers already sent by (output started at...</p>
+</blockquote>
+<p>但看了一下源代码却没有发现问题，在本机运行也一切正常。<code>&lt;?php</code> 前面和 <code>?&gt;</code> 后面都没有字符。</p>
+<p>百思不得其解，使用W3C的HTML校验却发现了:</p>
+<blockquote>
+<p>Byte-Order Mark found in UTF-8 File.</p>
+</blockquote>
+<p>才发现是由于他们在部署网站改配置时用记事本编辑保存成了UTF-8 with BOM导致的问题。解决方法也很简单，改成without BOM就好了。</p>
+<p>由此可见编辑器对Web开发有多重要（我一直在用Coda，很顺手）。</p>
+<p>顺便提示一下PHP开发好习惯，就是只写 <code>&lt;?php</code> 不写 <code>?&gt;</code>，原因就是谁也不能保证啥时手贱在 <code>?&gt;</code> 后面打些什么东西导致Headers already sent错误（当然如果你把PHP当模板语言用就不能不用 <code>?&gt;</code> 了）。</p>
+    </div>
+    <div class="clearfix">
+      <a class="button radius secondary small right" href="http://blog.li/2012/03/utf-8-with-bom-headers-already-sent/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://blog.li/2012/03/utf-8-with-bom-headers-already-sent/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article">
+    <header>
+      <a href="http://blog.li/2011/06/singleton-in-php/">
+        <h2 class="article-title">PHP 实现单例模式</h2>
+      </a>
+      <p class="article-meta" title="2011-06-17T00:00:00">17 Jun 2011</p>
+    </header>
+    <div class="typo article-body">
+      <p>目前的一个项目有几个模块需要实现单例模式，于是想实现一个 Singleton 基类来使这些模块通过继承该基类实现 Singleton。</p>
+
+    </div>
+    <div class="clearfix">
+      <a class="button radius secondary small right" href="http://blog.li/2011/06/singleton-in-php/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://blog.li/2011/06/singleton-in-php/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+<p class="paginator">
+    Page 1 / 1
+</p>
+
+<script type="text/javascript">
+var disqus_shortname = 'zihuali';
+(function () {
+var s = document.createElement('script'); s.async = true;
+s.type = 'text/javascript';
+s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+(document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+    </div>
+  </section>
+  <script type="text/javascript">
+    var clicky_site_ids = clicky_site_ids || [];
+    clicky_site_ids.push(100680749);
+    (function() {
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = '//static.getclicky.com/js';
+      ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+    })();
+  </script>
+  <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100680749ns.gif" /></p></noscript>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-46124852-1', 'zihua.li');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>

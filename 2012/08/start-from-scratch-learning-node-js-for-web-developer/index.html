@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Web 开发者怎么学 Node.js | Zihua Li</title>
+      <link href="http://blog.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
+    <link href='http://fonts.googleapis.com/css?family=Noto+Serif|Montserrat:700' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet'  href='http://blog.li/theme/css/normalize.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://blog.li/theme/css/style.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://blog.li/theme/css/highlight.css' type='text/css' media='all' />
+</head>
+<body>
+  <section class="l-cover">
+    <header id="banner" class="body">
+      <h1 class="site-name"><a href="http://blog.li/">Zihua Li</a></h1>
+      <p class="description">
+        设计师、全栈工程师（Web, iOS）<br>90 后，法号 Luin<br />
+        [<a href="http://blog.li/pages/about/">关于</a>, <a href="http://blog.li/pages/novel/">小说</a>]
+      </p>
+      <ul class="social-links">
+        <li><a href="https://twitter.com/luinlee">Twitter</a></li>
+        <li><a href="https://github.com/luin">Github</a></li>
+        <li><a href="http://dribbble.com/luin">Dribbble</a></li>
+      </ul>
+    </header>
+  </section>
+  <section class="l-content">
+    <div class="inner">
+<article>
+  <header>
+    <p class="article-meta" title="2012-08-12T00:00:00">12 Aug 2012</p>
+    <h2 class="article-title"><a href="http://blog.li/2012/08/start-from-scratch-learning-node-js-for-web-developer/" rel="bookmark"
+    title="Permalink to Web 开发者怎么学 Node.js">Web 开发者怎么学 Node.js</a></h3>
+  </header>
+  <div class="typo article-body">
+    <p>如果你是一个 Web 开发者，想必你一定听过 Node.js。这篇文章会告诉你如何开始学习 Node.js。</p>
+<p>这里假定你有过 Web 后端的开发经验，无论是 PHP, Python, Ruby 还是 Java。</p>
+
+
+<h3>1. 学习 JavaScript</h3>
+<p>接触过前端 JavaScript 开发的同学可以跳过这一部分，只需要确认你已经掌握了<strong>闭包</strong>和<strong>原型</strong>。</p>
+<p>学习 JavaScript 我推荐以下书籍:
+<a href="http://book.douban.com/subject/10546125/" target="_blank">《JavaScript高级程序设计》</a>
+这是一本这样的书：有人说它不适合入门，有人说它是入门的不二选择。总之它确实是从基础讲起，更重要的是，它是本好书。值得注意的是书中有些内容是和前端开发相关的，大可以略过不看。
+<a href="http://book.douban.com/subject/3590768/" target="_blank">《JavaScript语言精粹》</a>
+依然是本好书，没啥可说的。</p>
+<h3>2. 学习 HTTP</h3>
+<p>相信 Web 后端开发者对 HTTP 都很熟悉，但仍然还是觉得顺便提一下比较好。</p>
+<h3>3. 学习 Node.js</h3>
+<p>Node.js 现在的中文资料不多，而且 Node.js 的更新速度很快，所以看英文资料会比较好。
+Node.js 的官网是<a href="http://nodejs.org" target="_blank">http://nodejs.org</a>。学习 Node.js 要先从官网下载安装 node。官网页面下面有一个很不错的例子，用 6 行代码实现一个 Web Server，这个当做 Node.js 的“Hello World”很合适。需要说明的是，Node.js 写的 Web Server 是可以在生产环境下使用的，并且性能颇高。</p>
+<p>之后推荐阅读<a href="http://www.nodebeginner.org" target="_blank">The Node Beginner Book</a>，讲的很通俗易懂（在页面上方可以选择中文版哦）。</p>
+<p>接下来是最重量级的两个页面：<a href="http://nodeguide.com/beginner.html" target="_blank">Felix's Node.js Beginners Guide</a> 和 <a href="http://nodeguide.com/style.html" target="_blank">Felix's Node.js Style Guide</a>。Felix 是谁：</p>
+<blockquote>
+<p>Hi, I am Felix Geisendörfer, an early Node.js core contributor and co-founder of transloadit.com.</p>
+</blockquote>
+<p>另外有闲的同学可以看看小羞怯同学 Ryan Dahl（Node.js 的创造者）的演讲视频 <a href="http://www.youtube.com/watch?v=jo_B4LTHi3I" target="_blank">Introduction to Node.js with Ryan Dahl</a> （如果你感兴趣，这是我在 YouTube 上完整看过的唯一一个正经的视频）。</p>
+<p>最后，<a href="http://nodejs.org/api/" target="_blank">Node.js 官方文档</a>是你开发过程中会反复查阅的最重要的文档，相信我，你离不开它的。</p>
+<h2>自问自答</h2>
+<ul>
+<li>
+<p>Q: 有这么多东西要看，什么时候才能开发呢？</p>
+<p>A: 取决于你，我建议在看完 Felix's Node.js Beginners Guide 中 The module system 一节后就可以开始动手写小网站了，比如留言板，论坛什么的。其余的教程可以一边写一边看。</p>
+</li>
+<li>
+<p>Q: 用框架吗？用什么框架？</p>
+<p>A: 先不用框架写一个小网站，注意一定要是小网站。然后你会感叹 Node.js 写个网站好麻烦。这时你可以使用 <a href="http://expressjs.com" target="_blank">Express 框架</a>。学习 Express 的方法：看官网的 Guide，然后看例子，同时对照着例子查看官网的API，最后看Express的源代码（这一步最好不要省略，这不仅能帮你理解Express，也能让你学到很多Node.js的技巧，而且代码很短的哦）。</p>
+<p>等等，还有一个 Express 的超赞教程：<a href="http://dailyjs.com/tags.html#lmawa" target="_blank">Let's Make a Web App: Nodepad</a>，不过教程中用的 Express 是 2.* 版本，现在已经是 3.0 了，有些地方有所区别，不过问题不大。</p>
+</li>
+<li>
+<p>Q: 使用哪个 Node.js 版本？</p>
+<p>A: 使用最新的，另外 Node.js 的版本号: 0.8.6，其中第二位奇数表示不稳定版，偶数是稳定版。</p>
+</li>
+<li>
+<p>Q: Node.js 有没有包管理器？</p>
+<p>A: 有，并且很好用：<a href="https://npmjs.org" target="_blank">Node Packaged Modules</a></p>
+</li>
+</ul>
+  </div>
+  <div class="hr"></div>
+  <section class="article-share clearfix">
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <div class="about-blog">
+      <h4>关于此博客</h4>
+      <p>Luin 的个人博客，主要关注互联网技术。</p>
+      <a href="https://twitter.com/luinlee" class="twitter-follow-button" data-show-count="false" data-lang="en">Follow @luinlee</a>
+    </div>
+    <div class="share">
+      <h4>分享这篇文章</h4>
+      <a class="icon-social icon-social-twitter-bird" href="http://twitter.com/share?text=Web 开发者怎么学 Node.js&url=http://blog.li/2012/08/start-from-scratch-learning-node-js-for-web-developer/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+      </a>
+      <a class="icon-social icon-social-weibo" href="http://service.weibo.com/share/share.php?title=Web 开发者怎么学 Node.js&url=http://blog.li/2012/08/start-from-scratch-learning-node-js-for-web-developer/" onclick="window.open(this.href, 'weibo-share', 'width=550,height=435');return false;">
+        <span class="hidden">微博</span>
+      </a>
+    </div>
+  </section>
+  <div class="hr"></div>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+var disqus_shortname = 'zihuali'
+var disqus_identifier = "2012/08/start-from-scratch-learning-node-js-for-web-developer/";
+var disqus_url = "http://blog.li/2012/08/start-from-scratch-learning-node-js-for-web-developer/";
+
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+    </div>
+  </section>
+  <script type="text/javascript">
+    var clicky_site_ids = clicky_site_ids || [];
+    clicky_site_ids.push(100680749);
+    (function() {
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = '//static.getclicky.com/js';
+      ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+    })();
+  </script>
+  <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100680749ns.gif" /></p></noscript>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-46124852-1', 'zihua.li');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>

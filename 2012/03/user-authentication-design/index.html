@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>小谈网站用户验证系统的设计 | Zihua Li</title>
+      <link href="http://blog.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
+    <link href='http://fonts.googleapis.com/css?family=Noto+Serif|Montserrat:700' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet'  href='http://blog.li/theme/css/normalize.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://blog.li/theme/css/style.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://blog.li/theme/css/highlight.css' type='text/css' media='all' />
+</head>
+<body>
+  <section class="l-cover">
+    <header id="banner" class="body">
+      <h1 class="site-name"><a href="http://blog.li/">Zihua Li</a></h1>
+      <p class="description">
+        设计师、全栈工程师（Web, iOS）<br>90 后，法号 Luin<br />
+        [<a href="http://blog.li/pages/about/">关于</a>, <a href="http://blog.li/pages/novel/">小说</a>]
+      </p>
+      <ul class="social-links">
+        <li><a href="https://twitter.com/luinlee">Twitter</a></li>
+        <li><a href="https://github.com/luin">Github</a></li>
+        <li><a href="http://dribbble.com/luin">Dribbble</a></li>
+      </ul>
+    </header>
+  </section>
+  <section class="l-content">
+    <div class="inner">
+<article>
+  <header>
+    <p class="article-meta" title="2012-03-11T00:00:00">11 Mar 2012</p>
+    <h2 class="article-title"><a href="http://blog.li/2012/03/user-authentication-design/" rel="bookmark"
+    title="Permalink to 小谈网站用户验证系统的设计">小谈网站用户验证系统的设计</a></h3>
+  </header>
+  <div class="typo article-body">
+    <p>现在几乎每个Web2.0网站都有会员管理模块，那怎样设计用户验证系统才能保证用户的账户安全呢？</p>
+<p>本文主要涉及：</p>
+<ul>
+<li>数据库中怎样保存密码</li>
+<li>记住密码功能的实现方法</li>
+</ul>
+
+
+<p>前段时间以CSDN为首的几个大型网站纷纷爆出严重的密码泄露事件，更令人惊讶的是泄露的都是明文密码。明文密码有木有！我整个人都斯巴达了！</p>
+<p>咳咳...</p>
+<p>从小语文老师就教导我们，密码一定要经过散列处理才能存进数据库中，以免入侵者取得数据库后直接用明文密码登录用户账户。考虑到很多人都是“一码通”（即所有网站用的密码都一样），明文存储密码带来的危害就更严重了。</p>
+<h2>选择哪种散列函数？</h2>
+<p>常用的散列函数有MD5, SHA1, SHA256, SHA512, SHA-3等，至于哪个最常用不得而知，但我接触过的几个项目（不是我做的）多数使用了MD5。这些函数的比较这里就不细说了，感兴趣的话可以参考这篇文章后面的链接。就目前计算机的运行速度来看，MD5、SHA1这样的散列函数应当尽量避免使用，因为如果使用穷举法来破解一个一般复杂的密码基本不用花很久时间，甚至甚至！连穷举都不用，破解者只要查阅彩虹表就有可能直接得到散列前的密码原文。试试把自己的密码MD5加密后放到<a href="http://cmd5.com/" target="_blank">http://cmd5.com/</a>里面，看看能不能查到原文，如果能，那么所有使用MD5做散列函数的网站对你而言和使用明文密码是没有区别的。</p>
+<p>就我来看，SHA512是一个很适合存储密码的散列算法，目前我做的项目都采用此算法，不过<a href="http://codahale.com/how-to-safely-store-a-password/" target="_blank">也有人强烈要求用bcrypt算法来保证安全性</a>。一句话概括bcrypt的特点就是：很安全、很慢。如果你的客户不是极重要的、极易招惹攻击者的，或者除非你有足够多的CPU资源，SHA512已经足够了。</p>
+<p>哦，对了，忘了说盐（SALT）。盐，就是作料，在进行散列处理时，先把密码原文和盐放在一起（甚至搅拌搅拌）再散列。比如你的密码是123456，盐是Q2E4T6Y7U，那么处理的过程就是HASH('123456' + 'Q2E4T6Y7U')，你的密码瞬间变成123456Q2E4T6Y7U这样的健壮密码有木有！要注意的是盐的字符空间一定要大以保证安全，每个用户的盐应该是不同的，所以说盐要存储在数据库里，每次登录时要取出来验证。当然更安全的做法是盐和散列后的密码分开存放。使用盐的好处就是即使整个数据库都泄露了（包括散列后的密码和盐），破解者也不得不为每个用户单独破译，这样的成本极高。</p>
+<h2>怎样设计保存密码</h2>
+<p>HTTP是无状态的协议，想保存用户登录状态必须使用cookie或session，session一般都是通过cookie实现的（对不支持cookie的浏览器——如老版本的UCWEB等——有些网站也直接把session id放到网址上）。</p>
+<p>下面我来简短而形象解释一下session：每个用户登录后，服务器都把用户的资料（如用户id）保存在单独的保险箱中，然后把保险箱的密码（session id）存储在cookie中。
+大多数session的实现都是让记录session id的cookie随浏览器关闭而销毁，这样就浏览器关闭再打开后用户又变成未登录了。</p>
+<p>那怎么实现记住密码呢？</p>
+<ul>
+<li>我曾经看到一种实现是把记录session id的cookie的生命周期设为很长的时间，如两周，这样就可以实现记住密码了。然而，不安全啊！你想啊，别人把这个cookie原封拷进自己的电脑，然后就成功完成冒名顶替了。</li>
+<li>也可以在cookie中存用户id和一个记录在数据库中的随机值，然后系统查询数据库判断用户id和这个随机值是否符合，如果符合则登录成功。当然这个方法和前面那个存在一样的问题。</li>
+</ul>
+<p>我目前用的方法其实很类似上面第二个方法，只不过在cookie中记录三个值：用户id、一个记录在数据库中的随机值（token）、另一个记录在数据库中的随机值（series）。</p>
+<p>流程如下：</p>
+<ol>
+<li>用户第一次用密码登录时，程序生成两个随机值，即token和series，和用户id一起存到数据库中。</li>
+<li>用户再次来访时（不考虑session），系统在数据库中查询用户cookie中的3个值，查到了即登录成功。<strong>登录成功后要再生成一个随机值，把token的值设置为这个随机值，同时存入数据库和cookie中。</strong></li>
+<li>如果用户来访时，系统在数据库中查到cookie中用户id与series都与数据库中的数据符合，但token不一样。这意味着有人拷走了用户的cookie并用该cookie成功登录了，这时应该警示用户这个信息，并强烈要求用户更改密码。</li>
+</ol>
+<p>这个方法已经可以“解决”前两个方法的问题了，然而需要注意的是：此方法仍然无法避免别人通过拷走cookie冒名顶替登录，只不过能在这种不好的事情发生后通知一下受害者而已，所以在执行重要操作时（现金交易、修改密码等）一定需要用户提供密码才能继续操作。</p>
+<p>以上是我对网站用户验证系统的一些想法，欢迎留言吐槽!</p>
+<h2>参考链接</h2>
+<ul>
+<li><a href="http://codahale.com/how-to-safely-store-a-password/" target="_blank">How To Safely Store A Password</a></li>
+<li><a href="http://zh.wikipedia.org/wiki/SHA%E5%AE%B6%E6%97%8F" target="_blank">维基百科：SHA家族</a></li>
+<li><a href="http://coolshell.cn/articles/2078.html" target="_blank">如何防范密码被破解</a></li>
+</ul>
+  </div>
+  <div class="hr"></div>
+  <section class="article-share clearfix">
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <div class="about-blog">
+      <h4>关于此博客</h4>
+      <p>Luin 的个人博客，主要关注互联网技术。</p>
+      <a href="https://twitter.com/luinlee" class="twitter-follow-button" data-show-count="false" data-lang="en">Follow @luinlee</a>
+    </div>
+    <div class="share">
+      <h4>分享这篇文章</h4>
+      <a class="icon-social icon-social-twitter-bird" href="http://twitter.com/share?text=小谈网站用户验证系统的设计&url=http://blog.li/2012/03/user-authentication-design/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+      </a>
+      <a class="icon-social icon-social-weibo" href="http://service.weibo.com/share/share.php?title=小谈网站用户验证系统的设计&url=http://blog.li/2012/03/user-authentication-design/" onclick="window.open(this.href, 'weibo-share', 'width=550,height=435');return false;">
+        <span class="hidden">微博</span>
+      </a>
+    </div>
+  </section>
+  <div class="hr"></div>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+var disqus_shortname = 'zihuali'
+var disqus_identifier = "2012/03/user-authentication-design/";
+var disqus_url = "http://blog.li/2012/03/user-authentication-design/";
+
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</article>
+    </div>
+  </section>
+  <script type="text/javascript">
+    var clicky_site_ids = clicky_site_ids || [];
+    clicky_site_ids.push(100680749);
+    (function() {
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      s.src = '//static.getclicky.com/js';
+      ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
+    })();
+  </script>
+  <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100680749ns.gif" /></p></noscript>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-46124852-1', 'zihua.li');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>

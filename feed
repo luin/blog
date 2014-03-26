@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zihua Li</title><link>http://blog.li/</link><description>设计师、全栈工程师（Web, iOS）&lt;br&gt;90 后，法号 Luin</description><atom:link href="http://blog.li/feed" rel="self"></atom:link><lastBuildDate>Tue, 11 Mar 2014 00:00:00 +0100</lastBuildDate><item><title>Express 框架 middleware 的依赖问题与解决方案</title><link>http://blog.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/</link><description>&lt;p&gt;作为 Node 社区最受欢迎的框架，&lt;a href="http://expressjs.com"&gt;Express&lt;/a&gt; 在沿用 &lt;a href="http://www.senchalabs.org/connect/"&gt;Connect&lt;/a&gt; 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。&lt;/p&gt;
+&lt;p&gt;下面是使用路由中间件从数据库载入用户资料的示例，这段代码来自 &lt;a href="http://tjholowaychuk.com"&gt;TJ&lt;/a&gt;（Express 的作者）的一个 &lt;a href="http://www.screenr.com/elL"&gt;Screencast&lt;/a&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;session&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;在上面的代码中，我们定义了路由中间件 &lt;code&gt;loadUser&lt;/code&gt;。&lt;code&gt;loadUser&lt;/code&gt; 从数据库中读取用户数据后，将 &lt;code&gt;user&lt;/code&gt; 对象通过 &lt;code&gt;req&lt;/code&gt; 的 &lt;code&gt;currentUser&lt;/code&gt; 属性传递给下一个路由中间件。这种通过 &lt;code&gt;req&lt;/code&gt; 对象的属性传递数据的模式在 Express 中很常见。当项目比较小的时候这种模式非常方便易用，可是随着项目不断发展，这种模式会暴露出不少问题，至于具体有哪些问题，请继续往下看。&lt;/p&gt;
+
+
+&lt;p&gt;现在我们需要限制只有管理员可以访问 dashboard 页面，代码如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;session&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;!==&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nb"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;access denied&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;admin&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;我们又定义了一个路由中间件 &lt;code&gt;role()&lt;/code&gt;，当用户的角色不是管理员时该中间件就会传出异常。虽然需求已经满足，但是上面这段代码存在两个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;如果要使用 &lt;code&gt;role()&lt;/code&gt; 中间件，就必须在前面引入 &lt;code&gt;loadUser&lt;/code&gt; 中间件，即实际上 &lt;code&gt;loadUser&lt;/code&gt; 是 &lt;code&gt;role()&lt;/code&gt; 的一个隐含依赖，然而“中间件”的语义无法表现出依赖关系，导致代码可读性大大降低。&lt;/li&gt;&lt;/li&gt;
+&lt;li&gt;在渲染 dashboard 页面时我们使用了 &lt;code&gt;req.currentUser&lt;/code&gt; 对象，然而我们并不明确地知道 &lt;code&gt;currentUser&lt;/code&gt; 这个属性是前面的哪个路由中间件（&lt;code&gt;loadUser&lt;/code&gt; 还是 &lt;code&gt;role()&lt;/code&gt;）加到 &lt;code&gt;req&lt;/code&gt; 上的，代码可读性较差，对重构亦不友好。路由中间件的定义和路由的定义存放在不同的文件时这个问题更加明显。&lt;/li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;随着网站的复杂，单个路由上的路由中间件的数量增多，上述两个问题会越来越严重。如下面这个有些极端的例子：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;age&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware3&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware4&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;b&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;age&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;18&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nb"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;access denied&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;在上面的例子中，我们定义了 4 个路由中间件，其中可以分析出，&lt;code&gt;middleware4&lt;/code&gt; 依赖于 &lt;code&gt;middleware2&lt;/code&gt;，&lt;code&gt;middleware1&lt;/code&gt; 为 &lt;code&gt;req&lt;/code&gt; 加上了 &lt;code&gt;a&lt;/code&gt; 属性，此外 &lt;code&gt;middleware3&lt;/code&gt; 并没有用到。可以看到此时我们的代码已经混乱不堪了：开发者很难看出到底是哪个中间件向 &lt;code&gt;req&lt;/code&gt; 添加了什么属性，更难轻易指出中间件的依赖关系。当我们要定义另外一个路由时，如果我们想使用 &lt;code&gt;req.a&lt;/code&gt;，就不得不找到前面这 4 个路由中间件的定义挨个看 &lt;code&gt;req.a&lt;/code&gt; 是在哪定义的，如果这些中间件定义在不同的文件中，那么这一过程无疑非常痛苦。&lt;/p&gt;
+&lt;h2&gt;解决方案：依赖注入&lt;/h2&gt;
+&lt;p&gt;使用过 &lt;a href="http://angularjs.org"&gt;Angular&lt;/a&gt; 框架的人可能会对其中的依赖注入模式印象深刻。依赖注入是一种解决代码依赖的软件设计模式，具体可以查阅维基百科或设计模式相关的书籍。&lt;/p&gt;
+&lt;p&gt;在 Angular 中，一个 Controller 一般会需要若干个依赖，比如 &lt;code&gt;$http&lt;/code&gt;（用来读取网络资源）或 &lt;code&gt;$location&lt;/code&gt;（用来获取、设置当前网页的 URL）。比起在 Controller 中手工引入并创建这些依赖，Angular 借助依赖注入模式使得我们可以直接在 Controller 函数中通过形参声明所需要的依赖，而 Angular 会根据形参列表将对应的依赖作为实参传入。如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;Controller&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;$http&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;$location&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// 此处可以直接使用 $http 和 $location 两个依赖&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;实践表明这种模式在处理依赖关系时非常方便。受此启发，我开发了 &lt;a href="https://github.com/luin/express-di"&gt;express-di&lt;/a&gt; 插件，能够把依赖注入模式引入到 Express 中以解决路由中间件的依赖问题。使用方法非常简单，首先使用 npm 来安装：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="err"&gt;$&lt;/span&gt; &lt;span class="n"&gt;npm&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;save&lt;/span&gt; &lt;span class="n"&gt;express&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;di&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;而后在 Express 项目中引入 express-di 就可以了：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="c1"&gt;// Require express-di&lt;/span&gt;
+&lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express-di&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;此时你的 Express 项目中的所有路由中间件都支持依赖注入了！让我们回过头来看看有了 express-di 后我们能够把上面那个 loadUser 的例子改成什么样：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;currentUser&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;session&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;!==&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nb"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;access denied&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;admin&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这段代码和之前的代码有两个显著不同的地方：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;去除 &lt;code&gt;loadUser&lt;/code&gt; 中间件，将其本质化，即转换成它本身的角色：依赖。我们使用 express-di 提供的 &lt;code&gt;app.factory&lt;/code&gt; 方法定义依赖，该方法接收两个参数，第一个参数是依赖名称，第二个参数是依赖的定义函数，定义函数和 Connect 的 middleware 相似，唯一的不同是前者中的 &lt;code&gt;next&lt;/code&gt; 函数接受两个参数，第一个参数是 node.js 的惯例——err，当 err 为非 [cci lang="javascript"]null` 时，定义函数会和普通的路由中间件一样将 err 传出；第二个参数是该依赖对应的值。&lt;/li&gt;&lt;/li&gt;
+&lt;li&gt;将路由中间件的形参从 &lt;code&gt;(req, res, next)&lt;/code&gt; 转变为依赖声明。如 &lt;code&gt;role()&lt;/code&gt; 中间件中声明了 &lt;code&gt;currentUser&lt;/code&gt; 和 &lt;code&gt;next&lt;/code&gt; 两个依赖，而最后一个中间件（即负责渲染视图的函数）则声明了 &lt;code&gt;currentUser&lt;/code&gt; 和 &lt;code&gt;res&lt;/code&gt; 两个依赖。&lt;/li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;可以明显看到，express-di 模块通过将路由中间件中作为依赖的部分提取出来进行语义化，从而解决了前文中提到的问题。另外 express-di 模块预定义了 3 个依赖，分别为 &lt;code&gt;req&lt;/code&gt;, &lt;code&gt;res&lt;/code&gt; 和 &lt;code&gt;next&lt;/code&gt;，使得其可以完美兼容传统的路由中间件的定义，不会有任何兼容问题。&lt;/p&gt;
+&lt;h3&gt;对子 App 的支持&lt;/h3&gt;
+&lt;p&gt;当项目比较大的时候，我们经常会将项目拆分成多个 express app，如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;mainApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;subApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;use&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面代码中，&lt;code&gt;subApp&lt;/code&gt; 是 &lt;code&gt;mainApp&lt;/code&gt; 的子 App。express-di 对这种使用方法提供了非常好的支持，子 App 会继承父 App 定义的依赖，同时子 App 定义的依赖不会影响到父 App，例子如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express-di&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;mainApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;subApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;use&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;parents&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;parents&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;children&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;children&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/parents&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;children&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;children&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/children&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;parents&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;parents&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上述代码执行后，访问 /parents 时程序会报错，提示 "Unrecognized dependency: children"，而访问 /children 时，页面会打印出 "parents"。&lt;/p&gt;
+&lt;h3&gt;性能与缓存&lt;/h3&gt;
+&lt;p&gt;express-di 模块会在程序启动阶段解析依赖，启动后就和普通的 Express 项目没有区别了，性能并不受影响。同时单个请求中的同一个依赖会被缓存起来，只执行一次，所以使用 express-di 反而可能会比使用传统模式写出来的代码拥有更好的性能。&lt;/p&gt;
+&lt;h3&gt;单元测试&lt;/h3&gt;
+&lt;p&gt;当你通过依赖注入模式将依赖引入路由后，你会发现在单元测试时可以非常方便地将 mock 对象传入路由，而这正是依赖注入模式的另一个好处。&lt;/p&gt;
+&lt;h2&gt;结论&lt;/h2&gt;
+&lt;p&gt;我在最近的几个 Express 项目中使用了 express-di 模块，并惊喜地发现这个模块使项目代码的可读性和可维护性大大增加。而且因为 express-di 兼容传统的路由定义方法，你可以非常方便地在现有的项目中引入 express-di，从而使新定义的路由能享受依赖注入带来的便利，同时又无需对老的代码做任何修整。&lt;/p&gt;
+&lt;p&gt;项目地址在：&lt;a href="https://github.com/luin/express-di"&gt;https://github.com/luin/express-di&lt;/a&gt;。欢迎 star 或提 issue！&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Tue, 11 Mar 2014 00:00:00 +0100</pubDate><guid>tag:blog.li,2014-03-11:2014/03/using-dependency-injection-to-optimise-express-middlewares/</guid><category>dependency</category><category>injection</category><category>express</category><category>express-di</category><category>middleware</category><category>node.js</category></item><item><title>纯 CSS 实现高度与宽度成比例的效果</title><link>http://blog.li/2013/12/keep-height-relevant-to-width-using-css/</link><description>&lt;div class="clearfix"&gt;
+  &lt;div class="left"&gt;
+    最近在做一个产品列表页面，布局如右图所示。页面中有若干个 item，其中每个 item 都向左浮动，并包含在自适应浏览器窗口宽度的父元素中。
+  &lt;/div&gt;
+  &lt;aside class="right"&gt;
+    &lt;img src="http://blog.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" /&gt;
+  &lt;/aside&gt;
+&lt;/div&gt;
+
+&lt;p&gt;item 元素的 CSS 定义如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;21&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这时遇到的一个需求：&lt;strong&gt;在保持 item 元素宽高比恒定（如高是宽的 1.618 倍）的情况下，使得 item 元素可以和父元素同比缩放。&lt;/strong&gt; 我们知道，如果当 item 元素是图片，同时需要保持的宽高比恰好为图片本身的宽高比时，可以设置 item 的 &lt;code&gt;height&lt;/code&gt; 为 &lt;code&gt;auto&lt;/code&gt; 即可轻松实现这个需求。然而当 item 元素不是图片或者要保持的宽高比和图片本身的宽高比不同时，这个需求显得很难直接用 CSS 实现。&lt;/p&gt;
+&lt;p&gt;为此我放弃 CSS，直接用 JavaScript 绑定 &lt;code&gt;window&lt;/code&gt; 的 &lt;code&gt;onresize&lt;/code&gt; 事件来动态获取每个 item 的宽度，从而计算并设置其高度。&lt;/p&gt;
+&lt;p&gt;我一直在使用这个解决方案，直到今天调整样式时，突然想到这个需求竟然是可以只使用 CSS 解决的。&lt;/p&gt;
+
+
+&lt;p&gt;首先需要知道，一个元素的 &lt;code&gt;padding&lt;/code&gt;，如果值是一个百分比，那这个百分比是相对于其父元素的宽度而言的，即使对于 &lt;code&gt;padding-bottom&lt;/code&gt; 和 &lt;code&gt;padding-top&lt;/code&gt; 也是如此。&lt;/p&gt;
+&lt;p&gt;另外，在计算 Overflow 时，是将元素的内容区域（即 &lt;code&gt;width&lt;/code&gt; / &lt;code&gt;height&lt;/code&gt; 对应的区域）和 Padding 区域一起计算的。换句话说，即使将元素的 &lt;code&gt;overflow&lt;/code&gt; 设置为 &lt;code&gt;hidden&lt;/code&gt;，“溢出”到 Padding 区域的内容也会照常显示。&lt;/p&gt;
+&lt;p&gt;综上两条所述，我们可以使用 &lt;code&gt;padding-bottom&lt;/code&gt; 来代替 &lt;code&gt;height&lt;/code&gt; 来实现高度与宽度成比例的效果。因为 item 元素的宽度是其父元素宽度的 21%，所以我们将 &lt;code&gt;padding-bottom&lt;/code&gt; 设置为它的 1.618 倍，即 33.98%。同时将其 &lt;code&gt;height&lt;/code&gt; 设置为 &lt;code&gt;0&lt;/code&gt; 以使元素的“高度”等于 &lt;code&gt;padding-bottom&lt;/code&gt; 的值，从而实现需要的效果。&lt;/p&gt;
+&lt;p&gt;最后 item 元素的 CSS 样式为：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;5&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;padding-bottom&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;33&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="m"&gt;98&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;40&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;height&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;页面效果见 &lt;a href="http://jsfiddle.net/luin/25BbH/7/"&gt;http://jsfiddle.net/luin/25BbH/7/&lt;/a&gt;，拖动窗口调整页面宽度，item 元素始终保持恒定的宽高比。&lt;/p&gt;
+&lt;p&gt;同样，这个解决方案也自然支持前文说的“当 item 元素是图片但要保持的宽高比和图片本身的宽高比不同”的情况，具体见我在 Ruby China 上的一篇回复：&lt;a href="http://ruby-china.org/topics/17011#reply15"&gt;图片 CSS：怎样才能“响应式+固定宽高比例”？&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Mon, 09 Dec 2013 00:00:00 +0100</pubDate><guid>tag:blog.li,2013-12-09:2013/12/keep-height-relevant-to-width-using-css/</guid><category>css</category><category>ratio</category></item><item><title>我的 Vim 常用插件和键位映射配置</title><link>http://blog.li/2013/11/my-vim-configuration-plugin/</link><description>&lt;p&gt;写给那些从来不使用别人的 Vim 的人&lt;/p&gt;
+&lt;p&gt;记得刚接触 Mac 时，我是用 &lt;a href="http://panic.com/coda/" target="_blank"&gt;Coda&lt;/a&gt; 写代码的，写了很长很长时间。之后 &lt;a href="http://www.sublimetext.com" target="_blank"&gt;Sublime Text&lt;/a&gt; 大火，便也尝试了几个月。到了如今，已经不知不觉地当了两年的 Vim 党。&lt;/p&gt;
+&lt;p&gt;Vim 是个神奇的编辑器，不论编辑哪种语言的代码，总能找到一些插件来提升编码体验。就算是用了挺久的 Vim，也时不时地会听到别人说起一些自己从没用过但是很实用的技巧。虽然有时也会怀念 Coda 漂亮的界面和方便的远程文件管理，会怀念 Sublime Text  功能强大却又容易上手的设计理念。但是从没有一种理由让我换用其它编辑器，因为总会有一个 Vim 插件能够填补你内心深处的不满足。&lt;/p&gt;
+&lt;p&gt;我主要用 Vim 写些网页前后端代码，下面我将分享一些我在用的 Vim 插件和键位映射配置，完整的 .vimrc 文件可以在&lt;a href="https://github.com/luin/dotfiles/blob/master/vimrc" target="_blank"&gt;这里&lt;/a&gt;看到。&lt;/p&gt;
+
+
+&lt;h3&gt;插件&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/gmarik/vundle" target="_blank"&gt;Vundle&lt;/a&gt;
+Vundle 是一个 Vim 的插件管理工具，它使得安装插件不过是在 .vimrc 文件中增加一行描述那么简单。Vundle 吸引我的最重要的原因是让我可以将插件和其对应的配置（如键位映射）写在一起，这样当要删除某个插件时，也能很方便地将对应的配置删除。&lt;/p&gt;
+&lt;p&gt;比如下面的 .vimrc 片段中，&lt;code&gt;Bundle&lt;/code&gt; 语句告诉了 Vundle 要安装的插件名，而我将每个插件的配置写在了相应的 Bundle 的下面。这样当我要删除 Lokaltog/vim-easymotion 插件时，就可以很方便地将其对应的配置 &lt;code&gt;let g:EasyMotion_leader_key = 'f'&lt;/code&gt; 删除，避免了因为插件描述和其配置分隔两处造成的不同步现象。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Bundle &lt;span class="s1"&gt;&amp;#39;Lokaltog/vim-easymotion&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:EasyMotion_leader_key &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;f&amp;#39;&lt;/span&gt;
+
+Bundle &lt;span class="s1"&gt;&amp;#39;bling/vim-airline&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:airline_left_sep &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:airline_right_sep &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/Lokaltog/vim-easymotion" target="_blank"&gt;Easymotion&lt;/a&gt;
+&lt;code&gt;f&amp;lt;char&amp;gt;&lt;/code&gt; 可以实现定位到一行中的某个字符，如 &lt;code&gt;fa&lt;/code&gt; 会定位到当前光标到行末出现的第一个 "a"。然而如果存在多个 "a"，就得通过 &lt;code&gt;f&amp;lt;number&amp;gt;a&lt;/code&gt; 来完成定位。而使用 Easymotion 后，只需要敲击 &lt;code&gt;&amp;lt;leader&amp;gt;&amp;lt;leader&amp;gt;fa&lt;/code&gt;，则该行及该行以下所有的 "a" 都将被高亮并标记序号，此时再按相应的序号即可定位到指定的 "a"。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;leader&amp;gt;&amp;lt;leader&amp;gt;&lt;/code&gt; 是 Easymotion 默认的引导键，也可以自定义。比如我将其定义为 "f"，这样用 "f" 定位字符只需要按 &lt;code&gt;ff&amp;lt;char&amp;gt;&lt;/code&gt; 即可，非常方便。&lt;/p&gt;
+&lt;p&gt;Easymotion 不仅支持 &lt;code&gt;f&lt;/code&gt;，还支持其它定位功能键，如 &lt;code&gt;w&lt;/code&gt;、&lt;code&gt;t&lt;/code&gt;。不过我 99% 的时间都只用其和 "f" 来配合。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/bling/vim-airline" target="_blank"&gt;Airline&lt;/a&gt;
+Airline 和 Powerline 类似，都是在 Vim 底部显示一个很好看的状态条，可以自定义状态条中的显示项目。不同的是 Airline 更加轻量，而且支持一些特殊插件的状态显示。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/scrooloose/nerdtree" target="_blank"&gt;The NERD tree&lt;/a&gt;
+The NERD tree 是 Vim 中的资源管理器，它是我最常用的插件之一。The NERD tree 能够查看文件夹下文件列表（包括标记文件类型状态等），执行复制、移动和删除文件（夹）等操作。&lt;/p&gt;
+&lt;p&gt;我将 Shift + m 映射为切换 The NERD tree 窗口（&lt;code&gt;map &amp;lt;S-m&amp;gt; &amp;lt;plug&amp;gt;NERDTreeTabsToggle&amp;lt;CR&amp;gt;&lt;/code&gt;）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/scrooloose/syntastic" target="_blank"&gt;Syntastic&lt;/a&gt;
+Syntastic 是一个语法检查工具，它通过外部语法检查器来校验代码，并将结果显示在 Vim 的状态栏中。Syntastic 是一个神级的插件，它可以极大地减少编码出错的概率，对于脚本语言开发者来说绝对是一个福音。&lt;/p&gt;
+&lt;p&gt;对我而言，Syntastic 最大的作用就是校验 JavaScript 代码。我通过配置 Syntastic 使用代码质量检查工具 JSHint 来检查代码错误，同时控制代码质量。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/vim-scripts/bufexplorer.zip" target="_blank"&gt;bufexplorer&lt;/a&gt;
+bufexplorer 可以加快切换 buffer 的速度。我通过 &lt;code&gt;noremap &amp;lt;silent&amp;gt; &amp;lt;CR&amp;gt; :BufExplorer&amp;lt;CR&amp;gt;&lt;/code&gt; 将回车键映射为显示 buffer 列表，同时在 buffer 列表中还可以使用回车键选择想要编辑的 buffer，非常方便。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/vim-scripts/nerdtree-ack" target="_blank"&gt;NERDtree + ack.vim&lt;/a&gt;
+这个插件的名字很直白，就是 The NERD tree 和 &lt;a href="https://github.com/mileszs/ack.vim" target="_blank"&gt;ack&lt;/a&gt; 两个插件的合体。这个插件为 The NERD tree 的文件菜单中加入了搜索功能，可以实现搜索整个文件夹，不用再单独调用 grep 之类的命令了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/terryma/vim-multiple-cursors" target="_blank"&gt;vim-multiple-cursors&lt;/a&gt;
+Sublime Text 支持多个光标选择功能，在重构时非常有用。这个插件将 Sublime Text 中的这个邪恶功能引入了 Vim。想要修改变量名时，只需要将光标放在变量名内，然后多次敲击 Ctrl + n，即可将多个同名变量选中，此时再按 s 就能同时将这些变量重命名了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/tpope/vim-commentary" target="_blank"&gt;Commentary&lt;/a&gt;
+Commentary 可以帮你注释代码。只需要选中要注释的内容，然后敲击 gcc 即可将这段内容注释（Commentary 会根据当前的 filetype 使用不同的注释符号），再次敲击 gcc 即可还原注释。我做了如下映射：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;nmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; gcc
+vmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; gc
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;即在 normal 模式下，敲击退格键可以注释当前行，在 visual 模式下，敲击退格键可以注释选中的内容。平时无聊时，我就会不停地按退格键来注释/还原注释，还是挺能消磨时间的 :P。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/terryma/vim-expand-region" target="_blank"&gt;vim-expand-region&lt;/a&gt;
+这个插件用来扩展选择的内容。比方说当前光标在一对双引号中，双引号包含在一对括号中，此时敲击 &lt;code&gt;+&lt;/code&gt; 可以选中双引号中的内容，再敲击 &lt;code&gt;+&lt;/code&gt; 可以选中括号中的内容。我将其绑定为最大的空格键以显示我对这个插件的虔诚。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;键位映射&lt;/h3&gt;
+
+&lt;p&gt;每个 Vim 使用者都有自己的键位映射，通过映射键位可以在一些小的地方大大提高 Vim 的使用效率。下面列举几个我的映射配置。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;将分号和冒号互换&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;nnoremap&lt;/span&gt; ; :
+&lt;span class="nb"&gt;nnoremap&lt;/span&gt; : ;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这样输入 &lt;code&gt;:w&lt;/code&gt; 这样的命令时可以就少敲一个键了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;使用左右光标键切换 buffer&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;noremap&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="k"&gt;silent&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;Left&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; :&lt;span class="k"&gt;bp&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nb"&gt;noremap&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="k"&gt;silent&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;Right&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; :&lt;span class="k"&gt;bn&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;使用 &lt;code&gt;\&lt;/code&gt; 键打开当前编辑的文件&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;nnoremap&lt;/span&gt; \ :&lt;span class="p"&gt;!&lt;/span&gt;open &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;C&lt;span class="p"&gt;-&lt;/span&gt;R&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;%&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;粘贴时不置换“剪贴板”&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;xnoremap &lt;span class="k"&gt;p&lt;/span&gt; pgvy
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;我经常复制一段内容，在 visual 模式下选中一段文本并粘贴来实现替换，此时“剪贴板”中的内容会被替换成被删掉的文本，如果想粘贴第二次就很不方便了。这个映射解决了这个问题。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Sun, 17 Nov 2013 00:00:00 +0100</pubDate><guid>tag:blog.li,2013-11-17:2013/11/my-vim-configuration-plugin/</guid><category>plugin</category><category>vim</category></item><item><title>减少异步嵌套，Express-promise</title><link>http://blog.li/2013/09/express-promise/</link><description>&lt;p&gt;在使用 &lt;a href="http://expressjs.com" target="_blank"&gt;Express&lt;/a&gt; 框架开发网站或 API 时，经常会因为 Node.js 的异步流程造成逻辑代码中嵌套回调函数过多的问题。这时可以考虑使用 Promise 来简化这个流程。关于 Promise 可以参考以下资料：&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.infoq.com/cn/news/2011/09/js-promise" target="_blank"&gt;http://www.infoq.com/cn/news/2011/09/js-promise&lt;/a&gt;
+&lt;a href="http://martinfowler.com/bliki/JavascriptPromise.html" target="_blank"&gt;http://martinfowler.com/bliki/JavascriptPromise.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;现在 Node.js 很多 ORM/ODM 都通过 Promise 来返回查询、执行结果，而普通的 Node.js 风格回调函数可以很容易的转换成 Promise。&lt;/p&gt;
+&lt;p&gt;为此，我为 Express 框架开发了一个 middleware 用来更方便地使用 Promise。&lt;/p&gt;
+
+
+&lt;p&gt;例如，我们可能会经常写出如下代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/users/:userId&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;then&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;Project&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getMemo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;then&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;memo&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+        &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="nx"&gt;memo&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;memo&lt;/span&gt;
+      &lt;span class="p"&gt;});&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;而使用 express-promise 后，上面的代码可以改写成：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/users/:userId&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+    &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="nx"&gt;memo&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;Project&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getMemo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;更多实例可以见项目主页： &lt;a href="https://github.com/luin/express-promise" target="_blank"&gt;https://github.com/luin/express-promise&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;项目同样对 Mongoose 的 Query 对象提供了额外的支持。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Wed, 11 Sep 2013 00:00:00 +0200</pubDate><guid>tag:blog.li,2013-09-11:2013/09/express-promise/</guid><category>express</category><category>middleware</category><category>node.js</category><category>open source</category><category>promise</category></item><item><title>开源的数据统计可视化工具：Ranaly</title><link>http://blog.li/2013/02/an-open-source-tool-for-data-statistics/</link><description>&lt;p&gt;不少互联网项目都需要对项目的数据，如用户数量的增长趋势、最近注册的用户列表和当前在线用户数量等进行统计，而我最近在做的项目需要将这些统计数据以图表的形式展现出来。为此我开发了统计框架Ranaly，以使开发者只需要简单地配置就能生成一个强大的统计数据可视化后台。&lt;/p&gt;
+&lt;p&gt;项目地址：&lt;a href="https://github.com/luin/ranaly"&gt;https://github.com/luin/ranaly&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Sun, 17 Feb 2013 00:00:00 +0100</pubDate><guid>tag:blog.li,2013-02-17:2013/02/an-open-source-tool-for-data-statistics/</guid><category>node.js</category><category>open source</category><category>ranaly</category></item><item><title>最近入手的数码产品</title><link>http://blog.li/2012/11/my-last-digital-acquisition/</link><description>&lt;p&gt;博客很久没有更新了，最近计划出版一本Redis的入门书籍，所以时间都放到写书上了。其实写书倒也不算是件能让人忙起来的事情，但它却能轻易地占据人的生活。记得高一下学期刚开学的时候学生会开始招新，我需要准备一篇千字左右的讲稿，结果在演讲的前一周我就把讲稿写完了。然而在接下来的7天里我却满脑子都是讲稿的事：虽然我已经完成了它，写的也还算不错，可是写稿子这种事有起点却没终点，一个句子总会有更好的表达方法，没有人敢说自己的稿子能得满分。我自然希望能做得更好，当然代价就是我7天的时间。&lt;/p&gt;
+&lt;p&gt;写书也是此理，于是写书累了就换换思路改写博客放松一下（你就不能干点其它事情！）。&lt;/p&gt;
+&lt;p&gt;最近计划买一个投影仪晚上没事了投电影看，突然想到自己一直想要写篇文章总结一下最近买的数码产品（神思路啊，中间是不是少个过渡句啊）。于是按照购买顺序挑几个有特点的列举如下：&lt;/p&gt;
+
+
+&lt;h2&gt;Kindle 4&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 以后每天晚上都可以捧着Kindle看书，不用再买书了（或是买书可以便宜点）。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 哎？放哪了？（找了好久终于还是找到了）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;原因&lt;/strong&gt;: 国内计算机的书电子版几乎没有，有的也只是极为不清晰的扫描版，再配上Kindle 4的小屏幕真是绝配。国外的电子书价格都较贵，偶尔买一本还可以，但不是长久之计。不过用Kindle看小说确实很爽，而且Kindle 4的大小使它几乎可以放入任何牛仔裤的侧边和后边口袋中，真正随走随看。后来还发现Readability有一个Send to Kindle的Safari插件，当在Safari中看到文字比较多的页面时可以一键发送到自己的Kindle上慢慢读。然而即使是如此杀手级的功能也没能留住我，Kindle能做的iPhone都可以，虽然前者在阅读的时候会舒服些，但我浏览网页最多使用的还是iPhone。至于读书，至今我还是实体书的拥趸。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Nexus 7&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 某个项目需要测试机......&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 乖乖地躺在一边，在我视线内。但好久没用过了。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;原因&lt;/strong&gt;: 我的第一台Android设备是HTC G6，用了一年多换了iPhone 4后我就发誓此生和Android绝缘。但不得不说Nexus 7稍微地改变了一下我对Android的看法。但如果不是项目需要，现在再让我选择一款平板，我会选iPad mini。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Magic Trackpad&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 总盯着MacBook Pro的15寸小屏幕太累，所以买了台显示器。然后发现必须再配个键盘和鼠标，要不用起来好奇怪。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 买来的第二天就出手了，现状未知。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;原因&lt;/strong&gt;: 被MacBook Pro的触摸板惯的。归功于MacBook Pro自身的触摸板，在OS X下我从来不用鼠标，即使是使用PhotoShop做设计时。偶尔会用罗技的M705在Windows下打打DotA，说到M705确实是一款不错的鼠标，同时罗技的售后也很赞，微动坏了送到售后直接换新，然后还能延保。所以鼠标用了两年到现在和新的一样（啊不是，我没有说鼠标的做工不好啦）。扯远了，Magic Trackpad和MBP的触摸板手感差太多，所以想都没想直接出了。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;HHKB Pro 2&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 如上所述。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 无法忍受其它任何键盘了。&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;原因&lt;/strong&gt;: 对HHKB Pro 2的赞美之辞网上一搜一片，总结一下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;超棒的键位设计：Ctrl和退格键的位置是我最喜欢的。以前用Vim还得改建，现在就不用了，而且有的键位比较微妙，改建还实现不了。&lt;/li&gt;
+&lt;li&gt;超棒的触感：键帽摸上去触感一流。网上有人说“触感如loli的肌肤一般”也不是没有道理的。&lt;/li&gt;
+&lt;li&gt;超棒的手感：我用过黑轴茶轴和青轴的键盘，可是每个键盘平均只用过一天，在这方面没啥发言权。只和MacBook Pro的键盘比，天壤之别。以前我是怎么过的啊！&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;我是通过萌购从日本亚马逊代购的，想买的朋友推荐也走此路线，比淘宝便宜了几百块，不过运输时间长点（15天内）。我买的是黑色无刻版。&lt;/p&gt;
+&lt;h2&gt;题外话&lt;/h2&gt;
+
+&lt;p&gt;目前我在写的Redis书需要一些初学者案例，如果你对Redis有兴趣或者初学Redis，可以发送邮件将你对Redis的问题告诉我。我的邮箱是i#zihua.li（替换#为@）。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Mon, 19 Nov 2012 00:00:00 +0100</pubDate><guid>tag:blog.li,2012-11-19:2012/11/my-last-digital-acquisition/</guid><category>hhkb</category><category>kindle</category><category>nexus</category><category>Redis</category><category>trackpad</category></item></channel></rss>
