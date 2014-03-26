@@ -122,6 +122,7 @@ article {
 .article-body aside.left,
 .article-body aside.right {
   width: 39%;
+  overflow: hidden;
 }
 
 .article-body .right {
@@ -177,69 +178,6 @@ article {
 .article-share h4 {
   font-weight: 700;
   margin: 0 0 10px;
-}
-
-
-@media screen and (max-width: 1000px) {
-  .l-cover {
-    padding: 5%
-  }
-}
-
-@media screen and (min-width: 1001px) {
-  .l-cover {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    top: 0;
-    z-index: 100;
-    max-width: 500px;
-    width: 30%;
-    border-right: 1px solid #dededc
-  }
-
-  .l-cover header {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    padding: 50px 10%
-  }
-}
-
-@media screen and (min-width: 1001px) {
-  .l-content {
-    margin-left: 30%
-  }
-
-  .l-content > .inner {
-    padding: 50px 85px;
-    max-width: 810px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box
-  }
-}
-
-@media screen and (min-width: 1001px) and (min-width: 1667px) {
-  .l-content > .inner {
-    padding-left: 110px;
-    max-width: 910px
-  }
-}
-
-@media screen and (max-width: 1000px) {
-  .post {
-    padding: 2.4em 5%;
-    max-width: 700px;
-    margin: 0 auto
-  }
-}
-
-@media screen and (min-width: 1001px) {
-  .post {
-    padding: 2.5em 0
-  }
 }
 
 @font-face {
@@ -424,3 +362,106 @@ article {
 .icon-social-db-shape:before { content: '\f600'; } /* '' */
 .icon-social-sweden:before { content: '\f601'; } /* '' */
 .icon-social-logo-db:before { content: '\f603'; } /* '' */
+
+/* Selection colours (easy to forget) */
+
+::selection 	 	{background: #90cc67;}
+::-moz-selection 	{background: #90cc67;}
+img::selection 		{background: transparent;}
+img::-moz-selection	{background: transparent;}
+body {-webkit-tap-highlight-color: #90cc67;}
+
+  /*		Tablet Layout: 768px.
+  Gutters: 24px.
+  Outer margins: 28px.
+  Inherits styles from: Default Layout.
+  -----------------------------------------------------------------
+  cols    1     2      3      4      5      6      7      8
+  px      68    160    252    344    436    528    620    712    */
+
+  @media only screen and (min-width: 768px) and (max-width: 991px) {
+    .l-cover header {
+      padding: 50px 10px;
+    }
+    .l-content > .inner {
+      padding: 50px 40px;
+    }
+  }
+
+
+
+  /*		Mobile Layout: 320px.
+  Gutters: 24px.
+  Outer margins: 34px.
+  Inherits styles from: Default Layout.
+  ---------------------------------------------
+  cols    1     2      3
+  px      68    160    252    */
+
+  @media only screen and (max-width: 767px) {
+    .l-cover {
+      position: static;
+      width: auto;
+      border: none;
+      text-align: center;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .l-cover header {
+      position: static;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      padding: 50px 10%;
+    }
+    .l-content {
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .l-content > .inner {
+      padding: 50px 25px;
+      width: auto;
+    }
+    .article-body {
+      font-size: 1em;
+    }
+
+    .article-title {
+      font-size: 2em;
+    }
+
+    .index-article .article-title {
+      font-size: 1.6em;
+    }
+
+    .article-body .left {
+      width: 50%;
+    }
+
+    .article-body aside.left,
+    .article-body aside.right {
+      width: 50%;
+    }
+
+    .article-body .right {
+      width: 50%;
+    }
+  }
+
+
+
+  /*		Wide Mobile Layout: 480px.
+  Gutters: 24px.
+  Outer margins: 22px.
+  Inherits styles from: Default Layout, Mobile Layout.
+  ------------------------------------------------------------
+  cols    1     2      3      4      5
+  px      68    160    252    344    436    */
+
+  @media only screen and (min-width: 480px) and (max-width: 767px) {
+
+    .l-content > .inner {
+      padding: 50px 25px;
+    }
+  }
