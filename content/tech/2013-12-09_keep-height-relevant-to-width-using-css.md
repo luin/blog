@@ -40,7 +40,7 @@ item 元素的 CSS 定义如下：
       float: left;
       margin: 10px 5%;
       padding-bottom: 33.98%;
-      width: 40%;
+      width: 21%;
       height: 0;
     }
 
