@@ -114,7 +114,7 @@
 </pre></div>
 
 
-<p>上面的代码中，我们使用 <code>B.__get__('A')</code> 就可以获得 B 模块中的内部成员 <code>A</code>，进而可以对 <code>A</code> 进行测试。使用 Rewire 使得测试模块内部成员变得非常简单，但是务必要注意的是永远不要让其出现在非测试代码中，因为 Rewire 会破坏 Node.js 的模块系统，从而导致代码混乱。</p>
+<p>上面的代码中，我们使用 <code>B.__get__('A')</code> 就可以获得 B 模块中的内部成员 <code>A</code>，进而可以对 <code>A</code> 进行测试。使用 Rewire 使得测试模块内部成员变得非常简单，但是务必要注意永远不要让其出现在非测试代码中，因为 Rewire 会破坏 Node.js 的模块系统，从而导致代码混乱。</p>
   </div>
   <div class="hr"></div>
   <section class="article-share clearfix">
