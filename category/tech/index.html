@@ -9,7 +9,7 @@
     <link href='http://fonts.googleapis.com/css?family=Noto+Serif|Montserrat:700' rel='stylesheet' type='text/css'>
     <link rel='stylesheet'  href='http://zihua.li/theme/css/normalize.css' type='text/css' media='all' />
     <link rel='stylesheet'  href='http://zihua.li/theme/css/style.css' type='text/css' media='all' />
-    <link rel='stylesheet'  href='http://zihua.li/theme/css/highlight.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://blog.li/theme/css/highlight.css' type='text/css' media='all' />
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     <!--[if lt IE 9]> <script src="http://zihua.li/theme/js/vendor/html5shiv.js"></script> <![endif]-->
 </head>
@@ -30,6 +30,35 @@
   </section>
   <section class="l-content">
     <div class="inner">
+  <article class="index-article">
+    <header>
+      <a href="http://zihua.li/2014/03/test-private-methods-in-nodejs/">
+        <h2 class="article-title">在 Node.js 中测试模块的内部成员</h2>
+      </a>
+      <p class="article-meta" title="2014-03-27T00:00:00">27 Mar 2014</p>
+    </header>
+    <div class="typo article-body">
+      <p>模块（Module）的内部成员是指没有通过 <code>module.exports</code> 导出的变量或函数。如下面的示例模块：</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// 执行某些操作</span>
+<span class="p">};</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">B</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">A</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>其中函数 <code>A</code> 就是该模块的内部成员，而命名函数表达式（Named Function Expression） <code>B</code> 则是该模块的公开成员。绝大多数情况下，单元测试只关注模块的公开成员，这是因为公开成员代表着模块的接口与功能，而内部成员则与模块的具体实现相关。对模块的内部成员进行测试，意味着测试代码需要了解模块的实现细节，导致测试代码与实现代码高度耦合，进而阻碍日后对代码的重构，这显然违背了单元测试的本意。而且实践 TDD 时，测试先于实现，更谈不上对模块的实现细节进行测试了。</p>
+<p>然而凡事都有例外，实践时并不能百分之百地保证测试代码不需要直接访问模块内部成员。下面本文将就两种情况对如何测试模块内部成员进行介绍。</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/test-private-methods-in-nodejs/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/test-private-methods-in-nodejs/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
   <article class="index-article">
     <header>
       <a href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/">
@@ -138,23 +167,6 @@
     <div class="read-more clearfix">
       <a class="button radius secondary small right" href="http://zihua.li/2013/09/express-promise/">阅读全文</a>
       <a class="button radius secondary small right" href="http://zihua.li/2013/09/express-promise/#disqus_thread">评论</a>
-    </div>
-    <div class="hr"></div>
-  </article>
-  <article class="index-article">
-    <header>
-      <a href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/">
-        <h2 class="article-title">开源的数据统计可视化工具：Ranaly</h2>
-      </a>
-      <p class="article-meta" title="2013-02-17T00:00:00">17 Feb 2013</p>
-    </header>
-    <div class="typo article-body">
-      <p>不少互联网项目都需要对项目的数据，如用户数量的增长趋势、最近注册的用户列表和当前在线用户数量等进行统计，而我最近在做的项目需要将这些统计数据以图表的形式展现出来。为此我开发了统计框架Ranaly，以使开发者只需要简单地配置就能生成一个强大的统计数据可视化后台。</p>
-<p>项目地址：<a href="https://github.com/luin/ranaly">https://github.com/luin/ranaly</a></p>
-    </div>
-    <div class="read-more clearfix">
-      <a class="button radius secondary small right" href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/">阅读全文</a>
-      <a class="button radius secondary small right" href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/#disqus_thread">评论</a>
     </div>
     <div class="hr"></div>
   </article>

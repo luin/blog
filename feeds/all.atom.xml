@@ -1,5 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-03-11T00:00:00+01:00</updated><entry><title>Express 框架 middleware 的依赖问题与解决方案</title><link href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/" rel="alternate"></link><updated>2014-03-11T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-03-11:2014/03/using-dependency-injection-to-optimise-express-middlewares/</id><summary type="html">&lt;p&gt;作为 Node 社区最受欢迎的框架，&lt;a href="http://expressjs.com"&gt;Express&lt;/a&gt; 在沿用 &lt;a href="http://www.senchalabs.org/connect/"&gt;Connect&lt;/a&gt; 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-03-27T00:00:00+01:00</updated><entry><title>在 Node.js 中测试模块的内部成员</title><link href="http://zihua.li/2014/03/test-private-methods-in-nodejs/" rel="alternate"></link><updated>2014-03-27T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-03-27:2014/03/test-private-methods-in-nodejs/</id><summary type="html">&lt;p&gt;模块（Module）的内部成员是指没有通过 &lt;code&gt;module.exports&lt;/code&gt; 导出的变量或函数。如下面的示例模块：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;A&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// 执行某些操作&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;其中函数 &lt;code&gt;A&lt;/code&gt; 就是该模块的内部成员，而命名函数表达式（Named Function Expression） &lt;code&gt;B&lt;/code&gt; 则是该模块的公开成员。绝大多数情况下，单元测试只关注模块的公开成员，这是因为公开成员代表着模块的接口与功能，而内部成员则与模块的具体实现相关。对模块的内部成员进行测试，意味着测试代码需要了解模块的实现细节，导致测试代码与实现代码高度耦合，进而阻碍日后对代码的重构，这显然违背了单元测试的本意。而且实践 TDD 时，测试先于实现，更谈不上对模块的实现细节进行测试了。&lt;/p&gt;
+&lt;p&gt;然而凡事都有例外，实践时并不能百分之百地保证测试代码不需要直接访问模块内部成员。下面本文将就两种情况对如何测试模块内部成员进行介绍。&lt;/p&gt;
+
+
+&lt;h3&gt;1. &lt;code&gt;require&lt;/code&gt; 引入的外部模块&lt;/h3&gt;
+&lt;p&gt;当要测试的模块包含依赖外部资源的操作（如请求网络数据）时，我们需要 &lt;a href="http://en.wikipedia.org/wiki/Test_stub"&gt;Stub&lt;/a&gt; 该操作。考虑下面的代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;// 文件名：get_url_content.js&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;request&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;request&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;callback&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;request&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;callback&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;该模块通过引入 &lt;a href="https://github.com/mikeal/request"&gt;Request&lt;/a&gt; 库，提供了一个获取网页内容的接口。显然在测试时我们需要对 &lt;code&gt;request.get&lt;/code&gt; 进行 Stub。然而因为 &lt;code&gt;request&lt;/code&gt; 并未被导出（即为内部成员），无法直接被外界访问，所以在测试代码中直接操作 &lt;code&gt;request.get&lt;/code&gt; 看上去很难实现。不过特殊的是，使用 &lt;code&gt;require&lt;/code&gt; 函数引入外部模块时，Node.js 会根据模块的实际文件路径进行缓存，同一路径的模块只会加载一次。这就意味着同一进程的多个模块引入同一外部模块时，得到的是同一对象。即如果在测试代码中同样引入 Request 模块并对其 &lt;code&gt;get&lt;/code&gt; 方法进行 Stub，就如同在要测试的模块中对 &lt;code&gt;request.get&lt;/code&gt; 进行 Stub。于是测试代码可以写成：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;sinon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;sinon&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;getUrlContent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;./get_url_content&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;request&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;request&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;describe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;getUrlContent(url, callback)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;source code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="nx"&gt;beforeEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;sinon&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;stub&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;request&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;get&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;withArgs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;yields&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+
+  &lt;span class="nx"&gt;it&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;should return the source code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;done&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;getUrlContent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;result&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;result&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;should&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eql&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+      &lt;span class="nx"&gt;done&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+
+  &lt;span class="nx"&gt;afterEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;request&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;restore&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面的代码使用了 &lt;a href="http://sinonjs.org"&gt;Sinon&lt;/a&gt; 库实现 Stub。Sinon 是一个非常好用的测试辅助框架，提供了对 Spy, Stub 和 Mock 的支持。&lt;/p&gt;
+&lt;h2&gt;2. 对内部定义的成员测试&lt;/h2&gt;
+&lt;p&gt;如果要测试的内部成员是在模块中定义的而非通过 &lt;code&gt;require&lt;/code&gt; 加载而来，对其测试就变得相对困难了。让我们再回头看文章开头的例子：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;// 文件名：module_b.js&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;A&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// 执行某些操作&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;如果要对函数 &lt;code&gt;A&lt;/code&gt; 进行测试，因为 &lt;code&gt;A&lt;/code&gt; 并未导出，所以在测试代码中通过 &lt;code&gt;require&lt;/code&gt; 引入该模块是无法直接访问到 &lt;code&gt;A&lt;/code&gt; 的，更谈不上测试。这时可以使用 &lt;a href="https://github.com/jhnns/rewire"&gt;Rewire 库&lt;/a&gt; 提供的 &lt;code&gt;rewire&lt;/code&gt; 方法来代替 &lt;code&gt;require&lt;/code&gt; 以实现访问内部成员的目的。&lt;code&gt;rewire&lt;/code&gt; 的工作方式和 &lt;code&gt;require&lt;/code&gt; 几乎相同，只不过前者额外为被引入的模块提供两个方法 &lt;code&gt;__get__&lt;/code&gt; 和 &lt;code&gt;__set__&lt;/code&gt;，分别用来读取和写入该模块的内部成员。&lt;/p&gt;
+&lt;p&gt;首先使用 &lt;code&gt;npm install rewire&lt;/code&gt; 来安装 Rewire，然后在测试代码中使用 &lt;code&gt;rewire&lt;/code&gt; 来引入要测试的模块（即上面的 module_b.js）：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;rewire&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rewire&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;rewire&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;./module_b&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;A&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;__get__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;A&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面的代码中，我们使用 &lt;code&gt;B.__get__('A')&lt;/code&gt; 就可以获得 B 模块中的内部成员 &lt;code&gt;A&lt;/code&gt;，进而可以对 &lt;code&gt;A&lt;/code&gt; 进行测试。使用 Rewire 使得测试模块内部成员变得非常简单，但是务必要注意的是永远不要让其出现在非测试代码中，因为 Rewire 会破坏 Node.js 的模块系统，从而导致代码混乱。&lt;/p&gt;</summary></entry><entry><title>Express 框架 middleware 的依赖问题与解决方案</title><link href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/" rel="alternate"></link><updated>2014-03-11T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-03-11:2014/03/using-dependency-injection-to-optimise-express-middlewares/</id><summary type="html">&lt;p&gt;作为 Node 社区最受欢迎的框架，&lt;a href="http://expressjs.com"&gt;Express&lt;/a&gt; 在沿用 &lt;a href="http://www.senchalabs.org/connect/"&gt;Connect&lt;/a&gt; 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。&lt;/p&gt;
 &lt;p&gt;下面是使用路由中间件从数据库载入用户资料的示例，这段代码来自 &lt;a href="http://tjholowaychuk.com"&gt;TJ&lt;/a&gt;（Express 的作者）的一个 &lt;a href="http://www.screenr.com/elL"&gt;Screencast&lt;/a&gt;：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
   &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;session&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -343,43 +420,4 @@ vmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;
 
 &lt;p&gt;更多实例可以见项目主页： &lt;a href="https://github.com/luin/express-promise" target="_blank"&gt;https://github.com/luin/express-promise&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;项目同样对 Mongoose 的 Query 对象提供了额外的支持。&lt;/p&gt;</summary><category term="express"></category><category term="middleware"></category><category term="node.js"></category><category term="open source"></category><category term="promise"></category></entry><entry><title>开源的数据统计可视化工具：Ranaly</title><link href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/" rel="alternate"></link><updated>2013-02-17T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2013-02-17:2013/02/an-open-source-tool-for-data-statistics/</id><summary type="html">&lt;p&gt;不少互联网项目都需要对项目的数据，如用户数量的增长趋势、最近注册的用户列表和当前在线用户数量等进行统计，而我最近在做的项目需要将这些统计数据以图表的形式展现出来。为此我开发了统计框架Ranaly，以使开发者只需要简单地配置就能生成一个强大的统计数据可视化后台。&lt;/p&gt;
-&lt;p&gt;项目地址：&lt;a href="https://github.com/luin/ranaly"&gt;https://github.com/luin/ranaly&lt;/a&gt;&lt;/p&gt;</summary><category term="node.js"></category><category term="open source"></category><category term="ranaly"></category></entry><entry><title>最近入手的数码产品</title><link href="http://zihua.li/2012/11/my-last-digital-acquisition/" rel="alternate"></link><updated>2012-11-19T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2012-11-19:2012/11/my-last-digital-acquisition/</id><summary type="html">&lt;p&gt;博客很久没有更新了，最近计划出版一本Redis的入门书籍，所以时间都放到写书上了。其实写书倒也不算是件能让人忙起来的事情，但它却能轻易地占据人的生活。记得高一下学期刚开学的时候学生会开始招新，我需要准备一篇千字左右的讲稿，结果在演讲的前一周我就把讲稿写完了。然而在接下来的7天里我却满脑子都是讲稿的事：虽然我已经完成了它，写的也还算不错，可是写稿子这种事有起点却没终点，一个句子总会有更好的表达方法，没有人敢说自己的稿子能得满分。我自然希望能做得更好，当然代价就是我7天的时间。&lt;/p&gt;
-&lt;p&gt;写书也是此理，于是写书累了就换换思路改写博客放松一下（你就不能干点其它事情！）。&lt;/p&gt;
-&lt;p&gt;最近计划买一个投影仪晚上没事了投电影看，突然想到自己一直想要写篇文章总结一下最近买的数码产品（神思路啊，中间是不是少个过渡句啊）。于是按照购买顺序挑几个有特点的列举如下：&lt;/p&gt;
-
-
-&lt;h2&gt;Kindle 4&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 以后每天晚上都可以捧着Kindle看书，不用再买书了（或是买书可以便宜点）。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 哎？放哪了？（找了好久终于还是找到了）&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;原因&lt;/strong&gt;: 国内计算机的书电子版几乎没有，有的也只是极为不清晰的扫描版，再配上Kindle 4的小屏幕真是绝配。国外的电子书价格都较贵，偶尔买一本还可以，但不是长久之计。不过用Kindle看小说确实很爽，而且Kindle 4的大小使它几乎可以放入任何牛仔裤的侧边和后边口袋中，真正随走随看。后来还发现Readability有一个Send to Kindle的Safari插件，当在Safari中看到文字比较多的页面时可以一键发送到自己的Kindle上慢慢读。然而即使是如此杀手级的功能也没能留住我，Kindle能做的iPhone都可以，虽然前者在阅读的时候会舒服些，但我浏览网页最多使用的还是iPhone。至于读书，至今我还是实体书的拥趸。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2&gt;Nexus 7&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 某个项目需要测试机......&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 乖乖地躺在一边，在我视线内。但好久没用过了。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;原因&lt;/strong&gt;: 我的第一台Android设备是HTC G6，用了一年多换了iPhone 4后我就发誓此生和Android绝缘。但不得不说Nexus 7稍微地改变了一下我对Android的看法。但如果不是项目需要，现在再让我选择一款平板，我会选iPad mini。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2&gt;Magic Trackpad&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 总盯着MacBook Pro的15寸小屏幕太累，所以买了台显示器。然后发现必须再配个键盘和鼠标，要不用起来好奇怪。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 买来的第二天就出手了，现状未知。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;原因&lt;/strong&gt;: 被MacBook Pro的触摸板惯的。归功于MacBook Pro自身的触摸板，在OS X下我从来不用鼠标，即使是使用PhotoShop做设计时。偶尔会用罗技的M705在Windows下打打DotA，说到M705确实是一款不错的鼠标，同时罗技的售后也很赞，微动坏了送到售后直接换新，然后还能延保。所以鼠标用了两年到现在和新的一样（啊不是，我没有说鼠标的做工不好啦）。扯远了，Magic Trackpad和MBP的触摸板手感差太多，所以想都没想直接出了。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2&gt;HHKB Pro 2&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;购买原因&lt;/strong&gt;: 如上所述。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;现状&lt;/strong&gt;: 无法忍受其它任何键盘了。&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;原因&lt;/strong&gt;: 对HHKB Pro 2的赞美之辞网上一搜一片，总结一下：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;超棒的键位设计：Ctrl和退格键的位置是我最喜欢的。以前用Vim还得改建，现在就不用了，而且有的键位比较微妙，改建还实现不了。&lt;/li&gt;
-&lt;li&gt;超棒的触感：键帽摸上去触感一流。网上有人说“触感如loli的肌肤一般”也不是没有道理的。&lt;/li&gt;
-&lt;li&gt;超棒的手感：我用过黑轴茶轴和青轴的键盘，可是每个键盘平均只用过一天，在这方面没啥发言权。只和MacBook Pro的键盘比，天壤之别。以前我是怎么过的啊！&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;我是通过萌购从日本亚马逊代购的，想买的朋友推荐也走此路线，比淘宝便宜了几百块，不过运输时间长点（15天内）。我买的是黑色无刻版。&lt;/p&gt;
-&lt;h2&gt;题外话&lt;/h2&gt;
-
-&lt;p&gt;目前我在写的Redis书需要一些初学者案例，如果你对Redis有兴趣或者初学Redis，可以发送邮件将你对Redis的问题告诉我。我的邮箱是i#zihua.li（替换#为@）。&lt;/p&gt;</summary><category term="hhkb"></category><category term="kindle"></category><category term="nexus"></category><category term="Redis"></category><category term="trackpad"></category></entry></feed>
+&lt;p&gt;项目地址：&lt;a href="https://github.com/luin/ranaly"&gt;https://github.com/luin/ranaly&lt;/a&gt;&lt;/p&gt;</summary><category term="node.js"></category><category term="open source"></category><category term="ranaly"></category></entry></feed>
