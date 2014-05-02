@@ -141,6 +141,7 @@ mark {
 
 pre, code {
     font-family: 'Source Code Pro', "Courier New", Courier, monospace;
+    font-weight: 400;
     white-space: pre-wrap;
     word-wrap: break-word;
 }
