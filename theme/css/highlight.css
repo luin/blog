@@ -2,8 +2,9 @@
   font-size: 18px;
   line-height: 1.2;
   color: #4d4d4c;
-  background-color: #f7fafb;
-  border: none;
+  border: 1px solid #E3EDF3;
+  background: #F7FAFB;
+  border-radius: 2px;
 }
 
 .c { color: #999988; font-style: italic } /* Comment */
