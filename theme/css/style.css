@@ -94,6 +94,7 @@ article {
 .article-title {
   font-family: Microsoft Yahei, Hiragino Sans GB, WenQuanYi Micro Hei, sans-serif;
   font-size: 2.4em;
+  font-weight: 600;
   line-height: 1.2;
   margin-bottom: 16px;
 }
