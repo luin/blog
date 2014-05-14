@@ -5,7 +5,7 @@ body {
   font-size: 1em;
   line-height: 1.1;
   word-wrap: break-word;
-  font-family: Microsoft Yahei, Hiragino Sans GB, WenQuanYi Micro Hei, sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
 }
 
 a:link, a:visited, a:hover, a:active {
@@ -73,7 +73,6 @@ code {
 
 h1, h2, h3, h4, h5, h6 {
   line-height: 1.6;
-  font-family: 'Montserrat', sans-serif;
 }
 
 h1 {
@@ -100,7 +99,7 @@ article {
 }
 
 .article-title {
-  font-family: Microsoft Yahei, Hiragino Sans GB, WenQuanYi Micro Hei, sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 2.4em;
   font-weight: 600;
   line-height: 1.2;
