@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>C 端产品设计 | Zihua Li</title>
+      <link href="http://zihua.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
+    <link href='http://fonts.googleapis.com/css?family=Noto+Serif|Montserrat:700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet'  href='http://zihua.li/theme/css/normalize.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://zihua.li/theme/css/style.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://zihua.li/theme/css/highlight.css' type='text/css' media='all' />
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <!--[if lt IE 9]> <script src="http://zihua.li/theme/js/vendor/html5shiv.js"></script> <![endif]-->
+</head>
+<body>
+  <section class="l-cover">
+    <header id="banner" class="body">
+      <h1 class="site-name"><a href="http://zihua.li/">Zihua Li</a></h1>
+      <p class="description">
+        美工、全栈码农（Web, iOS）<br>90 后，法号 Luin<br />
+        [<a href="http://zihua.li/pages/about/">关于</a>, <a href="http://zihua.li/pages/novel/">小说</a>]
+      </p>
+      <ul class="social-links">
+        <li><a href="https://twitter.com/luinlee">Twitter</a></li>
+        <li><a href="https://github.com/luin">Github</a></li>
+        <li><a href="http://dribbble.com/luin">Dribbble</a></li>
+      </ul>
+    </header>
+  </section>
+  <section class="l-content">
+    <div class="inner">
+<article>
+  <header>
+    <h2 class="article-title">C 端产品设计</h3>
+  </header>
+  <div class="typo article-body">
+    <h2>主题</h2>
+<p>发现身边的美好（照片分享）</p>
+<h2>主要功能：</h2>
+<p>主体功能类似 Instagram，但有几点显著差异：</p>
+<ol>
+<li>强调地理位置信息：每张照片必须对应一个线下商户的 beacon</li>
+<li>使用微博账号登录</li>
+<li>返利：用户 A 喜欢了 B 的照片后一定时间内去了该照片对应的商户，系统会给 B 返利</li>
+<li>类似微博的用户关系：单向好友和双向好友（好友圈）。发照片时可以选择可见范围</li>
+</ol>
+<h3>1. 发照片</h3>
+<p>用户发表照片时需要和一个 Beacon 绑定（系统会显示用户遇到过的 Beacon 列表），支持滤镜，可以选择可见范围。
+其它用户可以自由地 like 和评论，但遇到过该 Beacon 的人的评论会以特殊标记显示。</p>
+<p>文案引导：引导用户只能发表美好的照片（积极向上的，不含抱怨的）。</p>
+<h3>2. 查看关注的人的照片</h3>
+<p>同微博一样可以切换自己关注的人和好友圈。列表中比较重要的信息：图、作者、like 和评论数量、地点、时间和评论摘要。</p>
+<h3>3. 发现</h3>
+<p>可以看到附近一定距离内的所有照片，同时提供类似陌陌的“漫游”功能——用户可以自由查看指定点附近的照片。</p>
+<h3>4. 个人资料</h3>
+<p>包含：</p>
+<ol>
+<li>个人基本信息</li>
+<li>自己的相册</li>
+<li>到过的地点（地图形式）</li>
+<li>自己得到的返利</li>
+<li>通过微博关系和上传通讯录来找寻好友</li>
+</ol>
+  </div>
+</article>
+    </div>
+  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-46124852-1', 'zihua.li');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>
