@@ -146,7 +146,8 @@ article {
 }
 
 .description a,
-.article-body a {
+.article-body a,
+.read-more a {
   color: #007998;
   -webkit-transition: color 0.25s ease-in-out;
   -moz-transition: color 0.25s ease-in-out;
@@ -190,7 +191,6 @@ article {
 
 .read-more a {
   margin-left: 8px;
-  color: #007998;
 }
 
 .icon-social-facebook-rect {
