@@ -161,7 +161,10 @@ article {
 .description a:active,
 .article-body a:hover,
 .article-body a:focus,
-.article-body a:active {
+.article-body a:active,
+.read-more a:hover,
+.read-more a:focus,
+.read-more a:active {
   color: rgba(0, 121, 152, 0.5);
 }
 
