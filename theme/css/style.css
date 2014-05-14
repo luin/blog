@@ -37,7 +37,7 @@ code {
   z-index: 100;
   max-width: 500px;
   width: 30%;
-  border-right: 1px solid #dededc;
+  background-color: #f5f5f5;
   text-align: center;
 }
 
@@ -47,6 +47,10 @@ code {
   right: 0;
   left: 0;
   padding: 50px 10%;
+}
+
+.l-cover .header-avatar {
+  border-radius: 999px;
 }
 
 .l-cover .description {
