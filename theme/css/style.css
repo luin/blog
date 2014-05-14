@@ -59,7 +59,7 @@ code {
 }
 
 .l-cover .social-links li a {
-  color: #007998;
+  color: #666;
 }
 
 .l-cover .social-links li::after {
@@ -190,6 +190,7 @@ article {
 
 .read-more a {
   margin-left: 8px;
+  color: #007998;
 }
 
 .icon-social-facebook-rect {
