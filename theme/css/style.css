@@ -149,7 +149,7 @@ article {
 
 .description a,
 .article-body a {
-  color: #90cc67;
+  color: #467229;
 }
 
 #instantclick-bar {
@@ -379,11 +379,11 @@ article {
 
 /* Selection colours (easy to forget) */
 
-::selection 	 	{background: #90cc67;}
-::-moz-selection 	{background: #90cc67;}
+::selection 	 	{background: #467229;}
+::-moz-selection 	{background: #467229;}
 img::selection 		{background: transparent;}
 img::-moz-selection	{background: transparent;}
-body {-webkit-tap-highlight-color: #90cc67;}
+body {-webkit-tap-highlight-color: #467229;}
 
   /*		Tablet Layout: 768px.
   Gutters: 24px.
