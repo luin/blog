@@ -120,6 +120,7 @@ article {
 .article-body {
   font-size: 1.1em;
   line-height: 1.8;
+  color: #555;
 }
 
 .article-body img.fill {
