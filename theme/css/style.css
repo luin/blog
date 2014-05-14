@@ -50,6 +50,10 @@ code {
 }
 
 .l-cover .header-avatar {
+  margin-bottom: 5px;
+}
+
+.l-cover .header-avatar img {
   border-radius: 999px;
 }
 
