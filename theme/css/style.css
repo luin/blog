@@ -119,7 +119,7 @@ article {
 
 .article-body {
   font-size: 1.1em;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 .article-body img.fill {
@@ -149,11 +149,21 @@ article {
 
 .description a,
 .article-body a {
-  color: #467229;
+  color: #007998;
+  -webkit-transition: color 0.25s ease-in-out;
+  -moz-transition: color 0.25s ease-in-out;
+  -o-transition: color 0.25s ease-in-out;
+  -ms-transition: color 0.25s ease-in-out;
+  transition: color 0.25s ease-in-out;
 }
 
-#instantclick-bar {
-  background: #90cc67;
+.description a:hover,
+.description a:focus,
+.description a:active,
+.article-body a:hover,
+.article-body a:focus,
+.article-body a:active {
+  color: rgba(0, 121, 152, 0.5);
 }
 
 .article-share {
@@ -379,11 +389,11 @@ article {
 
 /* Selection colours (easy to forget) */
 
-::selection 	 	{background: #467229;}
-::-moz-selection 	{background: #467229;}
+::selection 	 	{background: #007998;}
+::-moz-selection 	{background: #007998;}
 img::selection 		{background: transparent;}
 img::-moz-selection	{background: transparent;}
-body {-webkit-tap-highlight-color: #467229;}
+body {-webkit-tap-highlight-color: #007998;}
 
   /*		Tablet Layout: 768px.
   Gutters: 24px.
