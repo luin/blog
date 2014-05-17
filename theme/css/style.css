@@ -238,6 +238,15 @@ article {
   background-color: #007998;
   border-radius: 999px;
   color: #fff;
+  -webkit-transition: color 0.25s ease-in-out;
+  -moz-transition: color 0.25s ease-in-out;
+  -o-transition: color 0.25s ease-in-out;
+  -ms-transition: color 0.25s ease-in-out;
+  transition: color 0.25s ease-in-out;
+}
+
+.paginator a:hover {
+  color: rgba(0, 121, 152, 0.5);
 }
 
 .paginator a.next-page {
