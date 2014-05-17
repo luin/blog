@@ -216,14 +216,15 @@ article {
 
 .paginator {
   position: relative;
-  width: 300px;
+  width: 200px;
   margin: 0 auto;
   text-align: center;
   font-size: 20px;
   color: #fff;
   height: 30px;
   line-height: 30px;
-  background-color: #ccc;
+  background-color: #eee;
+  border-radius: 15px;
 }
 
 .paginator a {
