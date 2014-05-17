@@ -215,15 +215,18 @@ article {
 }
 
 .paginator {
+  width: 300px;
+  margin: 0 auto;
   text-align: center;
   font-size: 20px;
   color: #fff;
   height: 30px;
   line-height: 30px;
-  background-color: #aaa;
+  background-color: #ccc;
 }
 
 .paginator a {
+  position: relative;
   display: inline-block;
   width: 30px;
   height: 30px;
@@ -232,6 +235,14 @@ article {
   background-color: #007998;
   border-radius: 999px;
   color: #fff;
+}
+
+.paginator a.next-page {
+  right: -15px;
+}
+
+.paginator a.prev-page {
+  left: -15px;
 }
 
 
