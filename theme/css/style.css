@@ -241,11 +241,11 @@ article {
 }
 
 .paginator a.next-page {
-  right: -30px;
+  right: 0;
 }
 
 .paginator a.prev-page {
-  left: -30px;
+  left: 0;
 }
 
 
