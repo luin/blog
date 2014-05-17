@@ -215,6 +215,7 @@ article {
 }
 
 .paginator {
+  position: relative;
   width: 300px;
   margin: 0 auto;
   text-align: center;
@@ -226,7 +227,8 @@ article {
 }
 
 .paginator a {
-  position: relative;
+  position: absolute;
+  top: 0;
   display: inline-block;
   width: 30px;
   height: 30px;
