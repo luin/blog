@@ -220,11 +220,12 @@ article {
   color: #aaa;
 }
 
-.paginator {
+.paginator a {
   display: inline-block;
   width: 30px;
   height: 30px;
   background-color: #007998;
+  border-radius: 999px;
   color: #fff;
 }
 
