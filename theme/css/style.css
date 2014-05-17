@@ -214,6 +214,21 @@ article {
   margin: 0 0 10px;
 }
 
+.paginator {
+  text-align: center;
+  font-size: 20px;
+  color: #aaa;
+}
+
+.paginator {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background-color: #007998;
+  color: #fff;
+}
+
+
 @font-face {
   font-family: 'fontello';
   src: url("../font/fontello.eot");
