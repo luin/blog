@@ -216,7 +216,7 @@ article {
 
 .paginator {
   position: relative;
-  width: 100px;
+  width: 80px;
   margin: 0 auto;
   text-align: center;
   font-size: 20px;
@@ -246,7 +246,7 @@ article {
 }
 
 .paginator a:hover {
-  color: rgba(0, 121, 152, 0.5);
+  background-color: rgba(0, 121, 152, 0.5);
 }
 
 .paginator a.next-page {
