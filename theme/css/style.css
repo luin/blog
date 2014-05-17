@@ -236,7 +236,6 @@ article {
   line-height: 30px;
   text-align: center;
   background-color: #007998;
-  border-radius: 999px;
   color: #fff;
   -webkit-transition: color 0.25s ease-in-out;
   -moz-transition: color 0.25s ease-in-out;
@@ -250,11 +249,15 @@ article {
 }
 
 .paginator a.next-page {
-  right: 0;
+  right: -15px;
+  border-radius-right-top: 999px;
+  border-radius-right-bottom: 999px;
 }
 
 .paginator a.prev-page {
-  left: 0;
+  left: -15px;
+  border-radius-left-top: 999px;
+  border-radius-left-bottom: 999px;
 }
 
 
