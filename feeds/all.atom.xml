@@ -14,7 +14,7 @@
 &lt;p&gt;然而凡事都有例外，实践时并不能百分之百地保证测试代码不需要直接访问模块内部成员。下面本文将就两种情况对如何测试模块内部成员进行介绍。&lt;/p&gt;
 
 
-&lt;h3&gt;1. &lt;code&gt;require&lt;/code&gt; 引入的外部模块&lt;/h3&gt;
+&lt;h3&gt;1. 引入的外部模块&lt;/h3&gt;
 &lt;p&gt;当要测试的模块包含依赖外部资源的操作（如请求网络数据）时，我们需要 &lt;a href="http://en.wikipedia.org/wiki/Test_stub"&gt;Stub&lt;/a&gt; 该操作。考虑下面的代码：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;// 文件名：get_url_content.js&lt;/span&gt;
 &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;request&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;request&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;

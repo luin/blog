@@ -52,7 +52,7 @@
 <p>然而凡事都有例外，实践时并不能百分之百地保证测试代码不需要直接访问模块内部成员。下面本文将就两种情况对如何测试模块内部成员进行介绍。</p>
 
 
-<h3>1. <code>require</code> 引入的外部模块</h3>
+<h3>1. 引入的外部模块</h3>
 <p>当要测试的模块包含依赖外部资源的操作（如请求网络数据）时，我们需要 <a href="http://en.wikipedia.org/wiki/Test_stub">Stub</a> 该操作。考虑下面的代码：</p>
 <div class="highlight"><pre><span class="c1">// 文件名：get_url_content.js</span>
 <span class="kd">var</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">);</span>
