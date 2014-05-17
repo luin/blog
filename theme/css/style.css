@@ -250,14 +250,14 @@ article {
 
 .paginator a.next-page {
   right: -15px;
-  border-radius-right-top: 999px;
-  border-radius-right-bottom: 999px;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 
 .paginator a.prev-page {
   left: -15px;
-  border-radius-left-top: 999px;
-  border-radius-left-bottom: 999px;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
 }
 
 
