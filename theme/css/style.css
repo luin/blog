@@ -217,13 +217,18 @@ article {
 .paginator {
   text-align: center;
   font-size: 20px;
-  color: #aaa;
+  color: #fff;
+  height: 30px;
+  line-height: 30px;
+  background-color: #aaa;
 }
 
 .paginator a {
   display: inline-block;
   width: 30px;
   height: 30px;
+  line-height: 30px;
+  text-align: center;
   background-color: #007998;
   border-radius: 999px;
   color: #fff;
