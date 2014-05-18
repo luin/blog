@@ -154,6 +154,7 @@ article {
 }
 
 .description a,
+.index-article header a,
 .article-body a,
 .read-more a {
   color: #007998;
@@ -167,6 +168,9 @@ article {
 .description a:hover,
 .description a:focus,
 .description a:active,
+.index-article header a:hover,
+.index-article header a:focus,
+.index-article header a:active,
 .article-body a:hover,
 .article-body a:focus,
 .article-body a:active,
