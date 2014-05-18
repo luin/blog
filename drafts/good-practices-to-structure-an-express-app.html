@@ -37,15 +37,15 @@
     <h2 class="article-title">Good practices to structure an Express app</h3>
   </header>
   <div class="typo article-body">
-    <p>Having been heavily using the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app which make my code significantly cleaner and easier to follow. Here they are.</p>
+    <p>Having been heavily using the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app which makes my code significantly cleaner and easier to follow. Here they are.</p>
 <h2>1. Routing</h2>
-<p>While there are various ways we can set up routes, the most important thing I honestly feel to keep in mind is to put the URL definition and it’s routes(aka middlewares) in the same place. </p>
+<p>While there are countless ways we can set up routes, the most important thing I honestly feel to keep in mind is to put the URL definition and it’s routes(aka middlewares) in the same place. </p>
 <p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because there is a relatively high coupling between the URL definition and it's routes: when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> in the URL, you have to alter the route accordingly, and what's more, it takes more time to find the routes by the URL which is very common during the stages of development.</p>
 <blockquote>
 <p>When things get bigger, they need to be made smaller.</p>
 </blockquote>
 <p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, being the fundamental concept, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separate naturally.</p>
-<p>In light of the fact that an Express app instance can not only <code>use</code> a middleware but also another Express app instance(sub-app), I make each route an independent Express app, put each app in a separate file and expose them via the <code>module.exports</code> object. I put all of these files into a sub-folder, eg: /routes. Here's the structure of a typical Express project I have written:</p>
+<p>In light of the fact that an Express app instance cannot only <code>use</code> a middleware but also another Express app instance(sub-app), I make each route an independent Express app, put each app in a separate file and expose them via the <code>module.exports</code> object. I put all of these files into a sub-folder, eg: /routes. Here's the structure of a typical Express project I have written:</p>
 <div class="highlight"><pre><span class="n">project</span>
   <span class="o">|-</span> <span class="n">routes</span>
   <span class="o">|</span>   <span class="o">|-</span> <span class="n">users</span><span class="p">.</span><span class="n">js</span>
@@ -55,7 +55,7 @@
 </pre></div>
 
 
-<p>Once we have the route files as described, it is easy to load them from <code>app.js</code>. Using the <code>fs</code> module we can quickly load each module and <code>use</code> each one of them. We do this before the app is started. The <code>app.js</code> skeleton looks like so:</p>
+<p>Once we have the route files as described, it is easy to load them from <code>app.js</code>. Using the <code>fs</code> module, we can quickly load each module and <code>use</code> each one of them. We do this before the app is launched. The <code>app.js</code> skeleton looks like so:</p>
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
     <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
 
@@ -70,7 +70,7 @@
 </pre></div>
 
 
-<p>You may have noticed that we gived each route a mount path, which is the base name of the route file prefixed with a slash. Hence, for instance, when we write the following code in the <code>routes/users.js</code>:</p>
+<p>You may have noticed that we gave each route a mount path, which is the basename of the route file prefixed with a slash. Hence, for instance, when we type the following code in the <code>routes/users.js</code>:</p>
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
@@ -86,8 +86,8 @@
 <p>Global variables are evil.</p>
 </blockquote>
 <p>Global variables are variables that are accessible from every scope in your project, even in different modules.</p>
-<p>I've seen numerous people state that global variables are evil and resist using them in their projects. I admit there's a problem if a project depend heavily on global variables, but with my own personal believe that rational use of them will lead your project more efficient to develop. For instance, Database connections(or models if you are using ORM or ODM) are very well suited to be defined as global variables in respect that they are used pervasively in a typical Express project.</p>
-<p>The most simplest way to create a global variable is to declare a variable without the <code>var</code> keyword. However, I strongly oppose this way on account of ambiguity: It makes one wonder whether the variable was to be declared as a global variable or the developer just forgot using the <code>var</code>. Instead, I declare a global variable by adding the variable to the <code>GLOBAL</code> object:</p>
+<p>I've seen numerous people state that global variables are evil and resist using them in their projects. I admit there's a problem if a project depends heavily on global variables, but with my own personal believe that rational use of them will lead your project more efficient to develop. For instance, database connections(or models if you are using ORM or ODM) are very well suited to be defined as global variables in respect that they are used pervasively in a typical Express project.</p>
+<p>The simplest way to create a global variable is to declare a variable without the <code>var</code> keyword. However, I strongly oppose this way on account of ambiguity: It makes one wonder whether the variable was to be declared as a global variable or the developer just forgot using the <code>var</code>. Instead, I declare a global variable by adding the variable to the <code>GLOBAL</code> object:</p>
 <div class="highlight"><pre><span class="o">&gt;</span> <span class="n">GLOBAL</span><span class="p">.</span><span class="n">str</span> <span class="o">=</span> <span class="err">&#39;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">global</span> <span class="n">variable</span><span class="err">&#39;</span><span class="p">;</span>
 <span class="err">&#39;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">global</span> <span class="n">variable</span><span class="err">&#39;</span>
 <span class="o">&gt;</span> <span class="n">str</span>
