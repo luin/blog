@@ -128,6 +128,10 @@ article {
   line-height: 1.8;
 }
 
+.article-body blockquote p {
+  margin-bottom: 0;
+}
+
 .article-body img.fill {
   display: block;
   margin: 20px auto;
