@@ -40,12 +40,12 @@
     <p>Having been heavily using the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app which makes my code significantly cleaner and easier to follow. Here they are.</p>
 <h2>1. Routing</h2>
 <p>While there are countless ways we can set up routes, the most important thing I honestly feel to keep in mind is to put the URL definition and it’s routes(aka middlewares) in the same place. </p>
-<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because there is a relatively high coupling between the URL definition and it's routes: when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> in the URL, you have to alter the route accordingly, and what's more, it takes more time to find the routes by the URL which is very common during the stages of development.</p>
+<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because there is a relatively high coupling between the URL definition and it's routes: when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly, and what's more, it takes more time to find the routes by the URL which is very common during the stages of development.</p>
 <blockquote>
 <p>When things get bigger, they need to be made smaller.</p>
 </blockquote>
 <p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, being the fundamental concept, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separate naturally.</p>
-<p>In light of the fact that an Express app instance cannot only <code>use</code> a middleware but also another Express app instance(sub-app), I make each route an independent Express app, put each app in a separate file and expose them via the <code>module.exports</code> object. I put all of these files into a sub-folder, eg: /routes. Here's the structure of a typical Express project I have written:</p>
+<p>In light of the fact that an Express app instance cannot only <code>use</code> a middleware but also another Express app instance(sub-app), I make each route an independent Express app, put each app in a separate file and expose them via the <code>module.exports</code> object. I put all these files into a sub-folder, eg: /routes. Here's the structure of a typical Express project I have written:</p>
 <div class="highlight"><pre><span class="n">project</span>
   <span class="o">|-</span> <span class="n">routes</span>
   <span class="o">|</span>   <span class="o">|-</span> <span class="n">users</span><span class="p">.</span><span class="n">js</span>
@@ -55,7 +55,7 @@
 </pre></div>
 
 
-<p>Once we have the route files as described, it is easy to load them from <code>app.js</code>. Using the <code>fs</code> module, we can quickly load each module and <code>use</code> each one of them. We do this before the app is launched. The <code>app.js</code> skeleton looks like so:</p>
+<p>Once we have the route files as described, it is not difficult to load them from <code>app.js</code>. Using the <code>fs</code> module, we can quickly load each module and <code>use</code> each of them. We do this before the app is launched. The <code>app.js</code> skeleton looks like so:</p>
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
     <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
 
@@ -80,7 +80,7 @@
 </pre></div>
 
 
-<p>After the user route being mounted, the final URL will be <code>/users/:userId</code>. Freaking awesome!</p>
+<p>After the user route being mounted, the final URL will be <code>/users/:userId</code> instead of <code>/:userId</code>. Freaking awesome!</p>
 <h2>2. Global variables</h2>
 <blockquote>
 <p>Global variables are evil.</p>
