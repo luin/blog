@@ -8,6 +8,31 @@
   border: none;
 }
 
+.highlight pre {
+  padding-left: 85px;
+  margin-right: -85px;
+  margin-left: -85px;
+  border-radius: 0;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+  .highlight pre {
+    margin-left: -40px;
+    padding-left: 40px;
+    margin-right: -40px;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+
+  .highlight pre {
+    margin-left: -25px;
+    padding-left: 25px;
+    margin-right: -25px;
+  }
+
+}
+
 .c { color: #999988; font-style: italic } /* Comment */
 .err { color: #a61717; background-color: #e3d2d2 } /* Error */
 .k { font-weight: bold } /* Keyword */
