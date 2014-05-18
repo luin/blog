@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Good practices to structure an Express app | Zihua Li</title>
+      <link href="http://zihua.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet'  href='http://zihua.li/theme/css/normalize.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://zihua.li/theme/css/style.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://zihua.li/theme/css/highlight.css' type='text/css' media='all' />
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <!--[if lt IE 9]> <script src="http://zihua.li/theme/js/vendor/html5shiv.js"></script> <![endif]-->
+</head>
+<body>
+  <section class="l-cover">
+    <header id="banner" class="body">
+      <div class="header-avatar"><a href="http://zihua.li/"><img src="http://zihua.li/theme/images/avatar.png" width="64" height="64" alt="" /></a></div>
+      <h1 class="site-name"><a href="http://zihua.li/">Zihua Li</a></h1>
+      <p class="description">
+        美工、全栈码农（Web, iOS）<br>90 后，法号 Luin<br />
+        [<a href="http://zihua.li/pages/about/">关于</a>, <a href="http://zihua.li/pages/novel/">小说</a>]
+      </p>
+      <ul class="social-links">
+        <li><a href="https://twitter.com/luinlee">Twitter</a></li>
+        <li><a href="https://github.com/luin">Github</a></li>
+        <li><a href="http://dribbble.com/luin">Dribbble</a></li>
+      </ul>
+    </header>
+  </section>
+  <section class="l-content">
+    <div class="inner">
+<article>
+  <header>
+    <p class="article-meta" title="2014-05-21T00:00:00">21 May 2014</p>
+    <h2 class="article-title">Good practices to structure an Express app</h3>
+  </header>
+  <div class="typo article-body">
+    <p>Having been heavily using the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app which make my code significantly cleaner and easier to follow. Here they are.</p>
+<h2>1. Routing</h2>
+<p>While there are various ways we can set up routes, the most important thing I honestly feel to keep in mind is to put the URL definition and it’s routes(aka middlewares) in the same place. </p>
+<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because there is a relatively high coupling between the URL definition and it's routes: when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> in the URL, you have to alter the route accordingly, and what's more, it takes more time to find the routes by the URL which is very common during the stages of development.</p>
+<blockquote>
+<p>When things get bigger, they need to be made smaller.</p>
+</blockquote>
+<p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, being the fundamental concept, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separate naturally.</p>
+<p>In light of the fact that an Express app instance can not only <code>use</code> a middleware but also another Express app instance(sub-app), I make each route an independent Express app, put each app in a separate file and expose them via the <code>module.exports</code> object. I put all of these files into a sub-folder, eg: /routes. Here's the structure of a typical Express project I have written:</p>
+<div class="highlight"><pre><span class="n">project</span>
+  <span class="o">|-</span> <span class="n">routes</span>
+  <span class="o">|</span>   <span class="o">|-</span> <span class="n">users</span><span class="p">.</span><span class="n">js</span>
+  <span class="o">|</span>   <span class="o">|-</span> <span class="n">projects</span><span class="p">.</span><span class="n">js</span>
+  <span class="o">|</span>   <span class="o">|-</span> <span class="n">tasks</span><span class="p">.</span><span class="n">js</span>
+  <span class="o">|-</span> <span class="n">app</span><span class="p">.</span><span class="n">js</span>
+</pre></div>
+
+
+<p>Once we have the route files as described, it is easy to load them from <code>app.js</code>. Using the <code>fs</code> module we can quickly load each module and <code>use</code> each one of them. We do this before the app is started. The <code>app.js</code> skeleton looks like so:</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
+    <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">routeDir</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;routes&#39;</span><span class="p">),</span>
+    <span class="nx">routes</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span><span class="p">(</span><span class="nx">routeDir</span><span class="p">);</span>
+
+<span class="nx">routes</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">routeFileName</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">routeName</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">basename</span><span class="p">(</span><span class="nx">routeFileName</span><span class="p">,</span> <span class="s1">&#39;.js&#39;</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">routeModule</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">routeDir</span><span class="p">,</span> <span class="nx">routeFileName</span><span class="p">));</span>
+  <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">routeName</span><span class="p">,</span> <span class="nx">routeModule</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+
+
+<p>You may have noticed that we gived each route a mount path, which is the base name of the route file prefixed with a slash. Hence, for instance, when we write the following code in the <code>routes/users.js</code>:</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/:userId&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// do something</span>
+<span class="p">});</span>
+</pre></div>
+
+
+<p>After the user route being mounted, the final URL will be <code>/users/:userId</code>. Freaking awesome!</p>
+<h2>2. Global variables</h2>
+<blockquote>
+<p>Global variables are evil.</p>
+</blockquote>
+<p>Global variables are variables that are accessible from every scope in your project, even in different modules.</p>
+<p>I've seen numerous people state that global variables are evil and resist using them in their projects. I admit there's a problem if a project depend heavily on global variables, but with my own personal believe that rational use of them will lead your project more efficient to develop. For instance, Database connections(or models if you are using ORM or ODM) are very well suited to be defined as global variables in respect that they are used pervasively in a typical Express project.</p>
+<p>The most simplest way to create a global variable is to declare a variable without the <code>var</code> keyword. However, I strongly oppose this way on account of ambiguity: It makes one wonder whether the variable was to be declared as a global variable or the developer just forgot using the <code>var</code>. Instead, I declare a global variable by adding the variable to the <code>GLOBAL</code> object:</p>
+<div class="highlight"><pre><span class="o">&gt;</span> <span class="n">GLOBAL</span><span class="p">.</span><span class="n">str</span> <span class="o">=</span> <span class="err">&#39;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">global</span> <span class="n">variable</span><span class="err">&#39;</span><span class="p">;</span>
+<span class="err">&#39;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">global</span> <span class="n">variable</span><span class="err">&#39;</span>
+<span class="o">&gt;</span> <span class="n">str</span>
+<span class="err">&#39;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">global</span> <span class="n">variable</span><span class="err">&#39;</span>
+</pre></div>
+
+
+<p>I am a huge fan of ORM/ODM, hence <a href="http://mongoosejs.com">Mongoose</a> and <a href="http://sequelizejs.com">Sequelize</a> are habitual frequenters of my Express projects. When I use them, I will be bound to expose the ORM/ODM models as global variables so that I can access them everywhere like this:</p>
+<div class="highlight"><pre><span class="nx">User</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span> <span class="nx">email</span><span class="o">:</span> <span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">email</span> <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+<span class="p">});</span>
+</pre></div>
+
+
+<p>In the code above, <code>User</code> is a Mongoose model which is a global variable.</p>
+<h2>Conclusion</h2>
+<p>I created a small reference app to codify a standard Express app structure. You can see it <a href="https://github.com/template-man/express-mongoose">here</a>.</p>
+  </div>
+  <div class="hr"></div>
+  <section class="article-share clearfix">
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    <div class="about-blog">
+      <h4>关于此博客</h4>
+      <p>Luin 的个人博客，主要关注互联网技术。</p>
+      <a href="https://twitter.com/luinlee" class="twitter-follow-button" data-show-count="false" data-lang="en">Follow @luinlee</a>
+    </div>
+    <div class="share">
+      <h4>分享这篇文章</h4>
+      <a class="icon-social icon-social-twitter-bird" href="http://twitter.com/share?text=Good practices to structure an Express app&url=http://zihua.li/2014/05/good-practices-to-structure-an-express-app/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+        <span class="hidden">Twitter</span>
+      </a>
+      <a class="icon-social icon-social-weibo" href="http://service.weibo.com/share/share.php?title=Good practices to structure an Express app&url=http://zihua.li/2014/05/good-practices-to-structure-an-express-app/" onclick="window.open(this.href, 'weibo-share', 'width=550,height=435');return false;">
+        <span class="hidden">微博</span>
+      </a>
+    </div>
+  </section>
+</article>
+    </div>
+  </section>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-46124852-1', 'zihua.li');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>
