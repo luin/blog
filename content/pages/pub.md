@@ -1,0 +1,6 @@
+Title: 公钥
+Category:
+Slug: pub
+
+## RMBP Burger King
+    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcIX5qPPSCe/0EiIdPhHka+7hovDa/oF1BXtduJ8ueMGSiYEPL6pIYLOAJc+VWxHJMQ2vjk+Qit3aLRuz3qfFytqHmh7a3Z0Vg4P8QmaOnvP11EqmwnoO6zWynjme1Tcapbwl6LsCxhJCAJUzP7xgyAnwhkaGCWAYRAyefdcO1h1rKU4a0PP4n5iUJKjrPoQU4dOvwobcww+rHAX0vI1fd2G2z6bzc1QRUknO0MUAVEN4shUHcr6vb/zCkF2w8Fve5D9454LzjOv5W/DOcNycgmCjhnDkdRS30oSpNESk/UnpdGrDp+NG0IeM28455p5uMhJt2HKeaRlt11lwRZhu5 i@zihua.li

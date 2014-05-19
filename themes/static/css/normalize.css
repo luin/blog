@@ -140,7 +140,8 @@ mark {
 }
 
 pre, code {
-    font-family: "Courier New", Courier, monospace;
+    font-family: 'Source Code Pro', "Courier New", Courier, monospace;
+    font-weight: 400;
     white-space: pre-wrap;
     word-wrap: break-word;
 }
@@ -159,7 +160,7 @@ hr{
     *margin:-7px 0 2px;
 }
 
-small, .typo-small, 
+small, .typo-small,
 
 figcaption {
     font-size: 0.9em;

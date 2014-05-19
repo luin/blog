@@ -4,8 +4,7 @@
 <article>
   <header>
     <p class="article-meta" title="{{ article.date.isoformat() }}">{{ article.locale_date }}</p>
-    <h2 class="article-title"><a href="{{ SITEURL }}/{{ article.url }}" rel="bookmark"
-    title="Permalink to {{ article.title|striptags }}">{{ article.title}}</a></h3>
+    <h2 class="article-title">{{ article.title}}</h3>
     {% include 'twitter.html' %}
   </header>
   <div class="typo article-body">

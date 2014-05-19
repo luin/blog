@@ -1,4 +1,4 @@
-Title: Express 框架 middleware 的依赖问题与解决方案
+Title: Express 框架中间件的依赖问题与解决方案
 Tags: dependency, injection, express, express-di, middleware, node.js
 
 作为 Node 社区最受欢迎的框架，[Express](http://expressjs.com) 在沿用 [Connect](http://www.senchalabs.org/connect/) 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。

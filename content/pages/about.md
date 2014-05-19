@@ -2,7 +2,7 @@ Title: 关于我
 Category:
 Slug: about
 
-设计师、全栈工程师（Web, iOS）。创业者，敏捷实践者。
+美工、全栈码农（Web, iOS）。创业者，敏捷实践者。
 
 90 后，法号 Luin。
 
@@ -46,8 +46,12 @@ Slug: about
 
 * <a href="http://book.douban.com/subject/24522045/" target="_blank">Redis入门指南</a> 人民邮电出版社 / 2013 / ISBN 9787115312945
 
+## Screencast
+
+[JavaScript 继承实践](https://www.youtube.com/watch?v=8e5vUWmPkuA) - *Youtube*
+
 ## 联系方式
 
-blog@zihua.li
+`echo YmxvZ0B6aWh1YS5saQo= | base64 -D`
 
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>

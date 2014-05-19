@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 AUTHOR = u'Zihua Li'
 SITENAME = u'Zihua Li'
-SITESUBTITLE = u'设计师、全栈工程师（Web, iOS）<br>90 后，法号 Luin'
+SITESUBTITLE = u'美工、全栈码农（Web, iOS）<br>90 后，法号 Luin'
 SITEURL = 'http://zihua.li'
 
 LOCALE = 'en_US'

@@ -9,7 +9,7 @@
     {% if FEED_ALL_RSS %}
       <link href="{{ FEED_DOMAIN }}/{{ FEED_ALL_RSS }}" type="application/rss+xml" rel="alternate" title="{{ SITENAME }} RSS Feed" />
     {% endif %}
-    <link href='http://fonts.googleapis.com/css?family=Noto+Serif|Montserrat:700' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
     <link rel='stylesheet'  href='{{ SITEURL }}/theme/css/normalize.css' type='text/css' media='all' />
     <link rel='stylesheet'  href='{{ SITEURL }}/theme/css/style.css' type='text/css' media='all' />
     <link rel='stylesheet'  href='{{ SITEURL }}/theme/css/highlight.css' type='text/css' media='all' />
@@ -20,6 +20,7 @@
 <body>
   <section class="l-cover">
     <header id="banner" class="body">
+      <div class="header-avatar"><a href="{{ SITEURL }}/"><img src="{{ SITEURL }}/theme/images/avatar.png" width="64" height="64" alt="" /></a></div>
       <h1 class="site-name"><a href="{{ SITEURL }}/">{{ SITENAME }}</a></h1>
       <p class="description">
         {{ SITESUBTITLE }}<br />
