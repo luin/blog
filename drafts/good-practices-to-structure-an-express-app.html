@@ -40,7 +40,7 @@
     <p>Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.</p>
 <h2>1. RESTful Routes</h2>
 <p>While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.</p>
-<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because the coupling between an URL and it's route is in fact relatively high.</p>
+<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because the coupling between a URL and it's route is in fact relatively high.</p>
 <p>For example, when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time to find them and change them both during development.</p>
 <p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.</p>
 <p>Since Express can mount apps as middlewares, I create an app for each resource, and put them in their own modules. I put these modules in a sub-folder (e.g. <code>/routes</code>). Here's the structure of a typical Express project following this convention:</p>
@@ -106,8 +106,8 @@
 
 <p>In the code above, the global variable <code>User</code> is a Mongoose model.</p>
 <h2>3. Dependency Injection</h2>
-<p>Middleware is a low-level concept of the Connect, and it's not applicable to every scenarios we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to <code>req</code>, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to <code>req</code>).</p>
-<p>To avoid this problem, I wrote a library to bing dependency injection to the Express. Visit it's <a href="https://github.com/luin/express-di">Github page</a> to learn about what is it and how to use it.</p>
+<p>Middleware is a low-level concept of the Connect, and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to <code>req</code>, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to <code>req</code>).</p>
+<p>To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's <a href="https://github.com/luin/express-di">Github page</a> to learn about what is it and how to use it.</p>
 <p>I always create a <code>factories</code> folder to store all the dependencies in my Express app like this:</p>
 <div class="highlight"><pre><span class="n">project</span>
   <span class="o">|-</span> <span class="n">factories</span>
@@ -135,9 +135,9 @@
 
 
 <h2>4. Configuration</h2>
-<p><a href="https://github.com/lorenwest/node-config">node-config</a> is an awesome configuration system for Node.js. It loads different configurations according to the runtime environments (specified by <code>NODE_ENV</code>), and It's easy to use the configuration in the code, just <code>var config = require('config')</code>.</p>
+<p><a href="https://github.com/lorenwest/node-config">Node-config</a> is an awesome configuration system for Node.js. It loads different configurations according to the runtime environments (specified by <code>NODE_ENV</code>), and It's easy to use the configuration in the code, just <code>var config = require('config')</code>.</p>
 <p>In my Express app, there's a <code>config</code> folder to hold all the configuration files. However, considering a config can vary between deploys, the only file to check into version control  is a sample config file named <code>_sample.yaml</code>. When deploying the app, just copy <code>_sample.yaml</code> to <code>$NODE_ENV.yaml</code>, usually <code>production.yaml</code>.</p>
-<p>What's more, when using an automatic deployment script, it's not easy to alter the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.</p>
+<p>What's more, when using an automatic deployment script, it's not easy to change the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.</p>
 <h2>Conclusion</h2>
 <p>I created a small reference app to codify a standard Express app structure. You can see it <a href="https://github.com/template-man/express-mongoose">here</a>.</p>
   </div>
