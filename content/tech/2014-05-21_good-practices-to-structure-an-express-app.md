@@ -89,7 +89,7 @@ In the code above, the global variable `User` is a Mongoose model.
 
 Middleware is a low-level concept of the [Connect](http://www.senchalabs.org/connect/), and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to `req`, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to `req`).
 
-To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's [Github page](https://github.com/luin/express-di) to learn about what is it and how to use it.
+To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's [GitHub page](https://github.com/luin/express-di) to learn about what is it and how to use it.
 
 I always create a `factories` folder to store all the dependencies in my Express app like this:
 

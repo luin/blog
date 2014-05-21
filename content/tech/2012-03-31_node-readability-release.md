@@ -3,7 +3,7 @@ Tags: commonjs, github, module, Node.js, open source, readability
 
 Readability是从一个开源项目发展而来的产品，该项目托管在<a href="http://code.google.com/p/arc90labs-readability/" target="_blank">Google Code</a>上，不过现在已经不再维护。由于其最初设计在浏览器上运行，在node.js中难以使用，而且转换效果和Readability现在的服务也相差较大。所以这几天我重写了这个项目，具体更新内容附后。
 
-项目托管在<a href="https://github.com/luin/node-readability" target="_blank">Github</a>上。
+项目托管在<a href="https://github.com/luin/node-readability" target="_blank">GitHub</a>上。
 
 <!-- more -->
 
