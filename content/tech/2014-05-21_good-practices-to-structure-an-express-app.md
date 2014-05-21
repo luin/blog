@@ -1,6 +1,6 @@
 Title: Good Practices to Structure an Express App
 
-Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.
+Having heavily used the [Express](http://expressjs.com) framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.
 
 ## 1. RESTful Routes
 
@@ -87,7 +87,7 @@ In the code above, the global variable `User` is a Mongoose model.
 
 ## 3. Dependency Injection
 
-Middleware is a low-level concept of the Connect, and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to `req`, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to `req`).
+Middleware is a low-level concept of the [Connect](http://www.senchalabs.org/connect/), and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to `req`, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to `req`).
 
 To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's [Github page](https://github.com/luin/express-di) to learn about what is it and how to use it.
 
