@@ -71,7 +71,7 @@
 &lt;p&gt;In the code above, the global variable &lt;code&gt;User&lt;/code&gt; is a Mongoose model.&lt;/p&gt;
 &lt;h2&gt;3. Dependency Injection&lt;/h2&gt;
 &lt;p&gt;Middleware is a low-level concept of the &lt;a href="http://www.senchalabs.org/connect/"&gt;Connect&lt;/a&gt;, and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to &lt;code&gt;req&lt;/code&gt;, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to &lt;code&gt;req&lt;/code&gt;).&lt;/p&gt;
-&lt;p&gt;To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's &lt;a href="https://github.com/luin/express-di"&gt;Github page&lt;/a&gt; to learn about what is it and how to use it.&lt;/p&gt;
+&lt;p&gt;To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's &lt;a href="https://github.com/luin/express-di"&gt;GitHub page&lt;/a&gt; to learn about what is it and how to use it.&lt;/p&gt;
 &lt;p&gt;I always create a &lt;code&gt;factories&lt;/code&gt; folder to store all the dependencies in my Express app like this:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;project&lt;/span&gt;
   &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;factories&lt;/span&gt;
