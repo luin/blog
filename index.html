@@ -40,6 +40,11 @@
     </header>
     <div class="typo article-body">
       <p>Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.</p>
+<h2>1. RESTful Routes</h2>
+<p>While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.</p>
+<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because the coupling between a URL and it's route is in fact relatively high.</p>
+<p>For example, when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time to find them and change them both during development.</p>
+<p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.</p>
 
     </div>
     <div class="read-more clearfix">
