@@ -41,11 +41,12 @@
 <h2>1. RESTful Routes</h2>
 <p>While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.</p>
 <p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because the coupling between an URL and it's route is in fact relatively high.</p>
-<p>For example, when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time find them and change them both during development.</p>
+<p>For example, when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time to find them and change them both during development.</p>
 <p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.</p>
 <p>Since Express can mount apps as middlewares, I create an app for each resource, and put them in their own modules. I put these modules in a sub-folder (e.g. <code>/routes</code>). Here's the structure of a typical Express project following this convention:</p>
 <div class="highlight"><pre><span class="n">project</span>
   <span class="o">|-</span> <span class="n">routes</span>
+  <span class="o">|</span>   <span class="o">|-</span> <span class="n">index</span><span class="p">.</span><span class="n">js</span>
   <span class="o">|</span>   <span class="o">|-</span> <span class="n">users</span><span class="p">.</span><span class="n">js</span>
   <span class="o">|</span>   <span class="o">|-</span> <span class="n">projects</span><span class="p">.</span><span class="n">js</span>
   <span class="o">|</span>   <span class="o">|-</span> <span class="n">tasks</span><span class="p">.</span><span class="n">js</span>
@@ -53,18 +54,21 @@
 </pre></div>
 
 
-<p>If the route files follow this naming convention, it is easy to use them automatically in <code>app.js</code>:</p>
-<div class="highlight"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
-    <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
+<p><code>routes/index.js</code> is used to load all the routes:</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">routes</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;node-require-directory&#39;</span><span class="p">)(</span><span class="nx">__dirname</span><span class="p">);</span>
 
-<span class="kd">var</span> <span class="nx">routeDir</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;routes&#39;</span><span class="p">),</span>
-    <span class="nx">routes</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span><span class="p">(</span><span class="nx">routeDir</span><span class="p">);</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">routes</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">key</span> <span class="o">===</span> <span class="s1">&#39;index&#39;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">routes</span><span class="cp">[</span><span class="nb">key</span><span class="cp">]</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">};</span>
+</pre></div>
 
-<span class="nx">routes</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">routeFileName</span><span class="p">)</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">routeName</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">basename</span><span class="p">(</span><span class="nx">routeFileName</span><span class="p">,</span> <span class="s1">&#39;.js&#39;</span><span class="p">);</span>
-  <span class="kd">var</span> <span class="nx">routeModule</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">routeDir</span><span class="p">,</span> <span class="nx">routeFileName</span><span class="p">));</span>
-  <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nx">routeName</span><span class="p">,</span> <span class="nx">routeModule</span><span class="p">);</span>
-<span class="p">});</span>
+
+<p><a href="https://github.com/radagaisus/node-require-directory/">node-require-directory</a> is a Node.js library to require every file in a directory.</p>
+<p>Then it's easy to load all the routes in the <code>app.js</code> by requiring the <code>routes/index.js</code>:</p>
+<div class="highlight"><pre><span class="n">require</span><span class="p">(</span><span class="err">&#39;</span><span class="p">.</span><span class="o">/</span><span class="n">routes</span><span class="err">&#39;</span><span class="p">)(</span><span class="n">app</span><span class="p">);</span>
 </pre></div>
 
 
@@ -126,15 +130,15 @@
 </pre></div>
 
 
-<p>And in the <code>app.js</code>, we can just <code>require</code> the <code>factories</code> folder like this:</p>
+<p>And in the <code>app.js</code>, we can just <code>require</code> all the factories like this:</p>
 <div class="highlight"><pre><span class="n">require</span><span class="p">(</span><span class="err">&#39;</span><span class="p">.</span><span class="o">/</span><span class="n">factories</span><span class="err">&#39;</span><span class="p">)(</span><span class="n">app</span><span class="p">);</span>
 </pre></div>
 
 
 <h2>4. Configuration</h2>
-<p><a href="https://github.com/lorenwest/node-config">node-config</a> is an awesome configuration system for Node.js. It loads different configuration according to the runtime environments (<code>NODE_ENV</code>), and It's easy to use the configuration in the code, just <code>var config = require('config')</code>.</p>
+<p><a href="https://github.com/lorenwest/node-config">node-config</a> is an awesome configuration system for Node.js. It loads different configurations according to the runtime environments (specified by <code>NODE_ENV</code>), and It's easy to use the configuration in the code, just <code>var config = require('config')</code>.</p>
 <p>In my Express app, there's a <code>config</code> folder to hold all the configuration files. However, considering a config can vary between deploys, the only file to check into version control  is a sample config file named <code>_sample.yaml</code>. When deploying the app, just copy <code>_sample.yaml</code> to <code>$NODE_ENV.yaml</code>, usually <code>production.yaml</code>.</p>
-<p>What's more, when using an automatic deployment script, it's difficult to alter the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.</p>
+<p>What's more, when using an automatic deployment script, it's not easy to alter the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.</p>
 <h2>Conclusion</h2>
 <p>I created a small reference app to codify a standard Express app structure. You can see it <a href="https://github.com/template-man/express-mongoose">here</a>.</p>
   </div>
