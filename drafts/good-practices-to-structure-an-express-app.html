@@ -66,8 +66,7 @@
 </pre></div>
 
 
-<p><em><a href="https://github.com/radagaisus/node-require-directory/">node-require-directory</a> is a Node.js library to require every file in a directory.</em></p>
-<p>Then it's easy to load all the routes in the <code>app.js</code> by requiring the <code>routes/index.js</code>:</p>
+<p>Then it's easy to load all the routes in the <code>app.js</code> by just requiring the <code>routes/index.js</code>:</p>
 <div class="highlight"><pre><span class="n">require</span><span class="p">(</span><span class="err">&#39;</span><span class="p">.</span><span class="o">/</span><span class="n">routes</span><span class="err">&#39;</span><span class="p">)(</span><span class="n">app</span><span class="p">);</span>
 </pre></div>
 
@@ -118,7 +117,7 @@
 </pre></div>
 
 
-<p><code>factories/index.js</code> is used to load all the factories:</p>
+<p>Just like routes, <code>factories/index.js</code> is used to load all the factories:</p>
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">factories</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;node-require-directory&#39;</span><span class="p">)(</span><span class="nx">__dirname</span><span class="p">);</span>
 
 <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span> <span class="p">{</span>
@@ -130,7 +129,7 @@
 </pre></div>
 
 
-<p>And in the <code>app.js</code>, we can just <code>require</code> all the factories like this:</p>
+<p>And in the <code>app.js</code>, we can <code>require</code> all the factories like this:</p>
 <div class="highlight"><pre><span class="n">require</span><span class="p">(</span><span class="err">&#39;</span><span class="p">.</span><span class="o">/</span><span class="n">factories</span><span class="err">&#39;</span><span class="p">)(</span><span class="n">app</span><span class="p">);</span>
 </pre></div>
 
