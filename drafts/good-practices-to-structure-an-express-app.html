@@ -37,15 +37,13 @@
     <h2 class="article-title">Good practices to structure an Express app</h3>
   </header>
   <div class="typo article-body">
-    <p>Having been heavily using the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app which makes my code significantly cleaner and easier to follow. Here they are.</p>
-<h2>1. Routing</h2>
-<p>While there are countless ways we can set up routes, the most important thing I honestly feel to keep in mind is to put the URL definition and it’s routes(aka middlewares) in the same place. </p>
-<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because there is a relatively high coupling between the URL definition and it's routes: when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly, and what's more, it takes more time to find the routes by the URL which is very common during the stages of development.</p>
-<blockquote>
-<p>When things get bigger, they need to be made smaller.</p>
-</blockquote>
-<p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, being the fundamental concept, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separate naturally.</p>
-<p>In light of the fact that an Express app instance cannot only <code>use</code> a middleware but also another Express app instance(sub-app), I make each route an independent Express app, put each app in a separate file and expose them via the <code>module.exports</code> object. I put all these files into a sub-folder, eg: /routes. Here's the structure of a typical Express project I have written:</p>
+    <p>Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.</p>
+<h2>1. RESTful Routes</h2>
+<p>While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.</p>
+<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because the coupling between an URL and it's route is in fact relatively high.</p>
+<p>For example, when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time find them and change them both during development.</p>
+<p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.</p>
+<p>Since Express can mount apps as middlewares, I create an app for each resource, and put them in their own modules. I put these modules in a sub-folder (e.g. <code>/routes</code>). Here's the structure of a typical Express project following this convention:</p>
 <div class="highlight"><pre><span class="n">project</span>
   <span class="o">|-</span> <span class="n">routes</span>
   <span class="o">|</span>   <span class="o">|-</span> <span class="n">users</span><span class="p">.</span><span class="n">js</span>
@@ -55,7 +53,7 @@
 </pre></div>
 
 
-<p>Once we have the route files as described, it is not difficult to load them from <code>app.js</code>. Using the <code>fs</code> module, we can quickly load each module and <code>use</code> each of them. We do this before the app is launched. The <code>app.js</code> skeleton looks like so:</p>
+<p>If the route files follow this naming convention, it is easy to use them automatically in <code>app.js</code>:</p>
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
     <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
 
@@ -70,7 +68,7 @@
 </pre></div>
 
 
-<p>You may have noticed that we gave each route a mount path, which is the basename of the route file prefixed with a slash. Hence, for instance, when we type the following code in the <code>routes/users.js</code>:</p>
+<p>Notice that the mount path of a route is the basename of its source file. So we can define the user resource in the file <code>routes/users.js</code> like this:</p>
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
 
@@ -80,14 +78,15 @@
 </pre></div>
 
 
-<p>After the user route being mounted, the final URL will be <code>/users/:userId</code> instead of <code>/:userId</code>. Freaking awesome!</p>
+<p>It would be mounted as <code>/users/:userId</code> instead of <code>/:userId</code> because <code>app.js</code> used <code>/users</code> as the path prefix. Awesome!</p>
 <h2>2. Global variables</h2>
 <blockquote>
 <p>Global variables are evil.</p>
 </blockquote>
 <p>Global variables are variables that are accessible from every scope in your project, even in different modules.</p>
-<p>I've seen numerous people state that global variables are evil and resist using them in their projects. I admit there's a problem if a project depends heavily on global variables, but with my own personal believe that rational use of them will lead your project more efficient to develop. For instance, database connections(or models if you are using ORM or ODM) are very well suited to be defined as global variables in respect that they are used pervasively in a typical Express project.</p>
-<p>The simplest way to create a global variable is to declare a variable without the <code>var</code> keyword. However, I strongly oppose this way on account of ambiguity: It makes one wonder whether the variable was to be declared as a global variable or the developer just forgot using the <code>var</code>. Instead, I declare a global variable by adding the variable to the <code>GLOBAL</code> object:</p>
+<p>Many people think that global variables are evil and refuse to use them in their projects. But I believe that rational use of them can make your project more efficient to develop. For instance, database connections (or models if you are using ORM or ODM) are very well suited to be defined as global variables because they are used pervasively in a typical Express project.</p>
+<p>The simplest way to create a global variable is to declare a variable without the <code>var</code> keyword. However, I strongly oppose this way because of its potential ambiguity. It is not clear whether a variable was intended as a global variable or if the developer forgot the <code>var</code>.</p>
+<p>Instead, I declare a global variable by adding it to the <code>GLOBAL</code> object:</p>
 <div class="highlight"><pre><span class="o">&gt;</span> <span class="n">GLOBAL</span><span class="p">.</span><span class="n">str</span> <span class="o">=</span> <span class="err">&#39;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">global</span> <span class="n">variable</span><span class="err">&#39;</span><span class="p">;</span>
 <span class="err">&#39;</span><span class="n">this</span> <span class="n">is</span> <span class="n">a</span> <span class="n">global</span> <span class="n">variable</span><span class="err">&#39;</span>
 <span class="o">&gt;</span> <span class="n">str</span>
@@ -95,14 +94,47 @@
 </pre></div>
 
 
-<p>I am a huge fan of ORM/ODM, hence <a href="http://mongoosejs.com">Mongoose</a> and <a href="http://sequelizejs.com">Sequelize</a> are habitual frequenters of my Express projects. When I use them, I will be bound to expose the ORM/ODM models as global variables so that I can access them everywhere like this:</p>
+<p>I am a huge fan of ORM/ODM, and <a href="http://mongoosejs.com">Mongoose</a> and <a href="http://sequelizejs.com">Sequelize</a> are often used in my Express projects. When I use them, I would be bound to expose the ORM/ODM models as global variables so that I can access them everywhere:</p>
 <div class="highlight"><pre><span class="nx">User</span><span class="p">.</span><span class="nx">find</span><span class="p">({</span> <span class="nx">email</span><span class="o">:</span> <span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">email</span> <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// ...</span>
+  <span class="c1">// ...</span>
 <span class="p">});</span>
 </pre></div>
 
 
-<p>In the code above, <code>User</code> is a Mongoose model which is a global variable.</p>
+<p>In the code above, the global variable <code>User</code> is a Mongoose model.</p>
+<h2>3. Dependency Injection</h2>
+<p>Middleware is a low-level concept of the Connect, and it's not applicable to every scenarios we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to <code>req</code>, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to <code>req</code>).</p>
+<p>To avoid this problem, I wrote a library to bing dependency injection to the Express. Visit it's <a href="https://github.com/luin/express-di">Github page</a> to learn about what is it and how to use it.</p>
+<p>I always create a <code>factories</code> folder to store all the dependencies in my Express app like this:</p>
+<div class="highlight"><pre><span class="n">project</span>
+  <span class="o">|-</span> <span class="n">factories</span>
+  <span class="o">|</span>   <span class="o">|-</span> <span class="n">user</span><span class="p">.</span><span class="n">js</span>
+  <span class="o">|</span>   <span class="o">|-</span> <span class="n">index</span><span class="p">.</span><span class="n">js</span>
+  <span class="o">|-</span> <span class="n">app</span><span class="p">.</span><span class="n">js</span>
+</pre></div>
+
+
+<p><code>factories/index.js</code> is used to load all the factories:</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">factories</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;node-require-directory&#39;</span><span class="p">)(</span><span class="nx">__dirname</span><span class="p">);</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">app</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">factories</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">key</span> <span class="o">===</span> <span class="s1">&#39;index&#39;</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="nx">app</span><span class="p">.</span><span class="nx">factory</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">factories</span><span class="cp">[</span><span class="nb">key</span><span class="cp">]</span><span class="p">);</span>
+  <span class="p">});</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>And in the <code>app.js</code>, we can just <code>require</code> the <code>factories</code> folder like this:</p>
+<div class="highlight"><pre><span class="n">require</span><span class="p">(</span><span class="err">&#39;</span><span class="p">.</span><span class="o">/</span><span class="n">factories</span><span class="err">&#39;</span><span class="p">)(</span><span class="n">app</span><span class="p">);</span>
+</pre></div>
+
+
+<h2>4. Configuration</h2>
+<p><a href="https://github.com/lorenwest/node-config">node-config</a> is an awesome configuration system for Node.js. It loads different configuration according to the runtime environments (<code>NODE_ENV</code>), and It's easy to use the configuration in the code, just <code>var config = require('config')</code>.</p>
+<p>In my Express app, there's a <code>config</code> folder to hold all the configuration files. However, considering a config can vary between deploys, the only file to check into version control  is a sample config file named <code>_sample.yaml</code>. When deploying the app, just copy <code>_sample.yaml</code> to <code>$NODE_ENV.yaml</code>, usually <code>production.yaml</code>.</p>
+<p>What's more, when using an automatic deployment script, it's difficult to alter the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.</p>
 <h2>Conclusion</h2>
 <p>I created a small reference app to codify a standard Express app structure. You can see it <a href="https://github.com/template-man/express-mongoose">here</a>.</p>
   </div>
