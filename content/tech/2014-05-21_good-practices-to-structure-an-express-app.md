@@ -1,52 +1,60 @@
-Title: Good practices to structure an Express app
-Status: draft
+Title: Good Practices to Structure an Express App
 
-Having been heavily using the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app which makes my code significantly cleaner and easier to follow. Here they are.
+Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.
 
-## 1. Routing
+## 1. RESTful Routes
 
-While there are countless ways we can set up routes, the most important thing I honestly feel to keep in mind is to put the URL definition and it’s routes(aka middlewares) in the same place. 
+While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.
 
-When writing code like `app.get('/users', require('./routes').getUsers)`, you are actually making your application fragmented instead of modular because there is a relatively high coupling between the URL definition and it's routes: when making some changes on the [named parameter](http://expressjs.com/4x/api.html#req.params) of the URL, you have to alter the route accordingly, and what's more, it takes more time to find the routes by the URL which is very common during the stages of development.
+When writing code like `app.get('/users', require('./routes').getUsers)`, you are actually making your application fragmented instead of modular because the coupling between a URL and it's route is in fact relatively high.
 
-> When things get bigger, they need to be made smaller.
+For example, when making some changes on the [named parameter](http://expressjs.com/4x/api.html#req.params) of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time to find them and change them both during development.
 
-To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, being the fundamental concept, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separate naturally.
+To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.
 
-In light of the fact that an Express app instance cannot only `use` a middleware but also another Express app instance(sub-app), I make each route an independent Express app, put each app in a separate file and expose them via the `module.exports` object. I put all these files into a sub-folder, eg: /routes. Here's the structure of a typical Express project I have written:
+<!-- more -->
 
-	project
-	  |- routes
-	  |   |- users.js
-	  |   |- projects.js
-	  |   |- tasks.js
-	  |- app.js
+Since Express can mount apps as middlewares, I create an app for each resource, and put them in their own modules. I put these modules in a sub-folder (e.g. `/routes`). Here's the structure of a typical Express project following this convention:
 
-Once we have the route files as described, it is not difficult to load them from `app.js`. Using the `fs` module, we can quickly load each module and `use` each of them. We do this before the app is launched. The `app.js` skeleton looks like so:
+    project
+      |- routes
+      |   |- index.js
+      |   |- users.js
+      |   |- projects.js
+      |   |- tasks.js
+      |- app.js
 
-	var fs = require('fs'),
-	    path = require('path');
-		
-	var routeDir = path.join(__dirname, 'routes'),
-	    routes = fs.readdirSync(routeDir);
-	    
-	routes.forEach(function(routeFileName) {
-	  var routeName = path.basename(routeFileName, '.js');
-	  var routeModule = require(path.join(routeDir, routeFileName));
-	  app.use('/' + routeName, routeModule);
-	});
+`routes/index.js` is used to load all the routes:
 
-You may have noticed that we gave each route a mount path, which is the basename of the route file prefixed with a slash. Hence, for instance, when we type the following code in the `routes/users.js`:
+```
+var routes = require('node-require-directory')(__dirname);
 
-	var express = require('express');
-	var app = module.exports = express();
-	
-	app.get('/:userId', function() {
-	  // do something
-	});
+module.exports = function(app) {
+  Object.keys(routes).forEach(function(key) {
+    if (key === 'index') return;
+    app.use('/' + key, routes[key]);
+  });
+};
+```
 
-After the user route being mounted, the final URL will be `/users/:userId` instead of `/:userId`. Freaking awesome!
+Then it's easy to load all the routes in the `app.js` by just requiring the `routes/index.js`:
 
+```
+require('./routes')(app);
+```
+
+Notice that the mount path of a route is the basename of its source file. So we can define the user resource in the file `routes/users.js` like this:
+
+```
+var express = require('express');
+var app = module.exports = express();
+
+app.get('/:userId', function() {
+  // do something
+});
+```
+
+It would be mounted as `/users/:userId` instead of `/:userId` because `app.js` used `/users` as the path prefix. Awesome!
 
 ## 2. Global variables
 
@@ -54,23 +62,72 @@ After the user route being mounted, the final URL will be `/users/:userId` inste
 
 Global variables are variables that are accessible from every scope in your project, even in different modules.
 
-I've seen numerous people state that global variables are evil and resist using them in their projects. I admit there's a problem if a project depends heavily on global variables, but with my own personal believe that rational use of them will lead your project more efficient to develop. For instance, database connections(or models if you are using ORM or ODM) are very well suited to be defined as global variables in respect that they are used pervasively in a typical Express project.
+Many people think that global variables are evil and refuse to use them in their projects. But I believe that rational use of them can make your project more efficient to develop. For instance, database connections (or models if you are using ORM or ODM) are very well suited to be defined as global variables because they are used pervasively in a typical Express project.
 
-The simplest way to create a global variable is to declare a variable without the `var` keyword. However, I strongly oppose this way on account of ambiguity: It makes one wonder whether the variable was to be declared as a global variable or the developer just forgot using the `var`. Instead, I declare a global variable by adding the variable to the `GLOBAL` object:
+The simplest way to create a global variable is to declare a variable without the `var` keyword. However, I strongly oppose this way because of its potential ambiguity. It is not clear whether a variable was intended as a global variable or if the developer forgot the `var`.
 
-	> GLOBAL.str = 'this is a global variable';
-	'this is a global variable'
-	> str
-	'this is a global variable'
+Instead, I declare a global variable by adding it to the `GLOBAL` object:
 
-I am a huge fan of ORM/ODM, hence [Mongoose](http://mongoosejs.com) and [Sequelize](http://sequelizejs.com) are habitual frequenters of my Express projects. When I use them, I will be bound to expose the ORM/ODM models as global variables so that I can access them everywhere like this:
+```
+> GLOBAL.str = 'this is a global variable';
+'this is a global variable'
+> str
+'this is a global variable'
+```
 
-	User.find({ email: req.body.email }, function(err, user) {
-		// ...
-	});
+I am a huge fan of ORM/ODM, and [Mongoose](http://mongoosejs.com) and [Sequelize](http://sequelizejs.com) are often used in my Express projects. When I use them, I would be bound to expose the ORM/ODM models as global variables so that I can access them everywhere:
 
-In the code above, `User` is a Mongoose model which is a global variable.
+```
+User.find({ email: req.body.email }, function(err, user) {
+  // ...
+});
+```
+
+In the code above, the global variable `User` is a Mongoose model.
+
+## 3. Dependency Injection
+
+Middleware is a low-level concept of the Connect, and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to `req`, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to `req`).
+
+To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's [Github page](https://github.com/luin/express-di) to learn about what is it and how to use it.
+
+I always create a `factories` folder to store all the dependencies in my Express app like this:
+
+```
+project
+  |- factories
+  |   |- user.js
+  |   |- index.js
+  |- app.js
+```
+
+Just like routes, `factories/index.js` is used to load all the factories:
+
+```
+var factories = require('node-require-directory')(__dirname);
+
+module.exports = function(app) {
+  Object.keys(factories).forEach(function(key) {
+    if (key === 'index') return;
+    app.factory(key, factories[key]);
+  });
+};
+```
+
+And in the `app.js`, we can `require` all the factories like this:
+
+```
+require('./factories')(app);
+```
+
+## 4. Configuration
+
+[Node-config](https://github.com/lorenwest/node-config) is an awesome configuration system for Node.js. It loads different configurations according to the runtime environments (specified by `NODE_ENV`), and It's easy to use the configuration in the code, just `var config = require('config')`.
+
+In my Express app, there's a `config` folder to hold all the configuration files. However, considering a config can vary between deploys, the only file to check into version control  is a sample config file named `_sample.yaml`. When deploying the app, just copy `_sample.yaml` to `$NODE_ENV.yaml`, usually `production.yaml`.
+
+What's more, when using an automatic deployment script, it's not easy to change the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.
 
 ## Conclusion
 
-I created a small reference app to codify a standard Express app structure. You can see it [here](https://github.com/template-man/express-mongoose).
+I created a small reference app to codify a standard Express app structure. You can see it [here](https://github.com/luin/express-mongoose).
