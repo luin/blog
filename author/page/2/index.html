@@ -33,6 +33,27 @@
     <div class="inner">
   <article class="index-article">
     <header>
+      <a href="http://zihua.li/2013/09/express-promise/">
+        <h2 class="article-title">减少异步嵌套，Express-promise</h2>
+      </a>
+      <p class="article-meta" title="2013-09-11T00:00:00">11 Sep 2013</p>
+    </header>
+    <div class="typo article-body">
+      <p>在使用 <a href="http://expressjs.com" target="_blank">Express</a> 框架开发网站或 API 时，经常会因为 Node.js 的异步流程造成逻辑代码中嵌套回调函数过多的问题。这时可以考虑使用 Promise 来简化这个流程。关于 Promise 可以参考以下资料：</p>
+<p><a href="http://www.infoq.com/cn/news/2011/09/js-promise" target="_blank">http://www.infoq.com/cn/news/2011/09/js-promise</a>
+<a href="http://martinfowler.com/bliki/JavascriptPromise.html" target="_blank">http://martinfowler.com/bliki/JavascriptPromise.html</a></p>
+<p>现在 Node.js 很多 ORM/ODM 都通过 Promise 来返回查询、执行结果，而普通的 Node.js 风格回调函数可以很容易的转换成 Promise。</p>
+<p>为此，我为 Express 框架开发了一个 middleware 用来更方便地使用 Promise。</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2013/09/express-promise/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2013/09/express-promise/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article">
+    <header>
       <a href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/">
         <h2 class="article-title">开源的数据统计可视化工具：Ranaly</h2>
       </a>
@@ -101,25 +122,6 @@
     <div class="read-more clearfix">
       <a class="button radius secondary small right" href="http://zihua.li/2012/08/start-from-scratch-learning-node-js-for-web-developer/">阅读全文</a>
       <a class="button radius secondary small right" href="http://zihua.li/2012/08/start-from-scratch-learning-node-js-for-web-developer/#disqus_thread">评论</a>
-    </div>
-    <div class="hr"></div>
-  </article>
-  <article class="index-article">
-    <header>
-      <a href="http://zihua.li/2012/07/wandoujia-hack-day-live/">
-        <h2 class="article-title">直播: 豌豆荚Hack Day!</h2>
-      </a>
-      <p class="article-meta" title="2012-07-23T00:00:00">23 Jul 2012</p>
-    </header>
-    <div class="typo article-body">
-      <p>前天和昨天参加了豌豆荚的 Hack Day，这次 Hack Day 的主题是“Hi Web, High Web! ”，要求是使用豌豆荚百宝袋创建一个 Web 应用。</p>
-<p>赛前本来以为要仔细研读一下百宝袋的 API 才行，结果看了一下发现只有一个 API（汗）。功能是提供一个下载地址规范，符合该规范的链接会自动下载到豌豆荚连接的手机里，如果是 APK 则会自动安装（例如在线音乐网站可以把音乐的下载地址改成该 API 规范，则用户在百宝袋中点击音乐的下载链接就能把音乐下载到手机中了）。</p>
-<p>每组 3 人，从周六中午开始开发，直到周日下午 14 点截止，比赛第一名的奖品是 15 寸高配 Retina MBP（嘘，我才不是为了这个来的呢）！我们组成员是 PHP 大牛小明和 Android 大牛琪森。经过我们 3 人的激烈头脑风暴，最终决定做一款位置分享应用，可以让用户发送短信给朋友来和朋友分享自己当前的位置，使用流程是：用户把手机连上电脑，打开豌豆荚百宝袋中我们的应用就可以看到自己的通讯录，选择一个联系人 A 并点击分享按钮，应用会向对方发送一条包含链接的短信，同时用户的手机上会出现一个应用叫“A 的位置”。当 A 打开短信时就能看到用户当前的位置，而同时用户打开“A 的位置”应用也能看到A的位置。</p>
-
-    </div>
-    <div class="read-more clearfix">
-      <a class="button radius secondary small right" href="http://zihua.li/2012/07/wandoujia-hack-day-live/">阅读全文</a>
-      <a class="button radius secondary small right" href="http://zihua.li/2012/07/wandoujia-hack-day-live/#disqus_thread">评论</a>
     </div>
     <div class="hr"></div>
   </article>

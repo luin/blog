@@ -1,5 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-03-27T00:00:00+01:00</updated><entry><title>在 Node.js 中测试模块的内部成员</title><link href="http://zihua.li/2014/03/test-private-methods-in-nodejs/" rel="alternate"></link><updated>2014-03-27T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-03-27:2014/03/test-private-methods-in-nodejs/</id><summary type="html">&lt;p&gt;模块（Module）的内部成员是指没有通过 &lt;code&gt;module.exports&lt;/code&gt; 导出的变量或函数。如下面的示例模块：&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-05-21T00:00:00+02:00</updated><entry><title>Good practices to structure an Express app</title><link href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/" rel="alternate"></link><updated>2014-05-21T00:00:00+02:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-05-21:2014/05/good-practices-to-structure-an-express-app/</id><summary type="html">&lt;p&gt;Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.&lt;/p&gt;
+&lt;h2&gt;1. RESTful Routes&lt;/h2&gt;
+&lt;p&gt;While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.&lt;/p&gt;
+&lt;p&gt;When writing code like &lt;code&gt;app.get('/users', require('./routes').getUsers)&lt;/code&gt;, you are actually making your application fragmented instead of modular because the coupling between a URL and it's route is in fact relatively high.&lt;/p&gt;
+&lt;p&gt;For example, when making some changes on the &lt;a href="http://expressjs.com/4x/api.html#req.params"&gt;named parameter&lt;/a&gt; of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time to find them and change them both during development.&lt;/p&gt;
+&lt;p&gt;To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.&lt;/p&gt;
+&lt;p&gt;Since Express can mount apps as middlewares, I create an app for each resource, and put them in their own modules. I put these modules in a sub-folder (e.g. &lt;code&gt;/routes&lt;/code&gt;). Here's the structure of a typical Express project following this convention:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;project&lt;/span&gt;
+  &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;routes&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt;   &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt;   &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;users&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt;   &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;projects&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt;   &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;tasks&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+  &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;code&gt;routes/index.js&lt;/code&gt; is used to load all the routes:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;routes&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;node-require-directory&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="nx"&gt;__dirname&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nb"&gt;Object&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;routes&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;forEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt; &lt;span class="o"&gt;===&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;use&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;routes&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;key&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Then it's easy to load all the routes in the &lt;code&gt;app.js&lt;/code&gt; by just requiring the &lt;code&gt;routes/index.js&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;routes&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Notice that the mount path of a route is the basename of its source file. So we can define the user resource in the file &lt;code&gt;routes/users.js&lt;/code&gt; like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/:userId&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// do something&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It would be mounted as &lt;code&gt;/users/:userId&lt;/code&gt; instead of &lt;code&gt;/:userId&lt;/code&gt; because &lt;code&gt;app.js&lt;/code&gt; used &lt;code&gt;/users&lt;/code&gt; as the path prefix. Awesome!&lt;/p&gt;
+&lt;h2&gt;2. Global variables&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Global variables are evil.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Global variables are variables that are accessible from every scope in your project, even in different modules.&lt;/p&gt;
+&lt;p&gt;Many people think that global variables are evil and refuse to use them in their projects. But I believe that rational use of them can make your project more efficient to develop. For instance, database connections (or models if you are using ORM or ODM) are very well suited to be defined as global variables because they are used pervasively in a typical Express project.&lt;/p&gt;
+&lt;p&gt;The simplest way to create a global variable is to declare a variable without the &lt;code&gt;var&lt;/code&gt; keyword. However, I strongly oppose this way because of its potential ambiguity. It is not clear whether a variable was intended as a global variable or if the developer forgot the &lt;code&gt;var&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Instead, I declare a global variable by adding it to the &lt;code&gt;GLOBAL&lt;/code&gt; object:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;GLOBAL&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;this&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;global&lt;/span&gt; &lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;this&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;global&lt;/span&gt; &lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;
+&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;this&lt;/span&gt; &lt;span class="n"&gt;is&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;global&lt;/span&gt; &lt;span class="n"&gt;variable&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I am a huge fan of ORM/ODM, and &lt;a href="http://mongoosejs.com"&gt;Mongoose&lt;/a&gt; and &lt;a href="http://sequelizejs.com"&gt;Sequelize&lt;/a&gt; are often used in my Express projects. When I use them, I would be bound to expose the ORM/ODM models as global variables so that I can access them everywhere:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;find&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt; &lt;span class="nx"&gt;email&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;email&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// ...&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In the code above, the global variable &lt;code&gt;User&lt;/code&gt; is a Mongoose model.&lt;/p&gt;
+&lt;h2&gt;3. Dependency Injection&lt;/h2&gt;
+&lt;p&gt;Middleware is a low-level concept of the Connect, and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to &lt;code&gt;req&lt;/code&gt;, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to &lt;code&gt;req&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's &lt;a href="https://github.com/luin/express-di"&gt;Github page&lt;/a&gt; to learn about what is it and how to use it.&lt;/p&gt;
+&lt;p&gt;I always create a &lt;code&gt;factories&lt;/code&gt; folder to store all the dependencies in my Express app like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;project&lt;/span&gt;
+  &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;factories&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt;   &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+  &lt;span class="o"&gt;|&lt;/span&gt;   &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+  &lt;span class="o"&gt;|-&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;js&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Just like routes, &lt;code&gt;factories/index.js&lt;/code&gt; is used to load all the factories:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;factories&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;node-require-directory&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="nx"&gt;__dirname&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nb"&gt;Object&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;factories&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;forEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt; &lt;span class="o"&gt;===&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;factories&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="nb"&gt;key&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And in the &lt;code&gt;app.js&lt;/code&gt;, we can &lt;code&gt;require&lt;/code&gt; all the factories like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;factories&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;4. Configuration&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://github.com/lorenwest/node-config"&gt;Node-config&lt;/a&gt; is an awesome configuration system for Node.js. It loads different configurations according to the runtime environments (specified by &lt;code&gt;NODE_ENV&lt;/code&gt;), and It's easy to use the configuration in the code, just &lt;code&gt;var config = require('config')&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In my Express app, there's a &lt;code&gt;config&lt;/code&gt; folder to hold all the configuration files. However, considering a config can vary between deploys, the only file to check into version control  is a sample config file named &lt;code&gt;_sample.yaml&lt;/code&gt;. When deploying the app, just copy &lt;code&gt;_sample.yaml&lt;/code&gt; to &lt;code&gt;$NODE_ENV.yaml&lt;/code&gt;, usually &lt;code&gt;production.yaml&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;What's more, when using an automatic deployment script, it's not easy to change the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;I created a small reference app to codify a standard Express app structure. You can see it &lt;a href="https://github.com/luin/express-mongoose"&gt;here&lt;/a&gt;.&lt;/p&gt;</summary></entry><entry><title>在 Node.js 中测试模块的内部成员</title><link href="http://zihua.li/2014/03/test-private-methods-in-nodejs/" rel="alternate"></link><updated>2014-03-27T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-03-27:2014/03/test-private-methods-in-nodejs/</id><summary type="html">&lt;p&gt;模块（Module）的内部成员是指没有通过 &lt;code&gt;module.exports&lt;/code&gt; 导出的变量或函数。如下面的示例模块：&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;A&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
   &lt;span class="c1"&gt;// 执行某些操作&lt;/span&gt;
 &lt;span class="p"&gt;};&lt;/span&gt;
@@ -419,5 +521,4 @@ vmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;
 
 
 &lt;p&gt;更多实例可以见项目主页： &lt;a href="https://github.com/luin/express-promise" target="_blank"&gt;https://github.com/luin/express-promise&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;项目同样对 Mongoose 的 Query 对象提供了额外的支持。&lt;/p&gt;</summary><category term="express"></category><category term="middleware"></category><category term="node.js"></category><category term="open source"></category><category term="promise"></category></entry><entry><title>开源的数据统计可视化工具：Ranaly</title><link href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/" rel="alternate"></link><updated>2013-02-17T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2013-02-17:2013/02/an-open-source-tool-for-data-statistics/</id><summary type="html">&lt;p&gt;不少互联网项目都需要对项目的数据，如用户数量的增长趋势、最近注册的用户列表和当前在线用户数量等进行统计，而我最近在做的项目需要将这些统计数据以图表的形式展现出来。为此我开发了统计框架Ranaly，以使开发者只需要简单地配置就能生成一个强大的统计数据可视化后台。&lt;/p&gt;
-&lt;p&gt;项目地址：&lt;a href="https://github.com/luin/ranaly"&gt;https://github.com/luin/ranaly&lt;/a&gt;&lt;/p&gt;</summary><category term="node.js"></category><category term="open source"></category><category term="ranaly"></category></entry></feed>
+&lt;p&gt;项目同样对 Mongoose 的 Query 对象提供了额外的支持。&lt;/p&gt;</summary><category term="express"></category><category term="middleware"></category><category term="node.js"></category><category term="open source"></category><category term="promise"></category></entry></feed>
