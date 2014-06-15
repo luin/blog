@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-05-21T00:00:00+02:00</updated><entry><title>Good Practices to Structure an Express App</title><link href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/" rel="alternate"></link><updated>2014-05-21T00:00:00+02:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-05-21:2014/05/good-practices-to-structure-an-express-app/</id><summary type="html">&lt;p&gt;Having heavily used the &lt;a href="http://expressjs.com"&gt;Express&lt;/a&gt; framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-06-15T00:00:00+02:00</updated><entry><title>只需 4 步，手把手教你如何实现滤镜功能</title><link href="http://zihua.li/2014/06/implement-instagram-like-filters/" rel="alternate"></link><updated>2014-06-15T00:00:00+02:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-06-15:2014/06/implement-instagram-like-filters/</id><summary type="html">&lt;p&gt;滤镜对于照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手之作显得别有风味，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都有滤镜功能，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统地讲解滤镜是如何实现的。&lt;/p&gt;
+&lt;h2&gt;什么是滤镜&lt;/h2&gt;
+&lt;p&gt;滤镜最初是指安装在相机镜头前过滤自然光的附加镜头，用来实现调色和添加效果。一些数字图像处理软件（最著名的如 Adobe Photoshop）提供了一些特定的预设工具用来实现相机滤镜的效果，这些工具也就自然而然地被称作“滤镜”。软件实现的滤镜可以模拟大部分的镜头滤镜，如色温变换滤镜（LB）和强调滤镜等，但由于无法再现拍摄环境，软件滤镜无法复原照片中未包含的信息，进而也难以实现偏光镜和紫外线滤色镜（UV）的效果。&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lens-collection.jpg" alt="相机滤镜" class="fill" /&gt;&lt;/p&gt;
+
+
+&lt;h2&gt;实现滤镜的步骤&lt;/h2&gt;
+&lt;p&gt;就模拟镜头滤镜而言，实现软件滤镜无外乎是对照片中的色彩进行映射的过程。然而软件滤镜并不止于此，复杂的软件滤镜还需要为照片增加光线变化（如 LOMO 的暗角效果）、材质和相框等，最近美图秀秀针对国内环境问题推出的“去雾霾”滤镜正是复杂的软件滤镜的一种体现。不过再复杂的软件滤镜，实现起来也不外乎如下几个步骤。&lt;/p&gt;
+&lt;h3&gt;1. 颜色映射&lt;/h3&gt;
+&lt;p&gt;昏黄的颜色让人联想到古老与质朴，淡绿的颜色让人感到柔和与舒适：颜色是一张照片的灵魂，而实现滤镜最重要的一步就是颜色映射。颜色映射是指将原来照片中的每一种颜色，通过某种映射方法转换成另一种颜色。最常见也最简单的映射方法是查表法。&lt;/p&gt;
+&lt;p&gt;查表法的原理是在一张表中为每种颜色记录一个对应的映射目标颜色，当用查表法对一张照片做颜色映射时，只需要遍历照片的每个像素点，然后在表中找到该像素颜色对应的目标颜色，最后将该像素设置为目标颜色即可。查表法实现的前提是颜色的映射与周围的颜色无关，即一种颜色无论周围的颜色为何、无论其位于照片的哪个位置，其目标颜色都应该是相同的。&lt;/p&gt;
+&lt;p&gt;RGB 可以表示的颜色数量为 &lt;code&gt;256*256*256 = 16,777,216&lt;/code&gt;，如果要记录每种颜色的映射结果，那么颜色表需要 一千六百多万条记录，这显然无法应用到实际的工程中。为了简化起见，一般每相近的 4 种颜色采用一条记录存储，这样颜色表只需要 &lt;code&gt;64 * 64 * 64 = 262,144&lt;/code&gt; 条记录。&lt;/p&gt;
+&lt;p&gt;这里以 &lt;a href="https://plus.google.com/105075060804712942346/posts"&gt;Lev Zelensky&lt;/a&gt; 首先发表的一个基准颜色表为例：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lookup-table.png" alt="基准颜色表" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;上表将 262,144 种颜色分为 8 个块，每块 &lt;code&gt;64 * 64&lt;/code&gt; 格，每一格的颜色都不同。进行颜色映射时，首先使用数字图像处理软件对该基准颜色表应用要模拟的滤镜来生成映射表（如下图），然后对要处理的照片的每个像素，从基准颜色表中找到该像素颜色的位置，然后在映射表的相应位置就可以得到目的颜色。&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lookup-table-yellow.png" alt="昏黄滤镜映射表" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;Lev Zelensky 为 iOS/OS X 上著名的图像处理库 &lt;a href="https://github.com/BradLarson/GPUImage"&gt;GPUImage&lt;/a&gt; 加入了 &lt;a href="https://github.com/BradLarson/GPUImage/blob/master/framework/Source/GPUImageLookupFilter.h"&gt;&lt;code&gt;GPUImageLookupFilter)&lt;/code&gt;&lt;/a&gt; 方法来实现上述过程。&lt;/p&gt;
+&lt;h3&gt;2. 叠加材质&lt;/h3&gt;
+&lt;p&gt;只进行颜色映射就可以实现大部分简单的滤镜，然而复杂的滤镜需要更多的步骤来完成。其中最为典型的就是 &lt;a href="http://en.wikipedia.org/wiki/Lomography"&gt;LOMO&lt;/a&gt; 效果了。要实现 LOMO 效果，除了通过颜色映射让颜色更加鲜艳外，还需要为照片增加四周的暗角。首先需要一张暗角素材：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/overlay.png" alt="暗角素材" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;然后将该素材叠在照片上，并应用 &lt;a href="http://en.wikipedia.org/wiki/Blend_modes#Overlay"&gt;Overlay&lt;/a&gt; 混合算法。&lt;/p&gt;
+&lt;p&gt;要注意的是根据材质不同，可以选择不同的混合算法。只是对暗角这一材质而言，Overlay 可以带来最好的效果。另外一点就是先进行颜色映射还是先叠加材质并没有固定的规则，需要根据实际效果进行选择。就 LOMO 暗角而言，先叠加材质的效果更好。&lt;/p&gt;
+&lt;h3&gt;3. 应用相框&lt;/h3&gt;
+&lt;p&gt;严格来说相框并不属于滤镜的一部分，但是考虑到好的相框可以为照片提色不少，这里也顺便提一句。根据相框的不同，应用的照片上的方法也不同，有的相框可以直接盖在照片上，有的则需要按照某种混合算法和照片进行混合，但无论哪种方式，应用相框都算是整个滤镜最简单的部分了。与相框类似的就是照片装饰物，比如一颗桃心或用户可以自定义的文字，实现照片装饰物并没有任何技术难度，唯一要记住的点就是不要胡乱的为你的滤镜加入装饰物，否则会让滤镜落入俗套。&lt;/p&gt;
+&lt;h3&gt;4. 反复&lt;/h3&gt;
+&lt;p&gt;最终的滤镜效果可能需要反复应用上面的步骤才能实现，比如 Instagram 的滤镜很多都是应用了多种材质才得以完成。这一过程需要设计者的保留充分的耐心，一点一点地琢磨，一款优秀的滤镜才能得以诞生。&lt;/p&gt;</summary></entry><entry><title>Good Practices to Structure an Express App</title><link href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/" rel="alternate"></link><updated>2014-05-21T00:00:00+02:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-05-21:2014/05/good-practices-to-structure-an-express-app/</id><summary type="html">&lt;p&gt;Having heavily used the &lt;a href="http://expressjs.com"&gt;Express&lt;/a&gt; framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.&lt;/p&gt;
 &lt;h2&gt;1. RESTful Routes&lt;/h2&gt;
 &lt;p&gt;While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.&lt;/p&gt;
 &lt;p&gt;When writing code like &lt;code&gt;app.get('/users', require('./routes').getUsers)&lt;/code&gt;, you are actually making your application fragmented instead of modular because the coupling between a URL and it's route is in fact relatively high.&lt;/p&gt;
@@ -491,36 +516,4 @@ vmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;
 
 &lt;p&gt;我经常复制一段内容，在 visual 模式下选中一段文本并粘贴来实现替换，此时“剪贴板”中的内容会被替换成被删掉的文本，如果想粘贴第二次就很不方便了。这个映射解决了这个问题。&lt;/p&gt;
 &lt;/li&gt;
-&lt;/ol&gt;</summary><category term="plugin"></category><category term="vim"></category></entry><entry><title>减少异步嵌套，Express-promise</title><link href="http://zihua.li/2013/09/express-promise/" rel="alternate"></link><updated>2013-09-11T00:00:00+02:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2013-09-11:2013/09/express-promise/</id><summary type="html">&lt;p&gt;在使用 &lt;a href="http://expressjs.com" target="_blank"&gt;Express&lt;/a&gt; 框架开发网站或 API 时，经常会因为 Node.js 的异步流程造成逻辑代码中嵌套回调函数过多的问题。这时可以考虑使用 Promise 来简化这个流程。关于 Promise 可以参考以下资料：&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://www.infoq.com/cn/news/2011/09/js-promise" target="_blank"&gt;http://www.infoq.com/cn/news/2011/09/js-promise&lt;/a&gt;
-&lt;a href="http://martinfowler.com/bliki/JavascriptPromise.html" target="_blank"&gt;http://martinfowler.com/bliki/JavascriptPromise.html&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;现在 Node.js 很多 ORM/ODM 都通过 Promise 来返回查询、执行结果，而普通的 Node.js 风格回调函数可以很容易的转换成 Promise。&lt;/p&gt;
-&lt;p&gt;为此，我为 Express 框架开发了一个 middleware 用来更方便地使用 Promise。&lt;/p&gt;
-
-
-&lt;p&gt;例如，我们可能会经常写出如下代码：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/users/:userId&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;then&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="nx"&gt;Project&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getMemo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;then&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;memo&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-      &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
-        &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-        &lt;span class="nx"&gt;memo&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;memo&lt;/span&gt;
-      &lt;span class="p"&gt;});&lt;/span&gt;
-    &lt;span class="p"&gt;});&lt;/span&gt;
-  &lt;span class="p"&gt;});&lt;/span&gt;
-&lt;span class="p"&gt;});&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;而使用 express-promise 后，上面的代码可以改写成：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/users/:userId&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
-    &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
-    &lt;span class="nx"&gt;memo&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;Project&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getMemo&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;params&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-  &lt;span class="p"&gt;});&lt;/span&gt;
-&lt;span class="p"&gt;});&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;更多实例可以见项目主页： &lt;a href="https://github.com/luin/express-promise" target="_blank"&gt;https://github.com/luin/express-promise&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;项目同样对 Mongoose 的 Query 对象提供了额外的支持。&lt;/p&gt;</summary><category term="express"></category><category term="middleware"></category><category term="node.js"></category><category term="open source"></category><category term="promise"></category></entry></feed>
+&lt;/ol&gt;</summary><category term="plugin"></category><category term="vim"></category></entry></feed>
