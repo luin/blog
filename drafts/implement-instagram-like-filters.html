@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>使用查表法在 iOS 和 Web 平台上实现滤镜 | Zihua Li</title>
+    <title>只需 4 步，在你的软件中实现滤镜功能 | Zihua Li</title>
       <link href="http://zihua.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
     <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
     <link rel='stylesheet'  href='http://zihua.li/theme/css/normalize.css' type='text/css' media='all' />
@@ -34,13 +34,15 @@
 <article>
   <header>
     <p class="article-meta" title="2014-06-15T00:00:00">15 Jun 2014</p>
-    <h2 class="article-title">使用查表法在 iOS 和 Web 平台上实现滤镜</h3>
+    <h2 class="article-title">只需 4 步，在你的软件中实现滤镜功能</h3>
   </header>
   <div class="typo article-body">
     <p>滤镜对照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手一拍之作显得别有色彩，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都支持滤镜，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统讲解如何在 iOS 和 Web 平台上实现滤镜功能。</p>
 <h2>什么是滤镜</h2>
 <p>滤镜最初是指安装在相机镜头前过滤自然光的附加镜头，用来实现调色和添加效果。一些数字图像处理软件（最著名的如 Adobe Photoshop）提供了一些特定的预设工具用来实现相机滤镜的效果，这些工具也就自然而然地被称作“滤镜”。软件实现的滤镜可以模拟大部分的镜头滤镜，如色温变换滤镜（LB）和强调滤镜等，但由于无法再现拍摄环境，软件滤镜无法复原照片中未包含的信息，进而也难以实现偏光镜和紫外线滤色镜（UV）的效果。</p>
 <p><img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lens-collection.jpg" alt="相机滤镜" class="fill" /></p>
+
+
 <h2>实现滤镜的步骤</h2>
 <p>就模拟镜头滤镜而言，实现软件滤镜无外乎是对照片中的色彩进行映射的过程。然而软件滤镜并不止此，复杂的软件滤镜还需要为照片增加光线变化（如 LOMO 的暗角效果）、材质和相框等，最近美图秀秀为国内环境推出的“去雾霾”滤镜正是复杂的软件滤镜的一种体现。不过即使是复杂的软件滤镜，实现起来也不过如下几个步骤。</p>
 <h3>1. 颜色映射</h3>
@@ -50,7 +52,7 @@
 <p>这里以 <a href="https://plus.google.com/105075060804712942346/posts">Lev Zelensky</a> 首先发表的一个基准颜色表为例：</p>
 <p><img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lookup-table.png" alt="基准颜色表" class="fill" /></p>
 <p>上表将 262,144 种颜色分为 8 个块，每块 <code>64 * 64</code> 格，每一格的颜色都不同。进行颜色映射时，首先使用数字图像处理软件对该基准颜色表应用要模拟的滤镜来生成映射表，然后对要处理的照片的每个像素，从基准颜色表中找到该像素颜色的位置，然后在映射表的相应位置就可以得到目的颜色。</p>
-<p>Lev Zelensky 为 iOS/OS X 上著名的图像处理库 <a href="https://github.com/BradLarson/GPUImage">GPUImage</a> 加入了 <a href="https://github.com/BradLarson/GPUImage/blob/master/framework/Source/GPUImageLookupFilter.h"><code>GPUImageLookupFilter)</code></a> 方法来实现上述过程，而我也相应地为 HTML5 平台写了 InstaFilter。</p>
+<p>Lev Zelensky 为 iOS/OS X 上著名的图像处理库 <a href="https://github.com/BradLarson/GPUImage">GPUImage</a> 加入了 <a href="https://github.com/BradLarson/GPUImage/blob/master/framework/Source/GPUImageLookupFilter.h"><code>GPUImageLookupFilter)</code></a> 方法来实现上述过程。</p>
 <h3>2. 叠加材质</h3>
 <p>只进行颜色映射就可以实现大部分简单的滤镜，然而复杂的滤镜需要更多的步骤来完成。其中最为典型的就是 <a href="http://en.wikipedia.org/wiki/Lomography">LOMO</a> 效果了。要实现 LOMO 效果，除了通过颜色映射让颜色更加鲜艳外，还需要为照片增加四周的暗角。首先需要一张暗角素材：</p>
 <p><img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/overlay.png" alt="暗角素材" class="fill" /></p>
@@ -71,10 +73,10 @@
     </div>
     <div class="share">
       <h4>分享这篇文章</h4>
-      <a class="icon-social icon-social-twitter-bird" href="http://twitter.com/share?text=使用查表法在 iOS 和 Web 平台上实现滤镜&url=http://zihua.li/2014/06/implement-instagram-like-filters/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+      <a class="icon-social icon-social-twitter-bird" href="http://twitter.com/share?text=只需 4 步，在你的软件中实现滤镜功能&url=http://zihua.li/2014/06/implement-instagram-like-filters/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
         <span class="hidden">Twitter</span>
       </a>
-      <a class="icon-social icon-social-weibo" href="http://service.weibo.com/share/share.php?title=使用查表法在 iOS 和 Web 平台上实现滤镜&url=http://zihua.li/2014/06/implement-instagram-like-filters/" onclick="window.open(this.href, 'weibo-share', 'width=550,height=435');return false;">
+      <a class="icon-social icon-social-weibo" href="http://service.weibo.com/share/share.php?title=只需 4 步，在你的软件中实现滤镜功能&url=http://zihua.li/2014/06/implement-instagram-like-filters/" onclick="window.open(this.href, 'weibo-share', 'width=550,height=435');return false;">
         <span class="hidden">微博</span>
       </a>
     </div>
