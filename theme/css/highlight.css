@@ -9,10 +9,7 @@
 }
 
 .highlight pre {
-  padding-left: 85px;
-  margin-right: -85px;
-  margin-left: -85px;
-  border-radius: 0;
+  border-radius: 10px;
 }
 
 @media only screen and (min-width: 768px) and (max-width: 991px) {
