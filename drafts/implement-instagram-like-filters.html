@@ -52,7 +52,7 @@
 <p>这里以 <a href="https://plus.google.com/105075060804712942346/posts">Lev Zelensky</a> 首先发表的一个基准颜色表为例：</p>
 <p><img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lookup-table.png" alt="基准颜色表" class="fill" /></p>
 <p>上表将 262,144 种颜色分为 8 个块，每块 <code>64 * 64</code> 格，每一格的颜色都不同。进行颜色映射时，首先使用数字图像处理软件对该基准颜色表应用要模拟的滤镜来生成映射表（如下图），然后对要处理的照片的每个像素，从基准颜色表中找到该像素颜色的位置，然后在映射表的相应位置就可以得到目的颜色。</p>
-<p><img src="{filename}/images/2014-06-15_implement-instagram-like-filters/lookup-table-yellow.png" alt="昏黄滤镜映射表" class="fill" /></p>
+<p><img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lookup-table-yellow.png" alt="昏黄滤镜映射表" class="fill" /></p>
 <p>Lev Zelensky 为 iOS/OS X 上著名的图像处理库 <a href="https://github.com/BradLarson/GPUImage">GPUImage</a> 加入了 <a href="https://github.com/BradLarson/GPUImage/blob/master/framework/Source/GPUImageLookupFilter.h"><code>GPUImageLookupFilter)</code></a> 方法来实现上述过程。</p>
 <h3>2. 叠加材质</h3>
 <p>只进行颜色映射就可以实现大部分简单的滤镜，然而复杂的滤镜需要更多的步骤来完成。其中最为典型的就是 <a href="http://en.wikipedia.org/wiki/Lomography">LOMO</a> 效果了。要实现 LOMO 效果，除了通过颜色映射让颜色更加鲜艳外，还需要为照片增加四周的暗角。首先需要一张暗角素材：</p>
