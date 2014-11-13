@@ -38,19 +38,18 @@
     <h2 class="article-title">Code Game</h3>
   </header>
   <div class="typo article-body">
-    <p>Code Game 是我最近一个月在做的业余项目，今天修完了最后一个影响游戏性的 bug，觉得是时候总结一下 Code Game 的开发经验了。</p>
+    <p>Code Game 是我最近一个月在做的业余项目，这篇文章主要目的是介绍我在开发 Code Game 中总结的经验，并顺便回答了我之前提到过的“为什么不应该用 CoffeeScript” 和 “为什么不应该用 Less/Sass”这两个问题。</p>
 <h2>Code Game 是什么</h2>
-<p>Code Game 是一个 AI 脚本对战平台，网址是 <a href="http://codegame.org">http://codegame.org</a>，玩家可以通过编写 JavaScript 脚本来控制游戏中的角色并与平台上的其他玩家对抗竞赛。</p>
-<p>Code Game 的灵感来源于大学时我在北航 MSTC(Microsoft Technology Club) 开发的 BigTank 项目。BigTank 是一个使用 C# 开发的 3D 坦克大战游戏，与传统坦克大战游戏由玩家直接操控坦克不同，BigTank 的玩家通过编写 Lua 脚本来分析游戏局势并控制自己的坦克行动。基于 BigTank，MSTC 举办了编程挑战赛，在北航获得了很好的反响。</p>
-<p>然而限于开发时间和当时的技术水平，BigTank 本身存在很多不足，包括游戏规则欠考虑、脚本解析器有未修复的 Bug 等。种种这些都或多或少地影响了比赛的精彩程度，所以一个月前突发奇想，决定重新开发一套类似 BigTank 的系统来弥补遗憾。</p>
+<p>Code Game 是一个 AI 脚本对战平台，网址是 <a href="http://codegame.org">http://codegame.org</a>，玩家可以通过编写 JavaScript 脚本来控制游戏中的角色并与平台上的其他玩家进行竞赛。</p>
+<p>Code Game 的灵感来源于大学时我在北航 MSTC(Microsoft Technology Club) 参与的 BigTank 项目。BigTank 是一个使用 C# 开发的 3D 坦克大战游戏，与传统坦克大战游戏由玩家直接操控坦克不同，BigTank 的玩家需要通过编写 Lua 脚本来分析游戏局势并控制自己的坦克行动。基于 BigTank，MSTC 举办了编程挑战赛，在北航获得了很好的反响。然而限于开发时间和当时的技术水平，BigTank 本身存在很多不足，包括游戏规则欠考虑、脚本解析器存在不少 Bug 等。种种这些都或多或少地影响了比赛的精彩程度，所以一个月前我突发奇想，决定重新开发一套类似 BigTank 的平台来弥补遗憾。</p>
 <h2>功能</h2>
-<p>首先是个人主页页面，在这个页面中玩家可以看到自己的资料和脚本的排名：</p>
+<p>Code Game 的页面构成很简单，挨个介绍也并不会花费很多篇幅。首先是个人主页页面，在这个页面中玩家可以看到自己的资料和 AI 的排名：</p>
 <p><img src="http://zihua.li/images/2014-11-12_codegame/profile.png" alt="个人主页" class="fill" /></p>
-<p>点击“编写我的 AI”按钮就进入到了脚本编写页面（如下图所示）。该页面不仅提供了支持代码高亮和自动补全的在线编辑器，还提供了预览界面可以实时看到脚本的运行效果，另外还包括可以看到各种调试信息的控制台。</p>
+<p>点击“编写我的 AI”按钮就进入到了脚本编写页面，该页面由支持代码高亮和自动补全的在线编辑器、可以实时看到脚本的运行效果的预览画面以及用来查看调试信息的控制台组成：</p>
 <p><img src="http://zihua.li/images/2014-11-12_codegame/editor.png" alt="编辑器" class="fill" /></p>
-<p>Code Game 每天会更新一次排行榜，会通过比较每个脚本的胜率来对其进行排行：</p>
+<p>Code Game 每天会根据 AI 的胜率更新一次排行榜，可以看到每个玩家的排名，点击昵称可以进入其个人主页：</p>
 <p><img src="http://zihua.li/images/2014-11-12_codegame/rank.png" alt="排行榜" class="fill" /></p>
-<p>进入其他的主页可以对其发起挑战，如下图所示：</p>
+<p>在他人的个人主页中可以向其发起挑战，下图所示为挑战页面：</p>
 <p><img src="http://zihua.li/images/2014-11-12_codegame/game.png" alt="挑战页面" class="fill" /></p>
 <h2>技术架构</h2>
 <p>Code Game 的技术架构理念是在保证开发效率的前提下尽量降低技术栈复杂度。</p>
