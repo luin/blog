@@ -120,8 +120,8 @@
 </li>
 <li>
 <p>Browserify</p>
-<p>Browserify 可以非常方便地实现前端 JavaScript 的模块化。使用 Browserify，你可以在前端的 JavaScript 中使用和 Node.js 一样的模块加载方式，即 <code>require('modules')</code>，使得前后端 JavaScript 模块级复用成为了可能。在 Code Game 中的游戏沙盒部分的所有模块曾经是前后端共用的，当用户在编辑器中预览时沙盒运行在前端，当与其他玩家竞赛时，沙盒运行在后端。同时 Browserify 作为一个构建工具，并不影响前端脚本的加载逻辑，换言之在使用 Browserify 的同时依然可以使用 RequireJS、SeaJS 这样的 Module Loader 以及 Combo Handler 等技术。</p>
-<p>除了 Browserify 以外，Code Game 并没有使用其他的预处理工具。也并没有使用 CoffeeScript、LiveScript 这样的语言替代 JavaScript，原因在于 JavaScript 在前端工程方面本身已经足够优秀，而 CoffeeScript 和 LiveScript 这样的语言在提供更“现代”的语法同时，也会大大降低代码的可控性。同 Less 和 CSS 的关系一样，写 CoffeeScript 与写 JavaScript 的思路在很多情况下并不相同。比如 CoffeeScript 的函数调用无需写“()”，使得易读性大为下降（比较 <code>console.log x + 1</code> 和 <code>console.log x +1</code>），同时也引入了很多细节问题（比如无法实现 JavaScript 里的具名匿名函数 <code>var func = function func() {}</code>），另外 CoffeeScript 生成的 JavaScript 虽然有很多最佳实践，但总体并不易读，包括很容易生成冗余代码，比如：</p>
+<p>Browserify 可以非常方便地实现前端 JavaScript 的模块化。使用 Browserify，你可以在前端的 JavaScript 中使用和 Node.js 一样的模块加载方式，即 <code>require('modules')</code>，使得前后端 JavaScript 模块级复用成为了可能。Code Game 游戏沙盒部分的所有模块曾经是前后端共用的，当用户在编辑器中预览时沙盒运行在前端，当与其他玩家竞赛时，沙盒则运行在后端。同时 Browserify 作为一个构建工具，并不影响前端脚本的加载逻辑，换言之在使用 Browserify 的同时依然可以使用 RequireJS、SeaJS 这样的 Module Loader 以及 Combo Handler 等技术。</p>
+<p>除了 Browserify 以外，Code Game 没有使用其他的 JavaScript 预处理工具。也没有使用 CoffeeScript、LiveScript 这样的语言替代 JavaScript，原因在于 JavaScript 在前端工程方面本身已经足够优秀，而 CoffeeScript 和 LiveScript 这样的语言在提供更“现代”的语法同时，也会大大降低代码的可控性。同 Less 和 CSS 的关系一样，CoffeeScript 与 JavaScript 在语言层面的差异会导致二者间代码逻辑的不调和。一个最明显的例子是 CoffeeScript 提供的 <code>class</code> 关键词使得其可以像<strong>基于对象</strong>的语言一样声明类，然而 JavaScript 本身却是是<strong>基于原型</strong>的语言，当一个以基于对象的思想编写的代码逻辑编译成基于原型的语言时，其间产生的落差已经不是语言之间的优劣可以衡量的了。更何况 CoffeeScript 语言本身就存在太多的问题，比如 CoffeeScript 的函数调用无需写 <code>()</code>，使得易读性大为下降（比较 <code>console.log x + 1</code> 和 <code>console.log x +1</code>），同时也引入了很多细节问题（比如无法实现 JavaScript 里的具名匿名函数 <code>invoke(function func() {})</code>），另外 CoffeeScript 生成的 JavaScript 虽然有很多最佳实践，但总体并不易读，也很容易生成冗余代码，比如：</p>
 <div class="highlight"><pre><span class="n">greet</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">-&gt;</span>
   <span class="k">for</span> <span class="n">time</span> <span class="n">in</span> <span class="p">[</span><span class="err">&#39;</span><span class="n">morning</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">afternoon</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">nignt</span><span class="err">&#39;</span><span class="p">]</span>
     <span class="n">console</span><span class="p">.</span><span class="n">log</span> <span class="s">&quot;Good #{time}, #{name}!&quot;</span>
@@ -148,18 +148,18 @@
 </pre></div>
 
 
-<p>语句表达式化是好的，免去写 <code>return</code> 是好的，但是 CoffeeScript 终究不是 JavaScript，终究还是要编译成 JavaScript。本来简单的代码变得如此复杂，即使表面再光鲜，即使能通过 JSLint 又有什么意义呢。CoffeeScript 对于初级 JavaScript 程序员来说，可以帮助他们避免很多 JavaScript 的陷阱，也能更顺畅地写出最佳实践的代码，但一个富有经验的 JavaScript 开发者写出的 JavaScript 绝对要比 CoffeeScript 的可控性来的高。</p>
+<p>虽然语句表达式化是好的，免去写 <code>return</code> 也是好的，但是 CoffeeScript 终究还是一门要编译成 JavaScript 的语言，本来简单的代码变得如此复杂，即使表面再光鲜又有什么意义呢。CoffeeScript 对于初级 JavaScript 程序员来说，可以帮助他们避免很多 JavaScript 的陷阱，也能更顺畅地写出最佳实践的代码，但从整体而言，一个富有经验的 JavaScript 开发者写出的 JavaScript 更可能要比 CoffeeScript 的可控性来的高。</p>
 </li>
 <li>
 <p>SketchTool</p>
 <p>之前做设计一直使用 Photoshop，直到见识到 Sketch 的威力后便很少碰 Photoshop 了。网上有很多文章讨论两者的设计优劣，所以不再赘述。这里主要介绍对开发者来说 Sketch 的优势。</p>
-<p>相较 Photoshop，Sketch 最大的优势就是可以实现切图自动化，对于每个图层来都可以指定其导出格式以及文件名（如下图所示）。</p>
+<p>相较 Photoshop，Sketch 最大的优势就是可以实现切图自动化，对于每个图层来都可以指定其导出格式以及文件名：</p>
 <p><img src="http://zihua.li/images/2014-11-12_codegame/sketch.png" alt="个人主页" class="fill" /></p>
-<p>更重要的是，Sketch 官方提供了命令行工具 SketchTool，可以通过命令将 Sketch 源文件按规则导出成图像文件，这意味着配合 Gulp 可以实现当修改 Sketch 的设计后自动切图。同时由于 Sketch 的文件普遍很小，甚至可以将其放入版本库中来维护其版本（自然这样也就无需将切好的图片放入版本库，因为这些图片可以由 Gulp 构建脚本生成）。</p>
+<p>更重要的是，Sketch 官方提供了命令行工具 SketchTool，可以通过命令将 Sketch 源文件按规则导出成图像文件，这意味着配合 Gulp 可以实现当修改 Sketch 的设计后自动切图。同时由于 Sketch 的文件普遍很小，所以甚至可以将其放入版本库中来维护其版本（自然这样也就无需将切好的图片放入版本库，因为这些图片可以由 Gulp 构建脚本生成）。</p>
 </li>
 </ol>
 <h3>三、沙盒的实现</h3>
-<p>在 Code Game 中最关键的一环就是沙盒的实现了。因为涉及到对战，所以比赛时双方选手的代码自然不能运行在前端。所以 Code Game 采用如下流程来实现脚本对战：</p>
+<p>在 Code Game 中最关键的一环就是沙盒的实现了。因为涉及到对战，所以比赛时双方选手的代码自然不能运行在前端以免让玩家看到对手的代码。所以 Code Game 采用如下流程来实现脚本对战：</p>
 <ol>
 <li>玩家在编辑器调试代码并保存</li>
 <li>服务端将玩家的代码保存到 MySQL 数据库中</li>
@@ -169,8 +169,8 @@
 </ol>
 <p>下面分三个部分着重介绍 3 和 5 两个过程。</p>
 <h4>在后端解析玩家代码</h4>
-<p>这一过程是沙盒的意义所在。因为后端使用 Node.js 开发，而玩家的脚本本身是 JavaScript，所以解析脚本的过程本身就很简单，一个 <code>eval()</code> 即可。然而 <code>eval()</code> 并不能限制用户的脚本权限，即使用 <code>eval</code> 解析运行用户的脚本会使得用户的脚本可以访问 Node.js 的各种库函数，也会污染 Node.js 的全局变量，同时也无法对脚本的运行时间进行任何限制。</p>
-<p>这个问题的解决方式是使用 Node.js 提供的 <code>script.runInNewContext()</code> 函数。<code>runInNewContext()</code> 函数接受两个参数，一个是全局变量对象，这个对象包含脚本可以使用的全部全局变量，另一个是选项对象，可以在这个参数中指定脚本的超时时间。注意第二个参数是从 Node.js 0.11.x 开始支持的。</p>
+<p>这一过程是沙盒的意义所在。因为后端使用 Node.js 开发，而玩家的脚本本身是 JavaScript，所以解析脚本的过程本身就很简单，一个 <code>eval()</code> 即可。然而 <code>eval()</code> 并不能限制用户的脚本权限，从而使得用户的脚本可以访问 Node.js 的各种库函数，也会污染 Node.js 的全局变量，同时也无法对脚本的运行时间进行任何限制。</p>
+<p>这个问题的解决方式是使用 Node.js 提供的 <code>script.runInNewContext()</code> 函数。<code>runInNewContext()</code> 函数接受两个参数：一个是全局变量对象，这个对象包含脚本可以使用的全部全局变量，在脚本中声明的全局变量也会保存在这个对象中；另一个是运行选项，可以在这个参数中指定脚本的超时时间，要注意的是这个参数是从 Node.js 0.11.x 开始支持的。</p>
 <p>Code Game 定义了 <code>Sandbox</code> 类：</p>
 <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Sandbox</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sandbox</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">this</span><span class="p">.</span><span class="nb">Math</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">;</span>
@@ -185,8 +185,7 @@
 </pre></div>
 
 
-<p>执行玩家脚本时，会实例化一个 <code>Sandbox</code> 实例作为全局变量对象，所以玩家能使用的全局变量只有 <code>Math</code> 和 <code>parseInt</code>。</p>
-<p>玩家的脚本都会声明一个 <code>onIdle()</code> 函数（具体可以参加官网文档），这个函数可以在之前的 <code>Sandbox</code> 实例中获取到。接下来需要实现在坦克空闲时执行 <code>onIdle()</code> 函数，如果直接调用 <code>sandbox.onIdle()</code> 来执行的话就无法借助 <code>runInNewContext()</code> 函数来实现超时检测了，所以 Code Game 使用如下的方法来解决这个问题：</p>
+<p>执行玩家脚本时，会实例化一个 <code>Sandbox</code> 实例作为全局变量对象，所以玩家能使用的全局变量只有 <code>Math</code> 和 <code>parseInt</code>。同时玩家的脚本都会声明一个 <code>onIdle()</code> 函数（具体可以参见<a href="http://codegame.org/doc">官网文档</a>），这个函数可以在之前的 <code>Sandbox</code> 实例 <code>sandbox</code> 中获取到。接下来需要实现在坦克空闲时执行 <code>onIdle()</code> 函数，如果直接调用 <code>sandbox.onIdle()</code> 来执行的话就无法借助 <code>runInNewContext()</code> 函数来实现超时检测了，所以 Code Game 使用如下的方法来解决这个问题：</p>
 <div class="highlight"><pre><span class="nx">Player</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">onIdle</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">self</span><span class="p">,</span> <span class="nx">enemy</span><span class="p">,</span> <span class="nx">game</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">code</span> <span class="o">=</span> <span class="s1">&#39;onIdle(__self, __enemy, __game);&#39;</span><span class="p">;</span>
   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">script</span><span class="p">)</span> <span class="p">{</span>
@@ -214,7 +213,7 @@
 
 <p>首先为 <code>__self</code>、<code>__enemy</code> 和 <code>__game</code> 这三个不对用户公开的全局变量赋相应的值，之后使用同样的 <code>Sandbox</code> 实例执行代码 <code>onIdle(__self, __enemy, __game)</code>。因为调用了 <code>runInNewContext()</code>，所以可以定义超时规则。</p>
 <h4>录像文件的格式</h4>
-<p>为了将代码的执行结果在前端展示给用户，最重要的是讲结果以一定规则记录下来，形成“录像”。由于前后端都是 JavaScript，所以录像文件的格式自然就是 JSON 了。录像文件中记录了每个对象（坦克、子弹等）在每个帧的位置和执行的动作，如：</p>
+<p>为了将代码的执行结果在前端展示给用户，最重要的是把结果以一定规则记录下来，形成游戏录像。录像文件中记录了每个对象（坦克、子弹等）在每个帧的位置和执行的动作，如：</p>
 <div class="highlight"><pre><span class="p">[</span>
   <span class="p">[{</span>
     <span class="s2">&quot;objectId&quot;</span><span class="o">:</span> <span class="s2">&quot;6e723&quot;</span><span class="p">,</span>
@@ -242,16 +241,16 @@
 
 
 <p>首先录像的最外层是个数组，数组的一个元素代表一帧发生的所有动作。上面的示例录像中，第一帧坦克 6e723 从坐标 <code>(6, 7)</code> 向当前方向（右）前进了一个单位，同时坦克 4ad3f 向左转弯。第二帧坦克 6e723 从坐标 <code>(6, 8)</code> 继续前进了一步，同时坦克 4ad3f 没有执行任何操作。</p>
-<p>理论上来说，录像文件中只要记录每个对象最初的状态和中间每步的动作即可使数据完整。然而可以注意到上面的录像样例中的每一帧都会把对象的所有信息记录下来，包括朝向和坐标。这使得前端播放录像时可以从任意一帧开始播放，而不用先从头开始初始化对象状态，另外由于 Code Game 的录像一般都很小（游戏限定 200 帧之内必须结束），所以这样记录从成本考量也可以接受。</p>
+<p>理论上来说，录像文件中只要记录每个对象最初的状态和中间每步的动作即可使数据完整。然而可以注意到上面的录像样例中的每一帧都会把对象的所有信息记录下来，包括朝向和坐标。这使得前端播放录像时可以从任意一帧开始播放，而不需要从头开始初始化对象状态，另外由于 Code Game 的录像一般都很小（游戏限定 200 帧之内必须结束），所以这样记录从成本考量也可以接受。</p>
 <h4>前端录像展示</h4>
-<p>前端一律使用 CSS Animation 来实现动画。一般而言在前端实现动画有如下几种方式：</p>
+<p>一般而言在前端实现动画有如下几种方式：</p>
 <ol>
 <li>通过 JavaScript 操作 DOM</li>
 <li>使用 CSS Animation</li>
 <li>Canvas 动画</li>
 </ol>
-<p>首先排除的是 Canvas。虽然 Canvas 的性能优异且兼容性良好，但是就播放录像这样简单的需求而言开发起来相对较为繁琐。其次排除的是 1，因为 JavaScript 实现的动画进行微小的位移时会出现抖动，而 Code Game 开发时希望对战页面可以在移动设备上播放，同时用户可以自定义播放速度，这就使得小位移的动画非常容易出现。</p>
-<p>所以最后选择了 CSS Animation。录像中的每个拥有 <code>objectId</code> 属性的对象都会为其生成 DOM 节点，节点的 ID 由 <code>objectid</code> 构成，同时根据 <code>type</code> 的不同为其赋予不同的背景图。具体的动画实现以下面的动作为例：</p>
+<p>在开发 Code Game 项目时，首先排除的是 Canvas。虽然 Canvas 的性能优异且兼容性良好，但是就播放录像这样简单的需求而言使用 Canvas 开发相对繁琐。其次排除的是直接操作 DOM，因为 JavaScript 实现的动画进行微小的位移时会出现抖动，而 Code Game 开发时希望对战页面可以在移动设备上播放，同时用户可以自定义播放速度，这就使得小位移的动画非常容易出现。</p>
+<p>所以最后采取的播放录像的动画方案是 CSS Animation。录像中的每个拥有 <code>objectId</code> 属性的对象都会为其生成 DOM 节点，节点的 ID 由 <code>objectid</code> 构成，同时根据 <code>type</code> 的不同为其赋予不同的背景图。具体的动画实现以下面的动作为例：</p>
 <div class="highlight"><pre><span class="p">{</span>
   <span class="s2">&quot;objectId&quot;</span><span class="o">:</span> <span class="s2">&quot;6e723&quot;</span><span class="p">,</span>
   <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;tank&quot;</span><span class="p">,</span>
@@ -286,6 +285,8 @@
 
 
 <p>坦克 6e723 在第一帧的动作中增加了 <code>frames: 2</code> 这个属性，表明一共前进了两帧，在之后播放动画时就可以大大降低修改 DOM 属性的次数了。</p>
+<h2>结语</h2>
+<p>这篇文章从开发 Code Game 项目的角度介绍了我对 Less/Sass 和 CoffeeScript 这些流行技术的取舍，以及在 Node.js 中开发沙盒的一些经验。然而技术本身其实并没有明显的优劣可言，只有基于特定项目和特定的开发者讨论时，关于“取舍”的话题才有意义。如果大家关于本文有什么想法，欢迎留言讨论。</p>
   </div>
   <div class="hr"></div>
   <section class="article-share clearfix">
