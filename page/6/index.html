@@ -33,6 +33,32 @@
     <div class="inner">
   <article class="index-article">
     <header>
+      <a href="http://zihua.li/2011/07/implement-vertical-align/">
+        <h2 class="article-title">实现 vertical-align 的几种办法</h2>
+      </a>
+      <p class="article-meta" title="2011-07-07T00:00:00">07 Jul 2011</p>
+    </header>
+    <div class="typo article-body">
+      <p>一个简单的例子：</p>
+<div class="highlight"><pre><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;vertical-align: middle; height: 100px;&quot;</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;span&gt;</span>hello world!<span class="nt">&lt;/span&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</pre></div>
+
+
+<p>可以看到“hello world!”并没有垂直居中。网上有很多人从很多不同的方面进行分析，其实简单概括就一句话：
+<code>vertical-align</code>的作用范围仅限<code>display: table-cell</code>或<code>display: inline-block</code>元素。</p>
+<p>那么如何实现垂直居中呢？</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2011/07/implement-vertical-align/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2011/07/implement-vertical-align/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article">
+    <header>
       <a href="http://zihua.li/2011/06/singleton-in-php/">
         <h2 class="article-title">PHP 实现单例模式</h2>
       </a>
