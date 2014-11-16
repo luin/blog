@@ -147,7 +147,7 @@ article .article-title {
 .article-title .article-subtitle {
   display: block;
   font-size: 0.6em;
-  color: #666;
+  color: #999;
   line-height: 2em;
   font-weight: normal;
 }
@@ -160,6 +160,10 @@ article .article-title {
 .article-meta {
   color: #b3b3b1;
   margin-bottom: 10px;
+}
+
+article .article-meta {
+  text-align: center;
 }
 
 .article-body {
