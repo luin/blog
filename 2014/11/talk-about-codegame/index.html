@@ -82,39 +82,39 @@
 
 
 <p>也支持数学计算：</p>
-<div class="highlight"><pre><span class="n">pre</span> <span class="p">{</span>
-  <span class="nl">margin:</span> <span class="n">calc</span><span class="p">(</span><span class="n">var</span><span class="p">(</span><span class="o">--</span><span class="n">large</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
+<div class="highlight"><pre><span class="nt">pre</span> <span class="p">{</span>
+  <span class="k">margin</span><span class="o">:</span> <span class="n">calc</span><span class="p">(</span><span class="n">var</span><span class="p">(</span><span class="o">--</span><span class="k">large</span><span class="p">)</span> <span class="o">*</span> <span class="m">2</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 
 
 <p>甚至还支持颜色处理：</p>
-<div class="highlight"><pre><span class="n">a</span> <span class="p">{</span>
-  <span class="nl">color:</span> <span class="n">var</span><span class="p">(</span><span class="o">--</span><span class="n">purple</span><span class="p">);</span>
+<div class="highlight"><pre><span class="nt">a</span> <span class="p">{</span>
+  <span class="k">color</span><span class="o">:</span> <span class="n">var</span><span class="p">(</span><span class="o">--</span><span class="nb">purple</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="nl">a:</span><span class="n">hover</span> <span class="p">{</span>
-  <span class="nl">color:</span> <span class="n">color</span><span class="p">(</span><span class="n">var</span><span class="p">(</span><span class="o">--</span><span class="n">purple</span><span class="p">)</span> <span class="n">tint</span><span class="p">(</span><span class="mi">20</span><span class="o">%</span><span class="p">));</span>
+<span class="nt">a</span><span class="nd">:hover</span> <span class="p">{</span>
+  <span class="k">color</span><span class="o">:</span> <span class="k">color</span><span class="p">(</span><span class="n">var</span><span class="p">(</span><span class="o">--</span><span class="nb">purple</span><span class="p">)</span> <span class="n">tint</span><span class="p">(</span><span class="m">20</span><span class="o">%</span><span class="p">));</span>
 <span class="p">}</span>
 </pre></div>
 
 
 <p>可以说需要用到的特性 CSS 本身就已经具备了，那么何必再使用另一种语言呢？更何况 Less 和 Sass 这样“强大”的预处理语言在带来开发上方便的同时也引入了很多问题，而大部分问题都可以归结到一点，即“你根本就不是在写 CSS”。看下面的 Less 代码：</p>
-<div class="highlight"><pre><span class="p">.</span><span class="n">container</span> <span class="p">{</span>
-  <span class="nl">width:</span> <span class="mi">960</span><span class="n">px</span><span class="p">;</span>
-  <span class="nl">overflow:</span> <span class="n">hidden</span><span class="p">;</span>
-  <span class="p">.</span><span class="n">main</span> <span class="p">{</span>
-    <span class="nl">width:</span> <span class="mf">61.8</span><span class="o">%</span><span class="p">;</span>
-    <span class="nl">float:</span> <span class="n">left</span><span class="p">;</span>
-    <span class="p">.</span><span class="n">post</span> <span class="p">{</span>
-      <span class="nl">background:</span> <span class="err">#</span><span class="n">f00</span><span class="p">;</span>
-      <span class="p">.</span><span class="n">title</span> <span class="p">{</span>
-        <span class="nl">position:</span> <span class="n">absolute</span><span class="p">;</span>
-        <span class="nl">background:</span> <span class="n">url</span><span class="p">(</span><span class="s">&quot;images/header-image.jpg&quot;</span><span class="p">);</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span class="nc">.container</span> <span class="err">{</span>
+  <span class="na">width</span><span class="o">:</span> <span class="mi">960</span><span class="kt">px</span><span class="err">;</span>
+  <span class="na">overflow</span><span class="o">:</span> <span class="no">hidden</span><span class="err">;</span>
+  <span class="nc">.main</span> <span class="err">{</span>
+    <span class="na">width</span><span class="o">:</span> <span class="mi">61</span><span class="mf">.8</span><span class="kt">%</span><span class="err">;</span>
+    <span class="na">float</span><span class="o">:</span> <span class="no">left</span><span class="err">;</span>
+    <span class="nc">.post</span> <span class="err">{</span>
+      <span class="na">background</span><span class="o">:</span> <span class="mh">#f00</span><span class="err">;</span>
+      <span class="nc">.title</span> <span class="err">{</span>
+        <span class="na">position</span><span class="o">:</span> <span class="no">absolute</span><span class="err">;</span>
+        <span class="na">background</span><span class="o">:</span> <span class="sx">url(&quot;images/header-image.jpg&quot;)</span><span class="err">;</span>
+      <span class="err">}</span>
+    <span class="err">}</span>
+  <span class="err">}</span>
+<span class="err">}</span>
 </pre></div>
 
 
@@ -137,10 +137,10 @@
 
 <span class="nx">greet</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">time</span><span class="p">,</span> <span class="nx">_i</span><span class="p">,</span> <span class="nx">_len</span><span class="p">,</span> <span class="nx">_ref</span><span class="p">,</span> <span class="nx">_results</span><span class="p">;</span>
-  <span class="nx">_ref</span> <span class="o">=</span> <span class="cp">[</span><span class="s1">&#39;morning&#39;</span><span class="p">,</span> <span class="s1">&#39;afternoon&#39;</span><span class="p">,</span> <span class="s1">&#39;nignt&#39;</span><span class="cp">]</span><span class="p">;</span>
-  <span class="nx">_results</span> <span class="o">=</span> <span class="cp">[]</span><span class="p">;</span>
+  <span class="nx">_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;morning&#39;</span><span class="p">,</span> <span class="s1">&#39;afternoon&#39;</span><span class="p">,</span> <span class="s1">&#39;nignt&#39;</span><span class="p">];</span>
+  <span class="nx">_results</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="k">for</span> <span class="p">(</span><span class="nx">_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">_len</span> <span class="o">=</span> <span class="nx">_ref</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_i</span> <span class="o">&lt;</span> <span class="nx">_len</span><span class="p">;</span> <span class="nx">_i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">time</span> <span class="o">=</span> <span class="nx">_ref</span><span class="cp">[</span><span class="nx">_i</span><span class="cp">]</span><span class="p">;</span>
+    <span class="nx">time</span> <span class="o">=</span> <span class="nx">_ref</span><span class="p">[</span><span class="nx">_i</span><span class="p">];</span>
     <span class="nx">_results</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Good &quot;</span> <span class="o">+</span> <span class="nx">time</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nx">name</span> <span class="o">+</span> <span class="s2">&quot;!&quot;</span><span class="p">));</span>
   <span class="p">}</span>
   <span class="k">return</span> <span class="nx">_results</span><span class="p">;</span>
