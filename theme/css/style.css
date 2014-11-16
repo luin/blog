@@ -132,9 +132,24 @@ article {
   margin-bottom: 16px;
 }
 
+article h2,
+article h3,
+article h4,
+article h5,
+article h6 {
+  text-align: center;
+}
+
+article .article-title {
+  text-align: center;
+}
+
 .article-title .article-subtitle {
   display: block;
-  font-size: 0.8em;
+  font-size: 0.6em;
+  color: #666;
+  line-height: 2em;
+  font-weight: normal;
 }
 
 .index-article .article-title {
