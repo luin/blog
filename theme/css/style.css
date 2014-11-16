@@ -132,6 +132,11 @@ article {
   margin-bottom: 16px;
 }
 
+.article-title .article-subtitle {
+  display: block;
+  font-size: 1.6em;
+}
+
 .index-article .article-title {
   font-size: 2em;
   margin-bottom: 10px;

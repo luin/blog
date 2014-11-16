@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zihua Li</title><link>http://zihua.li/</link><description>美工、全栈码农（Web, iOS）&lt;br&gt;90 后，法号 Luin</description><atom:link href="http://zihua.li/feed" rel="self"></atom:link><lastBuildDate>Fri, 07 Nov 2014 00:00:00 +0100</lastBuildDate><item><title>Code Game 对技术的选取──兼谈为何不应该用 CoffeeScript 与 Less</title><link>http://zihua.li/2014/11/talk-about-codegame/</link><description>&lt;p&gt;这篇日志将以偏技术的角度介绍我最近在做的业余项目 Code Game，其中我会解释 Code Game 对某些技术是如何进行取舍的，包括为什么不使用 CoffeeScript 以及选择 Myth 代替 Less/Sass 的原因。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zihua Li</title><link>http://zihua.li/</link><description>美工、全栈码农（Web, iOS）&lt;br&gt;90 后，法号 Luin</description><atom:link href="http://zihua.li/feed" rel="self"></atom:link><lastBuildDate>Fri, 07 Nov 2014 00:00:00 +0100</lastBuildDate><item><title>Code Game 对技术的选取</title><link>http://zihua.li/2014/11/talk-about-codegame/</link><description>&lt;p&gt;这篇日志将以偏技术的角度介绍我最近在做的业余项目 Code Game，其中我会解释 Code Game 对某些技术是如何进行取舍的，包括为什么不使用 CoffeeScript 以及选择 Myth 代替 Less/Sass 的原因。&lt;/p&gt;
 
 
 &lt;h2&gt;Code Game 是什么&lt;/h2&gt;
