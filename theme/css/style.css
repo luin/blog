@@ -29,12 +29,11 @@
 
 body {
   color: #333;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+  /* text-rendering: optimizeLegibility; */
+  /* -webkit-font-smoothing: antialiased; */
   font-size: 1em;
   line-height: 1.1;
   word-wrap: break-word;
-  font-family: 'Source Sans Pro', sans-serif;
 }
 
 a:link, a:visited, a:hover, a:active {
@@ -70,6 +69,7 @@ code {
 }
 
 .l-cover header {
+  font-family: 'Source Sans Pro', sans-serif;
   position: absolute;
   bottom: 0;
   right: 0;
@@ -84,6 +84,10 @@ code {
 .l-cover .header-avatar img {
   border-radius: 999px;
   border: 4px solid #fff;
+}
+
+.l-cover ul {
+  padding: 0;
 }
 
 .l-cover .description {
