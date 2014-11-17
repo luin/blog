@@ -17,6 +17,16 @@
   src: local('Source Sans Pro Bold'), local('SourceSansPro-Bold'), url(../font/sb.ttf) format('truetype');
 }
 
+.cf:before,
+.cf:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.cf:after {
+    clear: both;
+}
+
 body {
   color: #333;
   text-rendering: optimizeLegibility;
