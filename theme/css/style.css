@@ -259,7 +259,8 @@ article .article-meta {
 .article-share .about-blog > p,
 .article-share .about-blog > a,
 .article-share .about-blog > iframe {
-  margin-top: 0 ;
+  margin-top: 0;
+  margin-bottom: 0;
   float: left;
 }
 
