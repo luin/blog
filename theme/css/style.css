@@ -17,13 +17,13 @@
   src: local('Source Sans Pro Bold'), local('SourceSansPro-Bold'), url(../font/sb.ttf) format('truetype');
 }
 
-.cf:before,
-.cf:after {
+.clearfix:before,
+.clearfix:after {
     content: " "; /* 1 */
     display: table; /* 2 */
 }
 
-.cf:after {
+.clearfix:after {
     clear: both;
 }
 
