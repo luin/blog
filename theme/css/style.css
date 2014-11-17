@@ -263,6 +263,10 @@ article .article-meta {
   float: left;
 }
 
+.article-share .about-blog > p {
+  font-size: 14px;
+}
+
 .read-more a {
   margin-left: 8px;
 }
