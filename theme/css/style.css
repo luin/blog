@@ -19,8 +19,8 @@
 
 .clearfix:before,
 .clearfix:after {
-    content: " "; /* 1 */
-    display: table; /* 2 */
+    content: " ";
+    display: table;
 }
 
 .clearfix:after {
@@ -29,8 +29,8 @@
 
 body {
   color: #333;
-  /* text-rendering: optimizeLegibility; */
-  /* -webkit-font-smoothing: antialiased; */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   font-size: 1em;
   line-height: 1.1;
   word-wrap: break-word;
@@ -259,6 +259,7 @@ article .article-meta {
 .article-share .about-blog > p,
 .article-share .about-blog > a,
 .article-share .about-blog > iframe {
+  margin-top: 0 ;
   float: left;
 }
 
