@@ -63,6 +63,36 @@
 <p>耳朵和主体一样，也可以使用 <code>radial-gradient</code> 来绘制，这里不在赘述。效果如下：</p>
 <p data-height="268" data-theme-id="11447" data-slug-hash="azJgGd" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/azJgGd/'>azJgGd</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
 
+<p>等等！还是不对啊，下半身还没画呢，脚呢！</p>
+<p>别担心，在游戏中地鼠是不会露出下半身的。</p>
+<h2>“开始”按钮的实现</h2>
+<p>进入游戏后，会出现开始界面，只有用户点击了“开始”按钮后游戏才会开始。如果可以使用 JavaScript，那么只需要绑定按钮的 <code>click</code> 事件来实现相应逻辑，那么只使用 CSS 要怎么实现呢？</p>
+<p>其实方法很简单，只需要想一下 CSS/HTML 中怎么才能够保存状态即可。没错，就是 <code>input[type="checkbox"]</code>。只要用户点击了按钮，就把 checkbox 选中，接下来就可以用 CSS 的 <code>+</code> 和 <code>~</code> 选择符来设置游戏中其他元素的属性了。比如如果想要 checkbox 选中后令开始界面（<code>.start</code>）隐藏，只需要：</p>
+<div class="highlight"><pre><span class="n">input</span><span class="p">[</span><span class="n">type</span><span class="o">=</span><span class="s">&quot;checkbox&quot;</span><span class="p">]</span><span class="o">:</span><span class="n">checked</span> <span class="o">+</span> <span class="p">.</span><span class="n">start</span> <span class="p">{</span>
+  <span class="nl">display:</span> <span class="n">none</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>借此我们可以把“点击按钮开始游戏”简化为“点击按钮选中 checkbox”，那么问题就迎刃而解了：<code>label</code>。在 HTML 中，点击 <code>label</code> 标签会自动选中其对应的表单元素，所以我们只需要把 checkbox 隐藏，并把 <code>label</code> 设置成按钮的样子即可。如下代码所示：</p>
+<p data-height="268" data-theme-id="11447" data-slug-hash="ByWgGO" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/ByWgGO/'>ByWgGO</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
+
+<h2>打地鼠的实现</h2>
+<p>实现打地鼠和实现“开始”按钮的思路是一样的，也是用户点击地鼠后设置其的 <code>checked</code> 属性，不同的是这里我们使用另一种方法来绘制地鼠：地鼠本身不是 <code>label</code>，而是 <code>input[type="radio"]</code>。至于为什么用 radio 而不是 checkbox，稍候会解释，在这一节中 radio 和 checkbox 都是可以的。</p>
+<p data-height="268" data-theme-id="11447" data-slug-hash="EaWBMy" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/EaWBMy/'>EaWBMy</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
+
+<p>要注意的是需要使用 <code>appearance: none</code> 来禁用 radio 元素的默认控件样式。</p>
+<h2>技巧：记分板</h2>
+<p>记分板的实现并不复杂，但是思路并不好想。在 CSS 中没有办法存放数据，使得记分板功能看起来很难实现。实际上我们可以这样想：要实现点击地鼠记分板加一，就要让地鼠和记分板联动起来。一般来说最容易想到的联动方式就是我们之前用过的 label + checkbox 和 <code>+</code>/<code>~</code> 选择器，实际上还有另一种联动方式，就是 radio。要知道拥有同一 name 的 一组 radio 同时只会有一个元素被选中，所以接下来就很容易想到可以让地鼠是一个 radio，同时记分板是一个 radio，两个元素拥有相同的 name 即可实现点击地鼠后记分板发生变化。</p>
+<p>下面的问题就是怎么把记分板的 radio 的选中状态转换成具体数字了。思路是这样的：</p>
+<ol>
+<li>每个 radio 都占据一定高度</li>
+<li>每个分数都以一个元素的形式来展现，高度和 radio 相同</li>
+<li>使用一个 viewport 来显示当前分数，当 radio 被取消选中后，将其高度设置为 0，这样下面的分数就会向上升，使得当前对应的分数在 viewport 中显示出来。</li>
+</ol>
+<p>整个结构如下图所示：</p>
+<p><img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/score.png" alt="score结构图" /></p>
+<p>示例代码如下：</p>
 <script async src="//assets.codepen.io/assets/embed/ei.js"></script>
   </div>
   <div class="hr"></div>
