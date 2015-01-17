@@ -42,9 +42,20 @@
     <p>只借助 CSS 而不使用 JavaScript 来实现一个网页游戏并不需要什么新潮的技术，简单的几个选择器组合就能创造出意想不到的效果，再配合上 CSS3 的“绘图”能力，甚至可以做出不逊于 JavaScript 实现的网页游戏。</p>
 <p>为了参加一个 CSS3 比赛，我连夜做了一个 CSS3 打地鼠游戏（其实准备时间挺长的，但是报了个名就忘记这回事了，交稿前两天才被人提醒），如下：</p>
 <p><img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/game.png" alt="游戏截图" class="fill" /></p>
+<p>进入游戏后，首先会有个开始按钮，点击开始后，游戏开始倒计时，同时不断地有地鼠从洞里钻出来，用鼠标点击地鼠即可得分（总分显示在顶部的记分板上）。15秒后游戏结束，同时显示结束页面。</p>
 <p>项目代码放在 <a href="https://github.com/luin/Hits-the-mole">GitHub</a> 上，也可以访问<a href="http://luin.github.io/Hits-the-mole/">在线 Demo</a>试玩。</p>
 <p>这篇日志将介绍实现这个游戏的过程中我认为比较有意思的几个地方。</p>
 
+
+<h2>使用 CSS 绘制地鼠</h2>
+<p>由于是个纯 CSS 游戏，为了不使用图片，所有的游戏角色都使用了 CSS 进行绘制。在这个游戏中主要有两个元素：地洞和地鼠。地洞（你别骗我啦，那个明明就是马里奥的小绿桶嘛）画起来很简单，用一个元素和其 <code>:before</code> 伪元素结合，设置好位置和尺寸，加些渐变色就可以了。稍微复杂点的是地鼠的绘制，为了实现方便，我希望能<strong>只使用一个元素</strong>来绘制（稍候会介绍原因）。绘制步骤如下：</p>
+<ol>
+<li>
+<p>首先找一个参照物</p>
+<p>地鼠是什么样子的呢？虽然玩了很多次打地鼠游戏，其实我对地鼠的样子一点印象都没有。不过这怎么能难倒前 Go 语言爱好者的我呢！我淡定地打开了 Go 的官网，端详了一下那个可爱的吉祥物：</p>
+</li>
+</ol>
+<p><img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/gopher.png" alt="Go语言吉祥物" /></p>
   </div>
   <div class="hr"></div>
   <section class="article-share clearfix">
