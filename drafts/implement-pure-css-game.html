@@ -51,7 +51,7 @@
 <p>由于是个纯 CSS 游戏，为了不使用图片，所有的游戏角色都使用了 CSS 进行绘制。在这个游戏中主要有两个元素：地洞和地鼠。地洞（你别骗我啦，那个明明就是马里奥的小绿桶嘛）画起来很简单，用一个元素和其 <code>:before</code> 伪元素结合，设置好位置和尺寸，加些渐变色就可以了。稍微复杂点的是地鼠的绘制，为了实现方便，我希望能<strong>只使用一个元素</strong>来绘制（稍候会介绍原因）。绘制步骤如下：</p>
 <h3>1. 首先找一个参照物</h3>
 <p>地鼠是什么样子的呢？虽然玩了很多次打地鼠游戏，其实我对地鼠的样子一点印象都没有。不过这怎么能难倒前 Go 语言爱好者的我呢！我淡定地打开了 Go 的官网，端详了一下那个可爱的吉祥物：</p>
-<p><img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/gopher.png" alt="Go语言吉祥物" /></p>
+<p><img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/gopher.png" alt="Go语言吉祥物" class="center" /></p>
 <p>我们先来把地鼠分成 3 个部分，主体、左耳朵和右耳朵。其中主体可以使用元素本身表现，设置宽高和 <code>border-radius</code> 来实现圆角：</p>
 <p data-height="268" data-theme-id="11447" data-slug-hash="EaWBEV" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/EaWBEV/'>EaWBEV</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
 
@@ -91,7 +91,7 @@
 <li>使用一个 viewport 来显示当前分数，当 radio 被取消选中后，将其高度设置为 0，这样下面的分数就会向上升，使得当前对应的分数在 viewport 中显示出来。</li>
 </ol>
 <p>整个结构如下图所示：</p>
-<p><img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/score.png" alt="score结构图" width="50%" /></p>
+<p><img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/score.png" alt="score结构图" class="center" /></p>
 <p>示例代码如下：
 <p data-height="268" data-theme-id="11447" data-slug-hash="wBJLLR" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/wBJLLR/'>wBJLLR</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
 <script async src="//assets.codepen.io/assets/embed/ei.js"></script></p>

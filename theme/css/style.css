@@ -192,6 +192,12 @@ article .article-meta {
   max-width: 100%;
 }
 
+.article-body img.center {
+  display: block;
+  margin: 20px auto;
+  width: 50%;
+}
+
 .article-body .left {
   float: left;
   width: 61%;
