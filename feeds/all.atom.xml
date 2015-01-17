@@ -1,5 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-11-07T00:00:00+01:00</updated><entry><title>Code Game 对技术的选取</title><link href="http://zihua.li/2014/11/talk-about-codegame/" rel="alternate"></link><updated>2014-11-07T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-11-07:2014/11/talk-about-codegame/</id><summary type="html">&lt;p&gt;这篇日志将以偏技术的角度介绍我最近在做的业余项目 Code Game，其中我会解释 Code Game 对某些技术是如何进行取舍的，包括为什么不使用 CoffeeScript 以及选择 Myth 代替 Less/Sass 的原因。&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2015-01-17T00:00:00+01:00</updated><entry><title>纯 CSS 实现打地鼠游戏</title><link href="http://zihua.li/2015/01/implement-pure-css-game/" rel="alternate"></link><updated>2015-01-17T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2015-01-17:2015/01/implement-pure-css-game/</id><summary type="html">&lt;p&gt;只借助 CSS 而不使用 JavaScript 来实现一个网页游戏并不需要什么新潮的技术，简单的几个选择器组合就能创造出意想不到的效果，再配合上 CSS3 的“绘图”能力，甚至可以做出不逊于 JavaScript 实现的网页游戏。&lt;/p&gt;
+&lt;p&gt;为了参加公司内的 CSS3 比赛，我连夜做了一个 CSS3 打地鼠游戏（其实准备时间挺长的，但是报了个名就忘记这回事了，交稿前两天被人提醒才想起来），如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/game.png" alt="游戏截图" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;进入游戏后，首先会有个开始按钮，点击开始后，游戏开始倒计时，同时不断地有地鼠从洞里钻出来，用鼠标点击地鼠即可得分（总分显示在顶部的记分板上）。15秒后游戏结束，同时显示结束页面。&lt;/p&gt;
+&lt;p&gt;项目代码放在 &lt;a href="https://github.com/luin/Hits-the-mole"&gt;GitHub&lt;/a&gt; 上，也可以访问&lt;a href="http://luin.github.io/Hits-the-mole/"&gt;在线 Demo&lt;/a&gt;试玩。&lt;/p&gt;
+&lt;p&gt;这篇日志将介绍实现这个游戏的过程中我认为比较有意思的几个地方。&lt;/p&gt;
+
+
+&lt;h2&gt;使用 CSS 绘制地鼠&lt;/h2&gt;
+&lt;p&gt;由于是个纯 CSS 游戏，为了不使用图片，所有的游戏角色都使用了 CSS 进行绘制。在这个游戏中主要有两个元素：地洞和地鼠。地洞（你别骗我啦，那个明明就是马里奥的小绿桶嘛）画起来很简单，用一个元素和其 &lt;code&gt;:before&lt;/code&gt; 伪元素结合，设置好位置和尺寸，加些渐变色就可以了。稍微复杂点的是地鼠的绘制，为了实现方便，我希望能&lt;strong&gt;只使用一个元素&lt;/strong&gt;来绘制（稍候会介绍原因）。绘制步骤如下：&lt;/p&gt;
+&lt;h3&gt;1. 首先找一个参照物&lt;/h3&gt;
+&lt;p&gt;地鼠是什么样子的呢？虽然玩了很多次打地鼠游戏，其实我对地鼠的样子一点印象都没有。不过这怎么能难倒前 Go 语言爱好者的我呢！我淡定地打开了 Go 的官网，端详了一下那个可爱的吉祥物：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/gopher.png" alt="Go语言吉祥物" class="center" /&gt;&lt;/p&gt;
+&lt;p&gt;我们先来把地鼠分成 3 个部分，主体、左耳朵和右耳朵。其中主体可以使用元素本身表现，设置宽高和 &lt;code&gt;border-radius&lt;/code&gt; 来实现圆角：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="EaWBEV" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/EaWBEV/'&gt;EaWBEV&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;等等，根本不像啊！&lt;/p&gt;
+&lt;p&gt;下面关键的地方来了，怎么实现画眼睛和鼻子。因为 CSS &lt;a href="http://caniuse.com/#search=multiple%20background"&gt;支持一个元素多个背景图&lt;/a&gt;，而每个背景图不仅可以是由 &lt;code&gt;url&lt;/code&gt; 指定的函数，还可以是一个 &lt;code&gt;gradient&lt;/code&gt; 类型来表示渐变。由于眼睛和鼻子都是近似圆形的，所以可以用射线渐变 &lt;code&gt;radial-gradient&lt;/code&gt; 来实现。技巧在于对透明色的使用，使得渐变看起来并不是充满整个元素的。请结合下面的代码来理解：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="gbmNev" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/gbmNev/'&gt;gbmNev&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3&gt;2. 使用 &lt;code&gt;:before&lt;/code&gt; 和 &lt;code&gt;:after&lt;/code&gt; 伪元素实现耳朵&lt;/h3&gt;
+&lt;p&gt;耳朵和主体一样，也可以使用 &lt;code&gt;radial-gradient&lt;/code&gt; 来绘制，这里不在赘述。效果如下：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="azJgGd" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/azJgGd/'&gt;azJgGd&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;等等！还是不对啊，下半身还没画呢，脚呢！&lt;/p&gt;
+&lt;p&gt;别担心，在游戏中地鼠是不会露出下半身的。&lt;/p&gt;
+&lt;h2&gt;“开始”按钮的实现&lt;/h2&gt;
+&lt;p&gt;进入游戏后，会出现开始界面，只有用户点击了“开始”按钮后游戏才会开始。如果可以使用 JavaScript，那么只需要绑定按钮的 &lt;code&gt;click&lt;/code&gt; 事件来实现相应逻辑，那么使用 CSS 要怎么实现呢？&lt;/p&gt;
+&lt;p&gt;其实方法很简单，只需要想一下 CSS/HTML 中怎么才能够保存状态即可。没错，就是 &lt;code&gt;input[type="checkbox"]&lt;/code&gt;。只要用户点击了按钮，就把 checkbox 选中，接下来就可以用 CSS 的 &lt;code&gt;+&lt;/code&gt; 和 &lt;code&gt;~&lt;/code&gt; 选择符来设置游戏中其他元素的属性了。比如如果想要 checkbox 选中后令开始界面（&lt;code&gt;.start&lt;/code&gt;）隐藏，只需要：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;input&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;checkbox&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;checked&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;start&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nl"&gt;display:&lt;/span&gt; &lt;span class="n"&gt;none&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;借此我们可以把“点击按钮开始游戏”简化为“点击按钮选中 checkbox”，很容易想到可以使用 &lt;code&gt;label&lt;/code&gt; 来实现按钮。在 HTML 中，点击 &lt;code&gt;label&lt;/code&gt; 标签会自动选中其对应的表单元素，所以我们只需要把 checkbox 隐藏，并把 &lt;code&gt;label&lt;/code&gt; 设置成按钮的样子即可。如下代码所示：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="ByWgGO" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/ByWgGO/'&gt;ByWgGO&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;打地鼠的实现&lt;/h2&gt;
+&lt;p&gt;实现打地鼠和实现“开始”按钮的思路是一样的，也是用户点击地鼠后设置其的 &lt;code&gt;checked&lt;/code&gt; 属性，不同的是这里我们使用另一种方法来绘制地鼠：地鼠本身不是 &lt;code&gt;label&lt;/code&gt;，而是 &lt;code&gt;input[type="radio"]&lt;/code&gt;。至于为什么用 radio 而不是 checkbox 稍候会解释，在这一节中 radio 和 checkbox 都是可以的。&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="EaWBMy" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/EaWBMy/'&gt;EaWBMy&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;要注意的是需要使用 &lt;code&gt;appearance: none&lt;/code&gt; 来禁用 radio 元素的默认控件样式。&lt;/p&gt;
+&lt;h2&gt;技巧：记分板&lt;/h2&gt;
+&lt;p&gt;记分板的实现并不复杂，但是思路比较绕。在 CSS 中没有办法存放数据，使得记分板功能看起来很难实现。实际上我们可以这样想：要实现点击地鼠记分板加一，就要让地鼠和记分板联动起来。一般来说最容易想到的联动方式就是我们之前用过的 label + checkbox 和 &lt;code&gt;+&lt;/code&gt;/&lt;code&gt;~&lt;/code&gt; 选择器，实际上还有另一种联动方式，就是 radio。要知道拥有同一 name 的 一组 radio 同时只会有一个元素被选中，所以接下来就很容易想到可以让地鼠是一个 radio，同时记分板是一个 radio，两个元素拥有相同的 name 即可实现点击地鼠后记分板发生变化。&lt;/p&gt;
+&lt;p&gt;下面的问题就是怎么把记分板的 radio 的选中状态转换成具体数字了。思路是这样的：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;每个 radio 都占据一定高度&lt;/li&gt;
+&lt;li&gt;每个分数都以一个元素的形式来展现，高度和 radio 相同&lt;/li&gt;
+&lt;li&gt;使用一个 viewport 来显示当前分数，当 radio 被取消选中后，将其高度设置为 0，这样下面的分数就会向上升，使得当前对应的分数在 viewport 中显示出来。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;整个结构如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/score.png" alt="score结构图" class="center" /&gt;&lt;/p&gt;
+&lt;p&gt;示例代码如下（点击地鼠分数会变化）：
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="wBJLLR" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/wBJLLR/'&gt;wBJLLR&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+&lt;script async src="//assets.codepen.io/assets/embed/ei.js"&gt;&lt;/script&gt;&lt;/p&gt;
+&lt;h2&gt;总结&lt;/h2&gt;
+&lt;p&gt;至此游戏的难点就介绍得差不多了，剩下的倒计时、地鼠钻入钻出都只不过是对 CSS Animation 的运用。使用纯 CSS 实现游戏的过程非常有意思，也很利于提高自己对 CSS 的理解，推荐大家都尝试一下。&lt;/p&gt;</summary><category term="css game"></category></entry><entry><title>Code Game 对技术的选取</title><link href="http://zihua.li/2014/11/talk-about-codegame/" rel="alternate"></link><updated>2014-11-07T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-11-07:2014/11/talk-about-codegame/</id><summary type="html">&lt;p&gt;这篇日志将以偏技术的角度介绍我最近在做的业余项目 Code Game，其中我会解释 Code Game 对某些技术是如何进行取舍的，包括为什么不使用 CoffeeScript 以及选择 Myth 代替 Less/Sass 的原因。&lt;/p&gt;
 
 
 &lt;h2&gt;Code Game 是什么&lt;/h2&gt;
@@ -624,42 +681,4 @@
 &lt;p&gt;当你通过依赖注入模式将依赖引入路由后，你会发现在单元测试时可以非常方便地将 mock 对象传入路由，而这正是依赖注入模式的另一个好处。&lt;/p&gt;
 &lt;h2&gt;结论&lt;/h2&gt;
 &lt;p&gt;我在最近的几个 Express 项目中使用了 express-di 模块，并惊喜地发现这个模块使项目代码的可读性和可维护性大大增加。而且因为 express-di 兼容传统的路由定义方法，你可以非常方便地在现有的项目中引入 express-di，从而使新定义的路由能享受依赖注入带来的便利，同时又无需对老的代码做任何修整。&lt;/p&gt;
-&lt;p&gt;项目地址在：&lt;a href="https://github.com/luin/express-di"&gt;https://github.com/luin/express-di&lt;/a&gt;。欢迎 star 或提 issue！&lt;/p&gt;</summary><category term="dependency"></category><category term="injection"></category><category term="express"></category><category term="express-di"></category><category term="middleware"></category><category term="node.js"></category></entry><entry><title>纯 CSS 实现高度与宽度成比例的效果</title><link href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/" rel="alternate"></link><updated>2013-12-09T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2013-12-09:2013/12/keep-height-relevant-to-width-using-css/</id><summary type="html">&lt;div class="clearfix"&gt;
-  &lt;div class="left"&gt;
-    最近在做一个产品列表页面，布局如右图所示。页面中有若干个 item，其中每个 item 都向左浮动，并包含在自适应浏览器窗口宽度的父元素中。
-  &lt;/div&gt;
-  &lt;aside class="right pull-right"&gt;
-    &lt;img src="http://zihua.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" /&gt;
-  &lt;/aside&gt;
-&lt;/div&gt;
-
-&lt;p&gt;item 元素的 CSS 定义如下：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;21&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;这时遇到的一个需求：&lt;strong&gt;在保持 item 元素宽高比恒定（如高是宽的 1.618 倍）的情况下，使得 item 元素可以和父元素同比缩放。&lt;/strong&gt; 我们知道，如果当 item 元素是图片，同时需要保持的宽高比恰好为图片本身的宽高比时，可以设置 item 的 &lt;code&gt;height&lt;/code&gt; 为 &lt;code&gt;auto&lt;/code&gt; 即可轻松实现这个需求。然而当 item 元素不是图片或者要保持的宽高比和图片本身的宽高比不同时，这个需求显得很难直接用 CSS 实现。&lt;/p&gt;
-&lt;p&gt;为此我放弃 CSS，直接用 JavaScript 绑定 &lt;code&gt;window&lt;/code&gt; 的 &lt;code&gt;onresize&lt;/code&gt; 事件来动态获取每个 item 的宽度，从而计算并设置其高度。&lt;/p&gt;
-&lt;p&gt;我一直在使用这个解决方案，直到今天调整样式时，突然想到这个需求竟然是可以只使用 CSS 解决的。&lt;/p&gt;
-
-
-&lt;p&gt;首先需要知道，一个元素的 &lt;code&gt;padding&lt;/code&gt;，如果值是一个百分比，那这个百分比是相对于其父元素的宽度而言的，即使对于 &lt;code&gt;padding-bottom&lt;/code&gt; 和 &lt;code&gt;padding-top&lt;/code&gt; 也是如此。&lt;/p&gt;
-&lt;p&gt;另外，在计算 Overflow 时，是将元素的内容区域（即 &lt;code&gt;width&lt;/code&gt; / &lt;code&gt;height&lt;/code&gt; 对应的区域）和 Padding 区域一起计算的。换句话说，即使将元素的 &lt;code&gt;overflow&lt;/code&gt; 设置为 &lt;code&gt;hidden&lt;/code&gt;，“溢出”到 Padding 区域的内容也会照常显示。&lt;/p&gt;
-&lt;p&gt;综上两条所述，我们可以使用 &lt;code&gt;padding-bottom&lt;/code&gt; 来代替 &lt;code&gt;height&lt;/code&gt; 来实现高度与宽度成比例的效果。因为 item 元素的宽度是其父元素宽度的 21%，所以我们将 &lt;code&gt;padding-bottom&lt;/code&gt; 设置为它的 1.618 倍，即 33.98%。同时将其 &lt;code&gt;height&lt;/code&gt; 设置为 &lt;code&gt;0&lt;/code&gt; 以使元素的“高度”等于 &lt;code&gt;padding-bottom&lt;/code&gt; 的值，从而实现需要的效果。&lt;/p&gt;
-&lt;p&gt;最后 item 元素的 CSS 样式为：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;5&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;padding-bottom&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;33&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="m"&gt;98&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;21&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;height&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;页面效果见 &lt;a href="http://jsfiddle.net/luin/25BbH/7/"&gt;http://jsfiddle.net/luin/25BbH/7/&lt;/a&gt;，拖动窗口调整页面宽度，item 元素始终保持恒定的宽高比。&lt;/p&gt;
-&lt;p&gt;同样，这个解决方案也自然支持前文说的“当 item 元素是图片但要保持的宽高比和图片本身的宽高比不同”的情况，具体见我在 Ruby China 上的一篇回复：&lt;a href="http://ruby-china.org/topics/17011#reply15"&gt;图片 CSS：怎样才能“响应式+固定宽高比例”？&lt;/a&gt;&lt;/p&gt;</summary><category term="css"></category><category term="ratio"></category></entry></feed>
+&lt;p&gt;项目地址在：&lt;a href="https://github.com/luin/express-di"&gt;https://github.com/luin/express-di&lt;/a&gt;。欢迎 star 或提 issue！&lt;/p&gt;</summary><category term="dependency"></category><category term="injection"></category><category term="express"></category><category term="express-di"></category><category term="middleware"></category><category term="node.js"></category></entry></feed>
