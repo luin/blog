@@ -56,10 +56,13 @@
 <p data-height="268" data-theme-id="11447" data-slug-hash="EaWBEV" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/EaWBEV/'>EaWBEV</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
 
 <p>等等，根本不像啊！</p>
-<p>下面关键的地方来了，怎么实现画眼睛和鼻子。</p>
+<p>下面关键的地方来了，怎么实现画眼睛和鼻子。因为 CSS <a href="http://caniuse.com/#search=multiple%20background">支持一个元素多个背景图</a>，而每个背景图不仅可以是由 <code>url</code> 指定的函数，还可以是一个 <code>gradient</code> 类型来表示渐变。由于眼睛和鼻子都是近似圆形的，所以可以用射线渐变 <code>radial-gradient</code> 来实现。技巧在于对透明色的使用，渐变看起来并不是充满整个元素的。请结合下面的代码来理解：</p>
 <p data-height="268" data-theme-id="11447" data-slug-hash="gbmNev" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/gbmNev/'>gbmNev</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
 
 <h3>2. 使用 <code>:before</code> 和 <code>:after</code> 伪元素实现耳朵</h3>
+<p>耳朵和主体一样，也可以使用 <code>radial-gradient</code> 来绘制，这里不在赘述。效果如下：</p>
+<p data-height="268" data-theme-id="11447" data-slug-hash="azJgGd" data-default-tab="result" data-user="luin" class='codepen'>See the Pen <a href='http://codepen.io/luin/pen/azJgGd/'>azJgGd</a> by Zihua Li (<a href='http://codepen.io/luin'>@luin</a>) on <a href='http://codepen.io'>CodePen</a>.</p>
+
 <script async src="//assets.codepen.io/assets/embed/ei.js"></script>
   </div>
   <div class="hr"></div>
