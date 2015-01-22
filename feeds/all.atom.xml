@@ -43,7 +43,7 @@
 
 &lt;p&gt;要注意的是需要使用 &lt;code&gt;appearance: none&lt;/code&gt; 来禁用 radio 元素的默认控件样式。&lt;/p&gt;
 &lt;h2&gt;技巧：记分板&lt;/h2&gt;
-&lt;p&gt;记分板的实现并不复杂，但是思路比较绕。在 CSS 中没有办法存放数据，使得记分板功能看起来很难实现。实际上我们可以这样想：要实现点击地鼠记分板加一，就要让地鼠和记分板联动起来。一般来说最容易想到的联动方式就是我们之前用过的 label + checkbox 和 &lt;code&gt;+&lt;/code&gt;/&lt;code&gt;~&lt;/code&gt; 选择器，实际上还有另一种联动方式，就是 radio。要知道拥有同一 name 的 一组 radio 同时只会有一个元素被选中，所以接下来就很容易想到可以让地鼠是一个 radio，同时记分板是一个 radio，两个元素拥有相同的 name 即可实现点击地鼠后记分板发生变化。&lt;/p&gt;
+&lt;p&gt;记分板的实现并不复杂，但是思路比较绕。在 CSS 中没有办法存放数据（可以使用 &lt;a href="http://caniuse.com/#search=counter"&gt;CSS Counters&lt;/a&gt;，但无法实现得分动画效果），使得记分板功能看起来很难实现。实际上我们可以这样想：要实现点击地鼠记分板加一，就要让地鼠和记分板联动起来。一般来说最容易想到的联动方式就是我们之前用过的 label + checkbox 和 &lt;code&gt;+&lt;/code&gt;/&lt;code&gt;~&lt;/code&gt; 选择器，实际上还有另一种联动方式，就是 radio。要知道拥有同一 name 的 一组 radio 同时只会有一个元素被选中，所以接下来就很容易想到可以让地鼠是一个 radio，同时记分板是一个 radio，两个元素拥有相同的 name 即可实现点击地鼠后记分板发生变化。&lt;/p&gt;
 &lt;p&gt;下面的问题就是怎么把记分板的 radio 的选中状态转换成具体数字了。思路是这样的：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;每个 radio 都占据一定高度&lt;/li&gt;
