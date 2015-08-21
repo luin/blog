@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Zihua Li</title>
       <link href="http://zihua.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
-    <link rel='stylesheet'  href='http://zihua.li/theme/han/han.css' type='text/css' media='all' />
+    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
+    <link rel='stylesheet'  href='http://zihua.li/theme/css/normalize.css' type='text/css' media='all' />
     <link rel='stylesheet'  href='http://zihua.li/theme/css/style.css' type='text/css' media='all' />
     <link rel='stylesheet'  href='http://zihua.li/theme/css/highlight.css' type='text/css' media='all' />
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -31,70 +32,10 @@
   </section>
   <section class="l-content">
     <div class="inner">
-  <article class="index-article han-init-context">
-    <header>
-      <a href="http://zihua.li/2012/03/utf-8-with-bom-headers-already-sent/">
-        <h2 class="article-title">
-          编码问题导致的 Headers already sent 错误
-        </h2>
-      </a>
-      <p class="article-meta" title="2012-03-05T00:00:00">05 Mar 2012</p>
-    </header>
-    <div class="typo article-body">
-      <p>前些日子同学找我来说我帮他做的网站的注册功能失效了。我看了一下发现是由于301跳转失败导致的。
-查看日志错误内容为：</p>
-<blockquote>
-<p>Warning: Cannot modify header information - headers already sent by (output started at...</p>
-</blockquote>
-<p>但看了一下源代码却没有发现问题，在本机运行也一切正常。<code>&lt;?php</code> 前面和 <code>?&gt;</code> 后面都没有字符。</p>
-<p>百思不得其解，使用W3C的HTML校验却发现了:</p>
-<blockquote>
-<p>Byte-Order Mark found in UTF-8 File.</p>
-</blockquote>
-<p>才发现是由于他们在部署网站改配置时用记事本编辑保存成了UTF-8 with BOM导致的问题。解决方法也很简单，改成without BOM就好了。</p>
-<p>由此可见编辑器对Web开发有多重要（我一直在用Coda，很顺手）。</p>
-<p>顺便提示一下PHP开发好习惯，就是只写 <code>&lt;?php</code> 不写 <code>?&gt;</code>，原因就是谁也不能保证啥时手贱在 <code>?&gt;</code> 后面打些什么东西导致Headers already sent错误（当然如果你把PHP当模板语言用就不能不用 <code>?&gt;</code> 了）。</p>
-    </div>
-    <div class="read-more clearfix">
-      <a class="button radius secondary small right" href="http://zihua.li/2012/03/utf-8-with-bom-headers-already-sent/">阅读全文</a>
-      <a class="button radius secondary small right" href="http://zihua.li/2012/03/utf-8-with-bom-headers-already-sent/#disqus_thread">评论</a>
-    </div>
-    <div class="hr"></div>
-  </article>
-  <article class="index-article han-init-context">
-    <header>
-      <a href="http://zihua.li/2011/07/implement-vertical-align/">
-        <h2 class="article-title">
-          实现 vertical-align 的几种办法
-        </h2>
-      </a>
-      <p class="article-meta" title="2011-07-07T00:00:00">07 Jul 2011</p>
-    </header>
-    <div class="typo article-body">
-      <p>一个简单的例子：</p>
-<div class="highlight"><pre><span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">&quot;vertical-align: middle; height: 100px;&quot;</span><span class="nt">&gt;</span>
-  <span class="nt">&lt;span&gt;</span>hello world!<span class="nt">&lt;/span&gt;</span>
-<span class="nt">&lt;/div&gt;</span>
-</pre></div>
-
-
-<p>可以看到“hello world!”并没有垂直居中。网上有很多人从很多不同的方面进行分析，其实简单概括就一句话：
-<code>vertical-align</code>的作用范围仅限<code>display: table-cell</code>或<code>display: inline-block</code>元素。</p>
-<p>那么如何实现垂直居中呢？</p>
-
-    </div>
-    <div class="read-more clearfix">
-      <a class="button radius secondary small right" href="http://zihua.li/2011/07/implement-vertical-align/">阅读全文</a>
-      <a class="button radius secondary small right" href="http://zihua.li/2011/07/implement-vertical-align/#disqus_thread">评论</a>
-    </div>
-    <div class="hr"></div>
-  </article>
-  <article class="index-article han-init-context">
+  <article class="index-article">
     <header>
       <a href="http://zihua.li/2011/06/singleton-in-php/">
-        <h2 class="article-title">
-          PHP 实现单例模式
-        </h2>
+        <h2 class="article-title">PHP 实现单例模式</h2>
       </a>
       <p class="article-meta" title="2011-06-17T00:00:00">17 Jun 2011</p>
     </header>
@@ -124,9 +65,6 @@ s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
 </script>
     </div>
   </section>
-  <script src="http://zihua.li/theme/han/han.js"></script>
-  <script>
-  </script>
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
