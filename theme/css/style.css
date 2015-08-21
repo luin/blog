@@ -29,6 +29,8 @@
 
 .WB_follow_ex .WB_ico_logo { border: none; }
 
+.btn { height: auto!important; }
+
 body {
   color: #333;
   text-rendering: optimizeLegibility;
