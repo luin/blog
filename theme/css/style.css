@@ -27,6 +27,8 @@
     clear: both;
 }
 
+.WB_follow_ex .WB_ico_logo { border: none; }
+
 body {
   color: #333;
   text-rendering: optimizeLegibility;
