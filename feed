@@ -1,5 +1,314 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zihua Li</title><link>http://zihua.li/</link><description>美工、全栈码农（Web, iOS）&lt;br&gt;90 后，法号 Luin</description><atom:link href="http://zihua.li/feed" rel="self"></atom:link><lastBuildDate>Sun, 15 Jun 2014 00:00:00 +0200</lastBuildDate><item><title>只需 4 步，手把手教你如何实现滤镜功能</title><link>http://zihua.li/2014/06/implement-instagram-like-filters/</link><description>&lt;p&gt;滤镜对于照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手之作显得别有风味，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都有滤镜功能，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统地讲解滤镜是如何实现的。&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zihua Li</title><link>http://zihua.li/</link><description>美工、全栈码农（Web, iOS）&lt;br&gt;90 后，法号 Luin</description><atom:link href="http://zihua.li/feed" rel="self"></atom:link><lastBuildDate>Sat, 17 Jan 2015 00:00:00 +0100</lastBuildDate><item><title>纯 CSS 实现打地鼠游戏</title><link>http://zihua.li/2015/01/implement-pure-css-game/</link><description>&lt;p&gt;只借助 CSS 而不使用 JavaScript 来实现一个网页游戏并不需要什么新潮的技术，简单的几个选择器组合就能创造出意想不到的效果，再配合上 CSS3 的“绘图”能力，甚至可以做出不逊于 JavaScript 实现的网页游戏。&lt;/p&gt;
+&lt;p&gt;为了参加公司内的 CSS3 比赛，我连夜做了一个 CSS3 打地鼠游戏（其实准备时间挺长的，但是报了个名就忘记这回事了，交稿前两天被人提醒才想起来），如下：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/game.png" alt="游戏截图" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;进入游戏后，首先会有个开始按钮，点击开始后，游戏开始倒计时，同时不断地有地鼠从洞里钻出来，用鼠标点击地鼠即可得分（总分显示在顶部的记分板上）。15秒后游戏结束，同时显示结束页面。&lt;/p&gt;
+&lt;p&gt;项目代码放在 &lt;a href="https://github.com/luin/Hits-the-mole"&gt;GitHub&lt;/a&gt; 上，也可以访问&lt;a href="http://luin.github.io/Hits-the-mole/"&gt;在线 Demo&lt;/a&gt;试玩。&lt;/p&gt;
+&lt;p&gt;这篇日志将介绍实现这个游戏的过程中我认为比较有意思的几个地方。&lt;/p&gt;
+
+
+&lt;h2&gt;使用 CSS 绘制地鼠&lt;/h2&gt;
+&lt;p&gt;由于是个纯 CSS 游戏，为了不使用图片，所有的游戏角色都使用了 CSS 进行绘制。在这个游戏中主要有两个元素：地洞和地鼠。地洞（你别骗我啦，那个明明就是马里奥的小绿桶嘛）画起来很简单，用一个元素和其 &lt;code&gt;:before&lt;/code&gt; 伪元素结合，设置好位置和尺寸，加些渐变色就可以了。稍微复杂点的是地鼠的绘制，为了实现方便，我希望能&lt;strong&gt;只使用一个元素&lt;/strong&gt;来绘制（稍候会介绍原因）。绘制步骤如下：&lt;/p&gt;
+&lt;h3&gt;1. 首先找一个参照物&lt;/h3&gt;
+&lt;p&gt;地鼠是什么样子的呢？虽然玩了很多次打地鼠游戏，其实我对地鼠的样子一点印象都没有。不过这怎么能难倒前 Go 语言爱好者的我呢！我淡定地打开了 Go 的官网，端详了一下那个可爱的吉祥物：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/gopher.png" alt="Go语言吉祥物" class="center" /&gt;&lt;/p&gt;
+&lt;p&gt;我们先来把地鼠分成 3 个部分，主体、左耳朵和右耳朵。其中主体可以使用元素本身表现，设置宽高和 &lt;code&gt;border-radius&lt;/code&gt; 来实现圆角：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="EaWBEV" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/EaWBEV/'&gt;EaWBEV&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;等等，根本不像啊！&lt;/p&gt;
+&lt;p&gt;下面关键的地方来了，怎么实现画眼睛和鼻子。因为 CSS &lt;a href="http://caniuse.com/#search=multiple%20background"&gt;支持一个元素多个背景图&lt;/a&gt;，而每个背景图不仅可以是由 &lt;code&gt;url&lt;/code&gt; 指定的函数，还可以是一个 &lt;code&gt;gradient&lt;/code&gt; 类型来表示渐变。由于眼睛和鼻子都是近似圆形的，所以可以用射线渐变 &lt;code&gt;radial-gradient&lt;/code&gt; 来实现。技巧在于对透明色的使用，使得渐变看起来并不是充满整个元素的。请结合下面的代码来理解：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="gbmNev" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/gbmNev/'&gt;gbmNev&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3&gt;2. 使用 &lt;code&gt;:before&lt;/code&gt; 和 &lt;code&gt;:after&lt;/code&gt; 伪元素实现耳朵&lt;/h3&gt;
+&lt;p&gt;耳朵和主体一样，也可以使用 &lt;code&gt;radial-gradient&lt;/code&gt; 来绘制，这里不在赘述。效果如下：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="azJgGd" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/azJgGd/'&gt;azJgGd&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;等等！还是不对啊，下半身还没画呢，脚呢！&lt;/p&gt;
+&lt;p&gt;别担心，在游戏中地鼠是不会露出下半身的。&lt;/p&gt;
+&lt;h2&gt;“开始”按钮的实现&lt;/h2&gt;
+&lt;p&gt;进入游戏后，会出现开始界面，只有用户点击了“开始”按钮后游戏才会开始。如果可以使用 JavaScript，那么只需要绑定按钮的 &lt;code&gt;click&lt;/code&gt; 事件来实现相应逻辑，那么使用 CSS 要怎么实现呢？&lt;/p&gt;
+&lt;p&gt;其实方法很简单，只需要想一下 CSS/HTML 中怎么才能够保存状态即可。没错，就是 &lt;code&gt;input[type="checkbox"]&lt;/code&gt;。只要用户点击了按钮，就把 checkbox 选中，接下来就可以用 CSS 的 &lt;code&gt;+&lt;/code&gt; 和 &lt;code&gt;~&lt;/code&gt; 选择符来设置游戏中其他元素的属性了。比如如果想要 checkbox 选中后令开始界面（&lt;code&gt;.start&lt;/code&gt;）隐藏，只需要：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;input&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="k"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;checkbox&amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt;&lt;span class="nd"&gt;:checked&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nc"&gt;.start&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;display&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;none&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;借此我们可以把“点击按钮开始游戏”简化为“点击按钮选中 checkbox”，很容易想到可以使用 &lt;code&gt;label&lt;/code&gt; 来实现按钮。在 HTML 中，点击 &lt;code&gt;label&lt;/code&gt; 标签会自动选中其对应的表单元素，所以我们只需要把 checkbox 隐藏，并把 &lt;code&gt;label&lt;/code&gt; 设置成按钮的样子即可。如下代码所示：&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="ByWgGO" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/ByWgGO/'&gt;ByWgGO&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;打地鼠的实现&lt;/h2&gt;
+&lt;p&gt;实现打地鼠和实现“开始”按钮的思路是一样的，也是用户点击地鼠后设置其的 &lt;code&gt;checked&lt;/code&gt; 属性，不同的是这里我们使用另一种方法来绘制地鼠：地鼠本身不是 &lt;code&gt;label&lt;/code&gt;，而是 &lt;code&gt;input[type="radio"]&lt;/code&gt;。至于为什么用 radio 而不是 checkbox 稍候会解释，在这一节中 radio 和 checkbox 都是可以的。&lt;/p&gt;
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="EaWBMy" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/EaWBMy/'&gt;EaWBMy&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;要注意的是需要使用 &lt;code&gt;appearance: none&lt;/code&gt; 来禁用 radio 元素的默认控件样式。&lt;/p&gt;
+&lt;h2&gt;技巧：记分板&lt;/h2&gt;
+&lt;p&gt;记分板的实现并不复杂，但是思路比较绕。在 CSS 中没有办法存放数据（可以使用 &lt;a href="http://caniuse.com/#search=counter"&gt;CSS Counters&lt;/a&gt;，但无法实现得分动画效果），使得记分板功能看起来很难实现。实际上我们可以这样想：要实现点击地鼠记分板加一，就要让地鼠和记分板联动起来。一般来说最容易想到的联动方式就是我们之前用过的 label + checkbox 和 &lt;code&gt;+&lt;/code&gt;/&lt;code&gt;~&lt;/code&gt; 选择器，实际上还有另一种联动方式，就是 radio。要知道拥有同一 name 的 一组 radio 同时只会有一个元素被选中，所以接下来就很容易想到可以让地鼠是一个 radio，同时记分板是一个 radio，两个元素拥有相同的 name 即可实现点击地鼠后记分板发生变化。&lt;/p&gt;
+&lt;p&gt;下面的问题就是怎么把记分板的 radio 的选中状态转换成具体数字了。思路是这样的：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;每个 radio 都占据一定高度&lt;/li&gt;
+&lt;li&gt;每个分数都以一个元素的形式来展现，高度和 radio 相同&lt;/li&gt;
+&lt;li&gt;使用一个 viewport 来显示当前分数，当 radio 被取消选中后，将其高度设置为 0，这样下面的分数就会向上升，使得当前对应的分数在 viewport 中显示出来。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;整个结构如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2015-01-17_implement-pure-css-game/score.png" alt="score结构图" class="center" /&gt;&lt;/p&gt;
+&lt;p&gt;示例代码如下（点击地鼠分数会变化）：
+&lt;p data-height="268" data-theme-id="11447" data-slug-hash="wBJLLR" data-default-tab="result" data-user="luin" class='codepen'&gt;See the Pen &lt;a href='http://codepen.io/luin/pen/wBJLLR/'&gt;wBJLLR&lt;/a&gt; by Zihua Li (&lt;a href='http://codepen.io/luin'&gt;@luin&lt;/a&gt;) on &lt;a href='http://codepen.io'&gt;CodePen&lt;/a&gt;.&lt;/p&gt;
+&lt;script async src="//assets.codepen.io/assets/embed/ei.js"&gt;&lt;/script&gt;&lt;/p&gt;
+&lt;h2&gt;总结&lt;/h2&gt;
+&lt;p&gt;至此游戏的难点就介绍得差不多了，剩下的倒计时、地鼠钻入钻出都只不过是对 CSS Animation 的运用。使用纯 CSS 实现游戏的过程非常有意思，也很利于提高自己对 CSS 的理解，推荐大家都尝试一下。&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Sat, 17 Jan 2015 00:00:00 +0100</pubDate><guid>tag:zihua.li,2015-01-17:2015/01/implement-pure-css-game/</guid><category>css game</category></item><item><title>Code Game 对技术的选取</title><link>http://zihua.li/2014/11/talk-about-codegame/</link><description>&lt;p&gt;这篇日志将以偏技术的角度介绍我最近在做的业余项目 Code Game，其中我会解释 Code Game 对某些技术是如何进行取舍的，包括为什么不使用 CoffeeScript 以及选择 Myth 代替 Less/Sass 的原因。&lt;/p&gt;
+
+
+&lt;h2&gt;Code Game 是什么&lt;/h2&gt;
+&lt;p&gt;Code Game 是我花费一个月的业余时间完成的 AI 脚本对战平台，网址是 &lt;a href="http://codegame.org"&gt;http://codegame.org&lt;/a&gt;，玩家可以通过编写 JavaScript 脚本来控制游戏中的角色并与平台上的其他玩家进行竞赛。&lt;/p&gt;
+&lt;p&gt;Code Game 的灵感来源于大学时我在北航 MSTC(Microsoft Technology Club) 参与的 BigTank 项目。BigTank 是一个使用 C# 开发的 3D 坦克对战游戏，与传统坦克对战游戏由玩家直接操控坦克不同，BigTank 的玩家需要通过编写 Lua 脚本来分析游戏局势并控制自己的坦克行动，本质上是一个关于 AI 算法的 Online Judge 平台。基于 BigTank，MSTC 举办了编程挑战赛，在北航获得了很好的反响。可惜限于开发周期和当时的技术水平，BigTank 本身存在很多不足，包括游戏规则欠考虑、脚本解析器存在不少 Bug 等，种种这些都或多或少地影响了比赛的精彩程度。一个月前，我终于决定重新开发一套类似 BigTank 的平台来弥补遗憾。&lt;/p&gt;
+&lt;h2&gt;功能&lt;/h2&gt;
+&lt;p&gt;Code Game 的页面构成很简单，挨个介绍也并不会花费很多篇幅。用户使用 GitHub 账号登录网站会进入个人主页页面，在这个页面中玩家可以看到自己的资料和 AI 的排名：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-11-12_codegame/profile.png" alt="个人主页" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;点击“编写我的 AI”按钮就来到了脚本编写页面，该页面由支持代码高亮和自动补全的在线编辑器、可以实时看到脚本的运行效果的预览画面以及用来查看调试信息的控制台组成：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-11-12_codegame/editor.png" alt="编辑器" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;Code Game 每天会根据 AI 的胜率更新一次排行榜，通过排行榜可以看到每个玩家的排名，并且点击昵称可以进入其个人主页：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-11-12_codegame/rank.png" alt="排行榜" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;玩家可以在他人的个人主页向对方发起挑战，发起挑战后玩家会进入挑战页面，并看到两个脚本的对战情况，游戏结束后页面会告知玩家胜者及胜利原因：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-11-12_codegame/game.png" alt="挑战页面" class="fill" /&gt;&lt;/p&gt;
+&lt;h2&gt;技术架构&lt;/h2&gt;
+&lt;p&gt;Code Game 的技术架构以及对技术的取舍理念是优先考虑开发效率，并在保证运行效率可接受的前提下尽量降低技术栈复杂度。&lt;/p&gt;
+&lt;h3&gt;1. 开发语言&lt;/h3&gt;
+&lt;p&gt;Code Game 使用 &lt;a href="http://nodejs.org/"&gt;Node.js&lt;/a&gt; 开发，除了我对其较熟悉以外，选择 Node.js 的另一个重要原因就是使用 Node.js 实现 JavaScript 脚本沙盒相较其他语言要容易得多。&lt;/p&gt;
+&lt;h3&gt;2. 前端技术栈&lt;/h3&gt;
+&lt;p&gt;前端使用了 &lt;a href="http://gulpjs.com/"&gt;Gulp&lt;/a&gt; + &lt;a href="http://www.myth.io/"&gt;Myth&lt;/a&gt; + &lt;a href="http://browserify.org/"&gt;Browserify&lt;/a&gt; + &lt;a href="http://bohemiancoding.com/sketch/tool/"&gt;SketchTool&lt;/a&gt;，下面分别详细介绍。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Gulp&lt;/p&gt;
+&lt;p&gt;平常的开发中，对于小型项目我一般会使用 Make 或 NPM 的 scripts 来进行构建任务。而 Code Game 由于需要构建的内容较多，所以选择了 Gulp。相较于更为流行的 Grunt，Gulp 的 Stream 理念使得完成同样的构建任务时编写的代码更少。在 Code Game 中，Gulp 中的任务分为两类：一类任务用来实现检测源文件的改动并自动编译，比如将基于 Myth 编写的 CSS 实时编译为可以被浏览器解析的 CSS；另一类任务则用来执行生产环境的构建，比如合并 CSS、压缩 JavaScript 等。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Myth&lt;/p&gt;
+&lt;p&gt;Myth 在各种 CSS 预处理语言中绝对算不上流行，在 GitHub 上其共被 3000 余人 star，虽然不算少，但相比 Less 这样动辄一万多 star 的项目说是冷门也毫不过分。Myth 的优势和它的口号一样：“CSS the way it was imagined.” Myth 可以让你提前使用 CSS 的高级特性而无需考虑浏览器兼容问题。举例来说，当用到 &lt;code&gt;transform&lt;/code&gt; 属性时通常还需要额外加上浏览器前缀 &lt;code&gt;-webkit&lt;/code&gt; 来兼容 Safari 和 旧版的 Chrome，如果要兼容 IE 9，则更是要加上 &lt;code&gt;-ms&lt;/code&gt;。而使用 Myth 则不用操心这个问题：只需要写一个 &lt;code&gt;transform&lt;/code&gt;，Myth 会在编译过程中自动加上需要的前缀。Myth 与 Less、Sass 这样的预处理语言最大的区别就在于写 Less 时你是在写 Less，写 Sass 时你是在写 Sass，而当你写 Myth 时，你就是在写 CSS。这一点十分重要，因为把标准和草案都算上，CSS 语言本身已经足够完备了，它支持变量：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nd"&gt;:root&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nb"&gt;purple&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;#847AD1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;large&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nt"&gt;a&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;color&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nb"&gt;purple&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nt"&gt;pre&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;padding&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;large&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;也支持数学计算：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;pre&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;calc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;large&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;甚至还支持颜色处理：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;a&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;color&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nb"&gt;purple&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nt"&gt;a&lt;/span&gt;&lt;span class="nd"&gt;:hover&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;color&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;color&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nb"&gt;purple&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;tint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;20%&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;可以说需要用到的特性 CSS 本身就已经具备了，那么何必再使用另一种语言呢？更何况 Less 和 Sass 这样“强大”的预处理语言在带来开发上方便的同时也引入了很多问题，而大部分问题都可以归结到一点，即“你根本就不是在写 CSS”。看下面的 Less 代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.container&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+  &lt;span class="na"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;960&lt;/span&gt;&lt;span class="kt"&gt;px&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt;
+  &lt;span class="na"&gt;overflow&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="no"&gt;hidden&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt;
+  &lt;span class="nc"&gt;.main&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+    &lt;span class="na"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;61&lt;/span&gt;&lt;span class="mf"&gt;.8&lt;/span&gt;&lt;span class="kt"&gt;%&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt;
+    &lt;span class="na"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="no"&gt;left&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt;
+    &lt;span class="nc"&gt;.post&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+      &lt;span class="na"&gt;background&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mh"&gt;#f00&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt;
+      &lt;span class="nc"&gt;.title&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+        &lt;span class="na"&gt;position&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="no"&gt;absolute&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt;
+        &lt;span class="na"&gt;background&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="sx"&gt;url(&amp;quot;images/header-image.jpg&amp;quot;)&lt;/span&gt;&lt;span class="err"&gt;;&lt;/span&gt;
+      &lt;span class="err"&gt;}&lt;/span&gt;
+    &lt;span class="err"&gt;}&lt;/span&gt;
+  &lt;span class="err"&gt;}&lt;/span&gt;
+&lt;span class="err"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Less 支持的样式嵌套很容易诱使开发者写出上面这样层层嵌套的代码，编译成 CSS 后，最长的 Selector 是&lt;code&gt;.container .main .post .title&lt;/code&gt;，以纯 CSS 的眼光来看，应该减少嵌套层数来提高性能（比如改成&lt;code&gt;.post .title&lt;/code&gt;），亦或是优化类名来实现样式模块化（比如把&lt;code&gt;.post .title&lt;/code&gt;改成&lt;code&gt;.post-title&lt;/code&gt;）。然后一旦用 Less 写出来，就很难以 CSS 的角度来审视本就要编译成 CSS 的代码。很多使用 Less 或 Sass 的公司的 Style Guide 都会明确禁止过度嵌套，然而与其以规范来要求开发者，不如就单纯地使用 CSS，并享受 Myth 提供的便利来的方便自然。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Browserify&lt;/p&gt;
+&lt;p&gt;Browserify 可以非常方便地实现前端 JavaScript 的模块化。使用 Browserify，你可以在前端的 JavaScript 中使用和 Node.js 一样的模块加载方式，即 &lt;code&gt;require('modules')&lt;/code&gt;，使得前后端 JavaScript 模块级复用成为了可能。Code Game 游戏沙盒部分的所有模块曾经是前后端共用的，当用户在编辑器中预览时沙盒运行在前端，当与其他玩家竞赛时，沙盒则运行在后端。同时 Browserify 作为一个构建工具，并不影响前端脚本的加载逻辑，换言之在使用 Browserify 的同时依然可以使用 RequireJS、SeaJS 这样的 Module Loader 以及 Combo Handler 等技术。&lt;/p&gt;
+&lt;p&gt;除了 Browserify 以外，Code Game 没有使用其他的 JavaScript 预处理工具。也没有使用 &lt;a href="http://coffeescript.org/"&gt;CoffeeScript&lt;/a&gt;、&lt;a href="http://livescript.net/"&gt;LiveScript&lt;/a&gt; 这样的语言替代 JavaScript，原因在于 JavaScript 在前端工程方面本身已经足够优秀，而 CoffeeScript 和 LiveScript 这样的语言在提供更“现代”的语法同时，也会大大降低代码的可控性。同 Less 和 CSS 的关系一样，CoffeeScript 与 JavaScript 在语言层面的差异会导致二者间代码逻辑的不调和。一个最明显的例子是 CoffeeScript 提供的 &lt;code&gt;class&lt;/code&gt; 关键词使得其可以像&lt;ruby&gt;&lt;em&gt;基于类&lt;/em&gt;&lt;rt&gt;&lt;a href="http://en.wikipedia.org/wiki/Class-based_programming"&gt;Class-based&lt;/a&gt;&lt;/rt&gt;&lt;/ruby&gt;的语言一样实现和管理对象，然而 JavaScript 本身却是是&lt;ruby&gt;&lt;em&gt;基于原型&lt;/em&gt;&lt;rt&gt;&lt;a href="http://en.wikipedia.org/wiki/Prototype-based_programming"&gt;Prototype-based&lt;/a&gt;&lt;/rt&gt;&lt;/ruby&gt;的语言，当一个以基于类的思想编写的代码逻辑编译成基于原型的语言时，其间产生的落差已经不是语言之间的优劣可以衡量的了。更何况 CoffeeScript 语言本身就存在太多的问题，比如 CoffeeScript 的函数调用无需写 &lt;code&gt;()&lt;/code&gt;，使得易读性大为下降（比较 &lt;code&gt;console.log x + 1&lt;/code&gt; 和 &lt;code&gt;console.log x +1&lt;/code&gt;），同时也引入了很多细节问题（比如无法实现 JavaScript 里的具名匿名函数 &lt;code&gt;invoke(function func() {})&lt;/code&gt;），另外 CoffeeScript 生成的 JavaScript 虽然有很多最佳实践，但总体并不易读，也很容易生成冗余代码，比如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;greet = &lt;/span&gt;&lt;span class="nf"&gt;(name) -&amp;gt;&lt;/span&gt;
+  &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nx"&gt;time&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;#39;morning&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;afternoon&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;nignt&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="nx"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;log&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Good &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="nx"&gt;time&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s"&gt;, &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s"&gt;!&amp;quot;&lt;/span&gt;
+
+&lt;span class="nx"&gt;greet&lt;/span&gt; &lt;span class="s"&gt;&amp;#39;Bob&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;会生成：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;greet&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="nx"&gt;greet&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;_i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;_len&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;_ref&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;_results&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="nx"&gt;_ref&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;morning&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;afternoon&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;nignt&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+  &lt;span class="nx"&gt;_results&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[];&lt;/span&gt;
+  &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;_i&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;_len&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;_ref&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;length&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;_i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="nx"&gt;_len&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;_i&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;time&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;_ref&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;_i&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="nx"&gt;_results&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;push&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Good &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nx"&gt;time&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;, &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nx"&gt;name&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;!&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;_results&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;greet&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Bob&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;虽然语句表达式化是好的，免去写 &lt;code&gt;return&lt;/code&gt; 也是好的，但是 CoffeeScript 终究还是一门要编译成 JavaScript 的语言，本来简单的代码变得如此复杂，即使表面再光鲜又有什么意义呢。CoffeeScript 对于初级 JavaScript 程序员来说，可以帮助他们避免很多 JavaScript 的陷阱，也能更顺畅地写出最佳实践的代码，但从整体而言，一个富有经验的 JavaScript 开发者写出的 JavaScript 更可能要比 CoffeeScript 的可控性来的高。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;SketchTool&lt;/p&gt;
+&lt;p&gt;之前做设计一直使用 Photoshop，直到见识到 Sketch 的威力后便很少碰 Photoshop 了。网上有很多文章讨论两者的设计优劣，所以不再赘述。这里主要介绍对开发者来说 Sketch 的优势。&lt;/p&gt;
+&lt;p&gt;相较 Photoshop，Sketch 最大的优势就是可以实现切图自动化，对于每个图层来都可以指定其导出格式以及文件名：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-11-12_codegame/sketch.png" alt="个人主页" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;更重要的是，Sketch 官方提供了命令行工具 SketchTool，可以通过命令将 Sketch 源文件按规则导出成图像文件，这意味着配合 Gulp 可以实现当修改 Sketch 的设计后自动切图。同时由于 Sketch 的文件普遍很小，所以甚至可以将其放入版本库中来维护其版本（自然这样也就无需将切好的图片放入版本库，因为这些图片可以由 Gulp 构建脚本生成）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;3. 沙盒的实现&lt;/h3&gt;
+&lt;p&gt;在 Code Game 中最关键的一环就是沙盒的实现了。因为涉及到对战，所以比赛时双方选手的代码自然不能运行在前端以免让玩家看到对手的代码。所以 Code Game 采用如下流程来实现脚本对战：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;玩家在编辑器调试代码并保存&lt;/li&gt;
+&lt;li&gt;服务端将玩家的代码保存到 MySQL 数据库中&lt;/li&gt;
+&lt;li&gt;进行比赛时，服务端调集双方的代码，并在后端解析运行&lt;/li&gt;
+&lt;li&gt;运行结束后，将游戏“录像”传回前端&lt;/li&gt;
+&lt;li&gt;前端解析“录像”，并以动画形式展现给用户&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;下面分三个部分着重介绍 3 和 5 两个过程。&lt;/p&gt;
+&lt;h4&gt;在后端解析玩家代码&lt;/h4&gt;
+&lt;p&gt;这一过程是沙盒的意义所在。因为后端使用 Node.js 开发，而玩家的脚本本身是 JavaScript，所以解析脚本的过程本身就很简单，一个 &lt;code&gt;eval()&lt;/code&gt; 即可。然而 &lt;code&gt;eval()&lt;/code&gt; 并不能限制用户的脚本权限，从而使得用户的脚本可以访问 Node.js 的各种库函数，也会污染 Node.js 的全局变量，同时也无法对脚本的运行时间进行任何限制。&lt;/p&gt;
+&lt;p&gt;这个问题的解决方式是使用 Node.js 提供的 &lt;code&gt;script.runInNewContext()&lt;/code&gt; 函数。&lt;code&gt;runInNewContext()&lt;/code&gt; 函数接受两个参数：一个是全局变量对象，这个对象包含脚本可以使用的全部全局变量，在脚本中声明的全局变量也会保存在这个对象中；另一个是运行选项，可以在这个参数中指定脚本的超时时间，要注意的是这个参数是从 Node.js 0.11.x 开始支持的。&lt;/p&gt;
+&lt;p&gt;Code Game 定义了 &lt;code&gt;Sandbox&lt;/code&gt; 类：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;Sandbox&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nb"&gt;Math&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;Math&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nb"&gt;parseInt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;parseInt&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+  &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;key&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;hasOwnProperty&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;执行玩家脚本时，会实例化一个 &lt;code&gt;Sandbox&lt;/code&gt; 实例作为全局变量对象，所以玩家能使用的全局变量只有 &lt;code&gt;Math&lt;/code&gt; 和 &lt;code&gt;parseInt&lt;/code&gt;。同时玩家的脚本都会声明一个 &lt;code&gt;onIdle()&lt;/code&gt; 函数（具体可以参见&lt;a href="http://codegame.org/doc"&gt;官网文档&lt;/a&gt;），这个函数可以在之前的 &lt;code&gt;Sandbox&lt;/code&gt; 实例 &lt;code&gt;sandbox&lt;/code&gt; 中获取到。接下来需要实现在坦克空闲时执行 &lt;code&gt;onIdle()&lt;/code&gt; 函数，如果直接调用 &lt;code&gt;sandbox.onIdle()&lt;/code&gt; 来执行的话就无法借助 &lt;code&gt;runInNewContext()&lt;/code&gt; 函数来实现超时检测了，所以 Code Game 使用如下的方法来解决这个问题：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;Player&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;prototype&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;onIdle&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;enemy&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;game&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;code&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;onIdle(__self, __enemy, __game);&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;script&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;script&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;vm&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;createScript&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;code&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;start&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;Date&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;now&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="k"&gt;try&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;__self&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;self&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;__enemy&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;enemy&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;__game&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;game&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;print&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="c1"&gt;// ...&lt;/span&gt;
+    &lt;span class="p"&gt;};&lt;/span&gt;
+    &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;script&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;runInNewContext&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;sandbox&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;timeout&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1500&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="k"&gt;catch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="c1"&gt;// ...&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;runTime&lt;/span&gt; &lt;span class="o"&gt;+=&lt;/span&gt; &lt;span class="nb"&gt;Date&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;now&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="nx"&gt;start&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;首先为 &lt;code&gt;__self&lt;/code&gt;、&lt;code&gt;__enemy&lt;/code&gt; 和 &lt;code&gt;__game&lt;/code&gt; 这三个不对用户公开的全局变量赋相应的值，之后使用同样的 &lt;code&gt;Sandbox&lt;/code&gt; 实例执行代码 &lt;code&gt;onIdle(__self, __enemy, __game)&lt;/code&gt;。因为调用了 &lt;code&gt;runInNewContext()&lt;/code&gt;，所以可以定义超时规则。&lt;/p&gt;
+&lt;h4&gt;录像文件的格式&lt;/h4&gt;
+&lt;p&gt;为了将代码的执行结果在前端展示给用户，最重要的是把结果以一定规则记录下来，形成游戏录像。录像文件中记录了每个对象（坦克、子弹等）在每个帧的位置和执行的动作，如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+  &lt;span class="p"&gt;[{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;objectId&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;6e723&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tank&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;direction&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;right&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;action&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;go&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;objectId&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;4ad3f&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tank&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;direction&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;left&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;action&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;turn&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;left&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;}],&lt;/span&gt;
+  &lt;span class="p"&gt;[{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;objectId&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;6e723&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tank&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;direction&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;right&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;action&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;go&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;}],&lt;/span&gt;
+&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;首先录像的最外层是个数组，数组的一个元素代表一帧发生的所有动作。上面的示例录像中，第一帧坦克 6e723 从坐标 &lt;code&gt;(6, 7)&lt;/code&gt; 向当前方向（右）前进了一个单位，同时坦克 4ad3f 向左转弯。第二帧坦克 6e723 从坐标 &lt;code&gt;(6, 8)&lt;/code&gt; 继续前进了一步，同时坦克 4ad3f 没有执行任何操作。&lt;/p&gt;
+&lt;p&gt;理论上来说，录像文件中只要记录每个对象最初的状态和中间每步的动作即可使数据完整。然而可以注意到上面的录像样例中的每一帧都会把对象的所有信息记录下来，包括朝向和坐标。这使得前端播放录像时可以从任意一帧开始播放，而不需要从头开始初始化对象状态，另外由于 Code Game 的录像一般都很小（游戏限定 200 帧之内必须结束），所以这样记录从成本考量也可以接受。&lt;/p&gt;
+&lt;h4&gt;前端录像展示&lt;/h4&gt;
+&lt;p&gt;一般而言在前端实现动画有如下几种方式：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;通过 JavaScript 操作 DOM&lt;/li&gt;
+&lt;li&gt;使用 CSS Animation&lt;/li&gt;
+&lt;li&gt;Canvas 动画&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在开发 Code Game 项目时，首先排除的是 Canvas。虽然 Canvas 的性能优异且兼容性良好，但是就播放录像这样简单的需求而言使用 Canvas 开发相对繁琐。其次排除的是直接操作 DOM，因为 JavaScript 实现的动画进行微小的位移时会出现抖动，而 Code Game 开发时希望对战页面可以在移动设备上播放，同时用户可以自定义播放速度，这就使得小位移的动画非常容易出现。&lt;/p&gt;
+&lt;p&gt;所以最后采取的播放录像的动画方案是 CSS Animation。录像中的每个拥有 &lt;code&gt;objectId&lt;/code&gt; 属性的对象都会为其生成 DOM 节点，节点的 ID 由 &lt;code&gt;objectid&lt;/code&gt; 构成，同时根据 &lt;code&gt;type&lt;/code&gt; 的不同为其赋予不同的背景图。具体的动画实现以下面的动作为例：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="s2"&gt;&amp;quot;objectId&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;6e723&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tank&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="s2"&gt;&amp;quot;direction&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;right&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="s2"&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+  &lt;span class="s2"&gt;&amp;quot;action&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;go&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;首先通过 JavaScript 找到 6e723 DOM 节点，然后根据当前游戏的 FPS 和地图大小 修改该节点的 Transition 时间，同时通过 &lt;code&gt;transform&lt;/code&gt; 的 &lt;code&gt;translate&lt;/code&gt; 操作来移动对象。&lt;/p&gt;
+&lt;p&gt;这样的实现存在一个问题，假设一个坦克不转向，一直前进了 10 个单位，前端会修改 10 次节点的 &lt;code&gt;transition&lt;/code&gt; 和 &lt;code&gt;transform&lt;/code&gt; 属性，每次只移动一个单位。而实际上对于这种情况可以优化成只修改一次属性，一次直接前进 10 个单位，当然 &lt;code&gt;transition&lt;/code&gt; 的时间也要相应乘以 10。因为在游戏中坦克直线连续行进的地方很多，所以这种优化效果很明显。为此 Code Game 在前端会在解析录像前对录像进行优化，合并直线前进的操作。如上面的录像实例会被优化成：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+  &lt;span class="p"&gt;[{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;objectId&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;6e723&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tank&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;direction&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;right&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;action&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;go&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;frames&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+  &lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;objectId&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;4ad3f&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;tank&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;direction&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;left&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;position&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;action&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;turn&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;value&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;left&amp;quot;&lt;/span&gt;
+  &lt;span class="p"&gt;}],&lt;/span&gt;
+  &lt;span class="p"&gt;[],&lt;/span&gt;
+&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;坦克 6e723 在第一帧的动作中增加了 &lt;code&gt;frames: 2&lt;/code&gt; 这个属性，表明一共前进了两帧，在之后播放动画时就可以大大降低修改 DOM 属性的次数了。&lt;/p&gt;
+&lt;h2&gt;结语&lt;/h2&gt;
+&lt;p&gt;这篇文章从开发 Code Game 项目的角度介绍了我对 Less/Sass 和 CoffeeScript 这些流行技术的取舍，以及在 Node.js 中开发沙盒的一些经验。然而技术本身其实并没有明显的优劣可言，只有基于特定项目和特定的开发者讨论时，关于“取舍”的话题才有意义。如果大家关于本文有什么想法，欢迎留言讨论。&lt;/p&gt;
+&lt;p&gt;另外 Code Game 已经&lt;a href="http://github.com/luin/codegame"&gt;在 GitHub 上开源&lt;/a&gt;，欢迎 Star！&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Fri, 07 Nov 2014 00:00:00 +0100</pubDate><guid>tag:zihua.li,2014-11-07:2014/11/talk-about-codegame/</guid><category>node.js codegame sandbox coffeescript less sass</category></item><item><title>只需 4 步，手把手教你如何实现滤镜功能</title><link>http://zihua.li/2014/06/implement-instagram-like-filters/</link><description>&lt;p&gt;滤镜对于照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手之作显得别有风味，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都有滤镜功能，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统地讲解滤镜是如何实现的。&lt;/p&gt;
 &lt;h2&gt;什么是滤镜&lt;/h2&gt;
 &lt;p&gt;滤镜最初是指安装在相机镜头前过滤自然光的附加镜头，用来实现调色和添加效果。一些数字图像处理软件（最著名的如 Adobe Photoshop）提供了一些特定的预设工具用来实现相机滤镜的效果，这些工具也就自然而然地被称作“滤镜”。软件实现的滤镜可以模拟大部分的镜头滤镜，如色温变换滤镜（LB）和强调滤镜等，但由于无法再现拍摄环境，软件滤镜无法复原照片中未包含的信息，进而也难以实现偏光镜和紫外线滤色镜（UV）的效果。&lt;/p&gt;
 &lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lens-collection.jpg" alt="相机滤镜" class="fill" /&gt;&lt;/p&gt;
@@ -372,148 +681,4 @@
 &lt;p&gt;当你通过依赖注入模式将依赖引入路由后，你会发现在单元测试时可以非常方便地将 mock 对象传入路由，而这正是依赖注入模式的另一个好处。&lt;/p&gt;
 &lt;h2&gt;结论&lt;/h2&gt;
 &lt;p&gt;我在最近的几个 Express 项目中使用了 express-di 模块，并惊喜地发现这个模块使项目代码的可读性和可维护性大大增加。而且因为 express-di 兼容传统的路由定义方法，你可以非常方便地在现有的项目中引入 express-di，从而使新定义的路由能享受依赖注入带来的便利，同时又无需对老的代码做任何修整。&lt;/p&gt;
-&lt;p&gt;项目地址在：&lt;a href="https://github.com/luin/express-di"&gt;https://github.com/luin/express-di&lt;/a&gt;。欢迎 star 或提 issue！&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Tue, 11 Mar 2014 00:00:00 +0100</pubDate><guid>tag:zihua.li,2014-03-11:2014/03/using-dependency-injection-to-optimise-express-middlewares/</guid><category>dependency</category><category>injection</category><category>express</category><category>express-di</category><category>middleware</category><category>node.js</category></item><item><title>纯 CSS 实现高度与宽度成比例的效果</title><link>http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/</link><description>&lt;div class="clearfix"&gt;
-  &lt;div class="left"&gt;
-    最近在做一个产品列表页面，布局如右图所示。页面中有若干个 item，其中每个 item 都向左浮动，并包含在自适应浏览器窗口宽度的父元素中。
-  &lt;/div&gt;
-  &lt;aside class="right pull-right"&gt;
-    &lt;img src="http://zihua.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" /&gt;
-  &lt;/aside&gt;
-&lt;/div&gt;
-
-&lt;p&gt;item 元素的 CSS 定义如下：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;2%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;21%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;这时遇到的一个需求：&lt;strong&gt;在保持 item 元素宽高比恒定（如高是宽的 1.618 倍）的情况下，使得 item 元素可以和父元素同比缩放。&lt;/strong&gt; 我们知道，如果当 item 元素是图片，同时需要保持的宽高比恰好为图片本身的宽高比时，可以设置 item 的 &lt;code&gt;height&lt;/code&gt; 为 &lt;code&gt;auto&lt;/code&gt; 即可轻松实现这个需求。然而当 item 元素不是图片或者要保持的宽高比和图片本身的宽高比不同时，这个需求显得很难直接用 CSS 实现。&lt;/p&gt;
-&lt;p&gt;为此我放弃 CSS，直接用 JavaScript 绑定 &lt;code&gt;window&lt;/code&gt; 的 &lt;code&gt;onresize&lt;/code&gt; 事件来动态获取每个 item 的宽度，从而计算并设置其高度。&lt;/p&gt;
-&lt;p&gt;我一直在使用这个解决方案，直到今天调整样式时，突然想到这个需求竟然是可以只使用 CSS 解决的。&lt;/p&gt;
-
-
-&lt;p&gt;首先需要知道，一个元素的 &lt;code&gt;padding&lt;/code&gt;，如果值是一个百分比，那这个百分比是相对于其父元素的宽度而言的，即使对于 &lt;code&gt;padding-bottom&lt;/code&gt; 和 &lt;code&gt;padding-top&lt;/code&gt; 也是如此。&lt;/p&gt;
-&lt;p&gt;另外，在计算 Overflow 时，是将元素的内容区域（即 &lt;code&gt;width&lt;/code&gt; / &lt;code&gt;height&lt;/code&gt; 对应的区域）和 Padding 区域一起计算的。换句话说，即使将元素的 &lt;code&gt;overflow&lt;/code&gt; 设置为 &lt;code&gt;hidden&lt;/code&gt;，“溢出”到 Padding 区域的内容也会照常显示。&lt;/p&gt;
-&lt;p&gt;综上两条所述，我们可以使用 &lt;code&gt;padding-bottom&lt;/code&gt; 来代替 &lt;code&gt;height&lt;/code&gt; 来实现高度与宽度成比例的效果。因为 item 元素的宽度是其父元素宽度的 21%，所以我们将 &lt;code&gt;padding-bottom&lt;/code&gt; 设置为它的 1.618 倍，即 33.98%。同时将其 &lt;code&gt;height&lt;/code&gt; 设置为 &lt;code&gt;0&lt;/code&gt; 以使元素的“高度”等于 &lt;code&gt;padding-bottom&lt;/code&gt; 的值，从而实现需要的效果。&lt;/p&gt;
-&lt;p&gt;最后 item 元素的 CSS 样式为：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;5%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;padding-bottom&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;33.98%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;21%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="k"&gt;height&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;页面效果见 &lt;a href="http://jsfiddle.net/luin/25BbH/7/"&gt;http://jsfiddle.net/luin/25BbH/7/&lt;/a&gt;，拖动窗口调整页面宽度，item 元素始终保持恒定的宽高比。&lt;/p&gt;
-&lt;p&gt;同样，这个解决方案也自然支持前文说的“当 item 元素是图片但要保持的宽高比和图片本身的宽高比不同”的情况，具体见我在 Ruby China 上的一篇回复：&lt;a href="http://ruby-china.org/topics/17011#reply15"&gt;图片 CSS：怎样才能“响应式+固定宽高比例”？&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Mon, 09 Dec 2013 00:00:00 +0100</pubDate><guid>tag:zihua.li,2013-12-09:2013/12/keep-height-relevant-to-width-using-css/</guid><category>css</category><category>ratio</category></item><item><title>我的 Vim 常用插件和键位映射配置</title><link>http://zihua.li/2013/11/my-vim-configuration-plugin/</link><description>&lt;p&gt;写给那些从来不使用别人的 Vim 的人&lt;/p&gt;
-&lt;p&gt;记得刚接触 Mac 时，我是用 &lt;a href="http://panic.com/coda/" target="_blank"&gt;Coda&lt;/a&gt; 写代码的，写了很长很长时间。之后 &lt;a href="http://www.sublimetext.com" target="_blank"&gt;Sublime Text&lt;/a&gt; 大火，便也尝试了几个月。到了如今，已经不知不觉地当了两年的 Vim 党。&lt;/p&gt;
-&lt;p&gt;Vim 是个神奇的编辑器，不论编辑哪种语言的代码，总能找到一些插件来提升编码体验。就算是用了挺久的 Vim，也时不时地会听到别人说起一些自己从没用过但是很实用的技巧。虽然有时也会怀念 Coda 漂亮的界面和方便的远程文件管理，会怀念 Sublime Text  功能强大却又容易上手的设计理念。但是从没有一种理由让我换用其它编辑器，因为总会有一个 Vim 插件能够填补你内心深处的不满足。&lt;/p&gt;
-&lt;p&gt;我主要用 Vim 写些网页前后端代码，下面我将分享一些我在用的 Vim 插件和键位映射配置，完整的 .vimrc 文件可以在&lt;a href="https://github.com/luin/dotfiles/blob/master/vimrc" target="_blank"&gt;这里&lt;/a&gt;看到。&lt;/p&gt;
-
-
-&lt;h3&gt;插件&lt;/h3&gt;
-
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/gmarik/vundle" target="_blank"&gt;Vundle&lt;/a&gt;
-Vundle 是一个 Vim 的插件管理工具，它使得安装插件不过是在 .vimrc 文件中增加一行描述那么简单。Vundle 吸引我的最重要的原因是让我可以将插件和其对应的配置（如键位映射）写在一起，这样当要删除某个插件时，也能很方便地将对应的配置删除。&lt;/p&gt;
-&lt;p&gt;比如下面的 .vimrc 片段中，&lt;code&gt;Bundle&lt;/code&gt; 语句告诉了 Vundle 要安装的插件名，而我将每个插件的配置写在了相应的 Bundle 的下面。这样当我要删除 Lokaltog/vim-easymotion 插件时，就可以很方便地将其对应的配置 &lt;code&gt;let g:EasyMotion_leader_key = 'f'&lt;/code&gt; 删除，避免了因为插件描述和其配置分隔两处造成的不同步现象。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;Bundle &lt;span class="s1"&gt;&amp;#39;Lokaltog/vim-easymotion&amp;#39;&lt;/span&gt;
-&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:EasyMotion_leader_key &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;f&amp;#39;&lt;/span&gt;
-
-Bundle &lt;span class="s1"&gt;&amp;#39;bling/vim-airline&amp;#39;&lt;/span&gt;
-&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:airline_left_sep &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;
-&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:airline_right_sep &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/Lokaltog/vim-easymotion" target="_blank"&gt;Easymotion&lt;/a&gt;
-&lt;code&gt;f&amp;lt;char&amp;gt;&lt;/code&gt; 可以实现定位到一行中的某个字符，如 &lt;code&gt;fa&lt;/code&gt; 会定位到当前光标到行末出现的第一个 "a"。然而如果存在多个 "a"，就得通过 &lt;code&gt;f&amp;lt;number&amp;gt;a&lt;/code&gt; 来完成定位。而使用 Easymotion 后，只需要敲击 &lt;code&gt;&amp;lt;leader&amp;gt;&amp;lt;leader&amp;gt;fa&lt;/code&gt;，则该行及该行以下所有的 "a" 都将被高亮并标记序号，此时再按相应的序号即可定位到指定的 "a"。&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;&amp;lt;leader&amp;gt;&amp;lt;leader&amp;gt;&lt;/code&gt; 是 Easymotion 默认的引导键，也可以自定义。比如我将其定义为 "f"，这样用 "f" 定位字符只需要按 &lt;code&gt;ff&amp;lt;char&amp;gt;&lt;/code&gt; 即可，非常方便。&lt;/p&gt;
-&lt;p&gt;Easymotion 不仅支持 &lt;code&gt;f&lt;/code&gt;，还支持其它定位功能键，如 &lt;code&gt;w&lt;/code&gt;、&lt;code&gt;t&lt;/code&gt;。不过我 99% 的时间都只用其和 "f" 来配合。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/bling/vim-airline" target="_blank"&gt;Airline&lt;/a&gt;
-Airline 和 Powerline 类似，都是在 Vim 底部显示一个很好看的状态条，可以自定义状态条中的显示项目。不同的是 Airline 更加轻量，而且支持一些特殊插件的状态显示。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/scrooloose/nerdtree" target="_blank"&gt;The NERD tree&lt;/a&gt;
-The NERD tree 是 Vim 中的资源管理器，它是我最常用的插件之一。The NERD tree 能够查看文件夹下文件列表（包括标记文件类型状态等），执行复制、移动和删除文件（夹）等操作。&lt;/p&gt;
-&lt;p&gt;我将 Shift + m 映射为切换 The NERD tree 窗口（&lt;code&gt;map &amp;lt;S-m&amp;gt; &amp;lt;plug&amp;gt;NERDTreeTabsToggle&amp;lt;CR&amp;gt;&lt;/code&gt;）。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/scrooloose/syntastic" target="_blank"&gt;Syntastic&lt;/a&gt;
-Syntastic 是一个语法检查工具，它通过外部语法检查器来校验代码，并将结果显示在 Vim 的状态栏中。Syntastic 是一个神级的插件，它可以极大地减少编码出错的概率，对于脚本语言开发者来说绝对是一个福音。&lt;/p&gt;
-&lt;p&gt;对我而言，Syntastic 最大的作用就是校验 JavaScript 代码。我通过配置 Syntastic 使用代码质量检查工具 JSHint 来检查代码错误，同时控制代码质量。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/vim-scripts/bufexplorer.zip" target="_blank"&gt;bufexplorer&lt;/a&gt;
-bufexplorer 可以加快切换 buffer 的速度。我通过 &lt;code&gt;noremap &amp;lt;silent&amp;gt; &amp;lt;CR&amp;gt; :BufExplorer&amp;lt;CR&amp;gt;&lt;/code&gt; 将回车键映射为显示 buffer 列表，同时在 buffer 列表中还可以使用回车键选择想要编辑的 buffer，非常方便。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/vim-scripts/nerdtree-ack" target="_blank"&gt;NERDtree + ack.vim&lt;/a&gt;
-这个插件的名字很直白，就是 The NERD tree 和 &lt;a href="https://github.com/mileszs/ack.vim" target="_blank"&gt;ack&lt;/a&gt; 两个插件的合体。这个插件为 The NERD tree 的文件菜单中加入了搜索功能，可以实现搜索整个文件夹，不用再单独调用 grep 之类的命令了。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/terryma/vim-multiple-cursors" target="_blank"&gt;vim-multiple-cursors&lt;/a&gt;
-Sublime Text 支持多个光标选择功能，在重构时非常有用。这个插件将 Sublime Text 中的这个邪恶功能引入了 Vim。想要修改变量名时，只需要将光标放在变量名内，然后多次敲击 Ctrl + n，即可将多个同名变量选中，此时再按 s 就能同时将这些变量重命名了。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/tpope/vim-commentary" target="_blank"&gt;Commentary&lt;/a&gt;
-Commentary 可以帮你注释代码。只需要选中要注释的内容，然后敲击 gcc 即可将这段内容注释（Commentary 会根据当前的 filetype 使用不同的注释符号），再次敲击 gcc 即可还原注释。我做了如下映射：&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;nmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; gcc
-vmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; gc
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;即在 normal 模式下，敲击退格键可以注释当前行，在 visual 模式下，敲击退格键可以注释选中的内容。平时无聊时，我就会不停地按退格键来注释/还原注释，还是挺能消磨时间的 :P。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/terryma/vim-expand-region" target="_blank"&gt;vim-expand-region&lt;/a&gt;
-这个插件用来扩展选择的内容。比方说当前光标在一对双引号中，双引号包含在一对括号中，此时敲击 &lt;code&gt;+&lt;/code&gt; 可以选中双引号中的内容，再敲击 &lt;code&gt;+&lt;/code&gt; 可以选中括号中的内容。我将其绑定为最大的空格键以显示我对这个插件的虔诚。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3&gt;键位映射&lt;/h3&gt;
-
-&lt;p&gt;每个 Vim 使用者都有自己的键位映射，通过映射键位可以在一些小的地方大大提高 Vim 的使用效率。下面列举几个我的映射配置。&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;将分号和冒号互换&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;nnoremap&lt;/span&gt; ; :
-&lt;span class="nb"&gt;nnoremap&lt;/span&gt; : ;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;这样输入 &lt;code&gt;:w&lt;/code&gt; 这样的命令时可以就少敲一个键了。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;使用左右光标键切换 buffer&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;noremap&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="k"&gt;silent&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;Left&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; :&lt;span class="k"&gt;bp&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
-&lt;span class="nb"&gt;noremap&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="k"&gt;silent&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;Right&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; :&lt;span class="k"&gt;bn&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;使用 &lt;code&gt;\&lt;/code&gt; 键打开当前编辑的文件&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;nnoremap&lt;/span&gt; \ :&lt;span class="p"&gt;!&lt;/span&gt;open &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;C&lt;span class="p"&gt;-&lt;/span&gt;R&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;%&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;粘贴时不置换“剪贴板”&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;xnoremap &lt;span class="k"&gt;p&lt;/span&gt; pgvy
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;我经常复制一段内容，在 visual 模式下选中一段文本并粘贴来实现替换，此时“剪贴板”中的内容会被替换成被删掉的文本，如果想粘贴第二次就很不方便了。这个映射解决了这个问题。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Sun, 17 Nov 2013 00:00:00 +0100</pubDate><guid>tag:zihua.li,2013-11-17:2013/11/my-vim-configuration-plugin/</guid><category>plugin</category><category>vim</category></item></channel></rss>
+&lt;p&gt;项目地址在：&lt;a href="https://github.com/luin/express-di"&gt;https://github.com/luin/express-di&lt;/a&gt;。欢迎 star 或提 issue！&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Zihua Li</dc:creator><pubDate>Tue, 11 Mar 2014 00:00:00 +0100</pubDate><guid>tag:zihua.li,2014-03-11:2014/03/using-dependency-injection-to-optimise-express-middlewares/</guid><category>dependency</category><category>injection</category><category>express</category><category>express-di</category><category>middleware</category><category>node.js</category></item></channel></rss>

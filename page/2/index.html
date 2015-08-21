@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:wb="http://open.weibo.com/wb">
+<html lang="zh-Hans">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Zihua Li</title>
       <link href="http://zihua.li/feed" type="application/rss+xml" rel="alternate" title="Zihua Li RSS Feed" />
-    <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro' rel='stylesheet' type='text/css'>
-    <link rel='stylesheet'  href='http://zihua.li/theme/css/normalize.css' type='text/css' media='all' />
+    <link rel='stylesheet'  href='http://zihua.li/theme/han/han.css' type='text/css' media='all' />
     <link rel='stylesheet'  href='http://zihua.li/theme/css/style.css' type='text/css' media='all' />
     <link rel='stylesheet'  href='http://zihua.li/theme/css/highlight.css' type='text/css' media='all' />
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -32,10 +31,86 @@
   </section>
   <section class="l-content">
     <div class="inner">
-  <article class="index-article">
+  <article class="index-article han-init-context">
+    <header>
+      <a href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/">
+        <h2 class="article-title">
+          Express 框架中间件的依赖问题与解决方案
+        </h2>
+      </a>
+      <p class="article-meta" title="2014-03-11T00:00:00+01:00">11 Mar 2014</p>
+    </header>
+    <div class="typo article-body">
+      <p>作为 Node 社区最受欢迎的框架，<a href="http://expressjs.com">Express</a> 在沿用 <a href="http://www.senchalabs.org/connect/">Connect</a> 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。</p>
+<p>下面是使用路由中间件从数据库载入用户资料的示例，这段代码来自 <a href="http://tjholowaychuk.com">TJ</a>（Express 的作者）的一个 <a href="http://www.screenr.com/elL">Screencast</a>：</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">loadUser</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">User</span><span class="p">.</span><span class="nx">findById</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">userId</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">next</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+    <span class="nx">req</span><span class="p">.</span><span class="nx">currentUser</span> <span class="o">=</span> <span class="nx">user</span><span class="p">;</span>
+    <span class="nx">next</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="p">};</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">,</span> <span class="nx">loadUser</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;dashboard&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">req</span><span class="p">.</span><span class="nx">currentUser</span> <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+
+<p>在上面的代码中，我们定义了路由中间件 <code>loadUser</code>。<code>loadUser</code> 从数据库中读取用户数据后，将 <code>user</code> 对象通过 <code>req</code> 的 <code>currentUser</code> 属性传递给下一个路由中间件。这种通过 <code>req</code> 对象的属性传递数据的模式在 Express 中很常见。当项目比较小的时候这种模式非常方便易用，可是随着项目不断发展，这种模式会暴露出不少问题，至于具体有哪些问题，请继续往下看。</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article han-init-context">
+    <header>
+      <a href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/">
+        <h2 class="article-title">
+          纯 CSS 实现高度与宽度成比例的效果
+        </h2>
+      </a>
+      <p class="article-meta" title="2013-12-09T00:00:00+01:00">09 Dec 2013</p>
+    </header>
+    <div class="typo article-body">
+      <div class="clearfix">
+  <div class="left">
+    最近在做一个产品列表页面，布局如右图所示。页面中有若干个 item，其中每个 item 都向左浮动，并包含在自适应浏览器窗口宽度的父元素中。
+  </div>
+  <aside class="right pull-right">
+    <img src="http://zihua.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" />
+  </aside>
+</div>
+
+<p>item 元素的 CSS 定义如下：</p>
+<div class="highlight"><pre><span class="nc">.item</span> <span class="p">{</span>
+  <span class="k">float</span><span class="o">:</span> <span class="k">left</span><span class="p">;</span>
+  <span class="k">margin</span><span class="o">:</span> <span class="m">10px</span> <span class="m">2%</span><span class="p">;</span>
+  <span class="k">width</span><span class="o">:</span> <span class="m">21%</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>这时遇到的一个需求：<strong>在保持 item 元素宽高比恒定（如高是宽的 1.618 倍）的情况下，使得 item 元素可以和父元素同比缩放。</strong> 我们知道，如果当 item 元素是图片，同时需要保持的宽高比恰好为图片本身的宽高比时，可以设置 item 的 <code>height</code> 为 <code>auto</code> 即可轻松实现这个需求。然而当 item 元素不是图片或者要保持的宽高比和图片本身的宽高比不同时，这个需求显得很难直接用 CSS 实现。</p>
+<p>为此我放弃 CSS，直接用 JavaScript 绑定 <code>window</code> 的 <code>onresize</code> 事件来动态获取每个 item 的宽度，从而计算并设置其高度。</p>
+<p>我一直在使用这个解决方案，直到今天调整样式时，突然想到这个需求竟然是可以只使用 CSS 解决的。</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article han-init-context">
     <header>
       <a href="http://zihua.li/2013/11/my-vim-configuration-plugin/">
-        <h2 class="article-title">我的 Vim 常用插件和键位映射配置</h2>
+        <h2 class="article-title">
+          我的 Vim 常用插件和键位映射配置
+        </h2>
       </a>
       <p class="article-meta" title="2013-11-17T00:00:00+01:00">17 Nov 2013</p>
     </header>
@@ -52,10 +127,12 @@
     </div>
     <div class="hr"></div>
   </article>
-  <article class="index-article">
+  <article class="index-article han-init-context">
     <header>
       <a href="http://zihua.li/2013/09/express-promise/">
-        <h2 class="article-title">减少异步嵌套，Express-promise</h2>
+        <h2 class="article-title">
+          减少异步嵌套，Express-promise
+        </h2>
       </a>
       <p class="article-meta" title="2013-09-11T00:00:00+02:00">11 Sep 2013</p>
     </header>
@@ -73,10 +150,12 @@
     </div>
     <div class="hr"></div>
   </article>
-  <article class="index-article">
+  <article class="index-article han-init-context">
     <header>
       <a href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/">
-        <h2 class="article-title">开源的数据统计可视化工具：Ranaly</h2>
+        <h2 class="article-title">
+          开源的数据统计可视化工具：Ranaly
+        </h2>
       </a>
       <p class="article-meta" title="2013-02-17T00:00:00+01:00">17 Feb 2013</p>
     </header>
@@ -87,44 +166,6 @@
     <div class="read-more clearfix">
       <a class="button radius secondary small right" href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/">阅读全文</a>
       <a class="button radius secondary small right" href="http://zihua.li/2013/02/an-open-source-tool-for-data-statistics/#disqus_thread">评论</a>
-    </div>
-    <div class="hr"></div>
-  </article>
-  <article class="index-article">
-    <header>
-      <a href="http://zihua.li/2012/11/my-last-digital-acquisition/">
-        <h2 class="article-title">最近入手的数码产品</h2>
-      </a>
-      <p class="article-meta" title="2012-11-19T00:00:00+01:00">19 Nov 2012</p>
-    </header>
-    <div class="typo article-body">
-      <p>博客很久没有更新了，最近计划出版一本Redis的入门书籍，所以时间都放到写书上了。其实写书倒也不算是件能让人忙起来的事情，但它却能轻易地占据人的生活。记得高一下学期刚开学的时候学生会开始招新，我需要准备一篇千字左右的讲稿，结果在演讲的前一周我就把讲稿写完了。然而在接下来的7天里我却满脑子都是讲稿的事：虽然我已经完成了它，写的也还算不错，可是写稿子这种事有起点却没终点，一个句子总会有更好的表达方法，没有人敢说自己的稿子能得满分。我自然希望能做得更好，当然代价就是我7天的时间。</p>
-<p>写书也是此理，于是写书累了就换换思路改写博客放松一下（你就不能干点其它事情！）。</p>
-<p>最近计划买一个投影仪晚上没事了投电影看，突然想到自己一直想要写篇文章总结一下最近买的数码产品（神思路啊，中间是不是少个过渡句啊）。于是按照购买顺序挑几个有特点的列举如下：</p>
-
-    </div>
-    <div class="read-more clearfix">
-      <a class="button radius secondary small right" href="http://zihua.li/2012/11/my-last-digital-acquisition/">阅读全文</a>
-      <a class="button radius secondary small right" href="http://zihua.li/2012/11/my-last-digital-acquisition/#disqus_thread">评论</a>
-    </div>
-    <div class="hr"></div>
-  </article>
-  <article class="index-article">
-    <header>
-      <a href="http://zihua.li/2012/08/learning-shuangpin-to-save-your-time/">
-        <h2 class="article-title">人生苦短，我用双拼</h2>
-      </a>
-      <p class="article-meta" title="2012-08-19T00:00:00+02:00">19 Aug 2012</p>
-    </header>
-    <div class="typo article-body">
-      <p>这篇文章写给使用全拼的人（怎么知道我用的是不是全拼？答：如果你不知道你在用什么输入法，那你很可能在用全拼）。</p>
-<p>当你输入“庄重”（不考虑自动补全，你需要输入“zhuangzhong”这 11 个字母）二字时，有没有想过其实你多打了很多无用的字母？普通话中绝大多数拼音是由声母和韵母组成，而声母和韵母的数量分别为 21 和 39 个，如果能对它们合理编排，完全可以让每个汉字都能使用两个字母表示出来（两个字母依次对应声母和韵母），这就是双拼的原理。</p>
-<p>学习双拼是一件性价比极高的事情。五笔输入速度快，但熟练使用需要几个月的时间，中间会有很长的真空期，而且得力于拼音输入法的不断改进，在输入常用词组时五笔输入法并无优势；而双拼输入法简单易学，理论知识瞬间就能理解，键位的话就我而言练习一个小时就可以全部记忆下来（但不是很熟练，需要再练习几天）。更重要的是大多数支持双拼的输入法都支持双拼全拼混合输入，如当你不知道韵母“uang”在双拼中对应哪个字母时，“庄重”可以输成“zhuangvs”，前半部分是全拼，后半部分是双拼，这样你可以一天记几个键位，其余的用全拼输入，这样就不会影响自己的输入速度了。</p>
-
-    </div>
-    <div class="read-more clearfix">
-      <a class="button radius secondary small right" href="http://zihua.li/2012/08/learning-shuangpin-to-save-your-time/">阅读全文</a>
-      <a class="button radius secondary small right" href="http://zihua.li/2012/08/learning-shuangpin-to-save-your-time/#disqus_thread">评论</a>
     </div>
     <div class="hr"></div>
   </article>
@@ -145,6 +186,9 @@ s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
 </script>
     </div>
   </section>
+  <script src="http://zihua.li/theme/han/han.js"></script>
+  <script>
+  </script>
   <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -1,3 +1,32 @@
+@font-face {
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Source Code Pro'), local('SourceCodePro-Regular'), url(../font/sc.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Source Sans Pro'), local('SourceSansPro-Regular'), url(../font/sc.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Source Sans Pro Bold'), local('SourceSansPro-Bold'), url(../font/sb.ttf) format('truetype');
+}
+
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
 body {
   color: #333;
   text-rendering: optimizeLegibility;
@@ -5,7 +34,6 @@ body {
   font-size: 1em;
   line-height: 1.1;
   word-wrap: break-word;
-  font-family: 'Source Sans Pro', sans-serif;
 }
 
 a:link, a:visited, a:hover, a:active {
@@ -41,6 +69,7 @@ code {
 }
 
 .l-cover header {
+  font-family: 'Source Sans Pro', sans-serif;
   position: absolute;
   bottom: 0;
   right: 0;
@@ -55,6 +84,10 @@ code {
 .l-cover .header-avatar img {
   border-radius: 999px;
   border: 4px solid #fff;
+}
+
+.l-cover ul {
+  padding: 0;
 }
 
 .l-cover .description {
@@ -113,6 +146,23 @@ article {
   margin-bottom: 16px;
 }
 
+article h2,
+article h3 {
+  text-align: center;
+}
+
+article .article-title {
+  text-align: center;
+}
+
+.article-title .article-subtitle {
+  display: block;
+  font-size: 0.6em;
+  color: #999;
+  line-height: 2em;
+  font-weight: normal;
+}
+
 .index-article .article-title {
   font-size: 2em;
   margin-bottom: 10px;
@@ -123,8 +173,12 @@ article {
   margin-bottom: 10px;
 }
 
+article .article-meta {
+  text-align: center;
+}
+
 .article-body {
-  font-size: 1.1em;
+  font-size: 1em;
   line-height: 1.8;
 }
 
@@ -136,6 +190,12 @@ article {
   display: block;
   margin: 20px auto;
   max-width: 100%;
+}
+
+.article-body img.center {
+  display: block;
+  margin: 20px auto;
+  width: 50%;
 }
 
 .article-body .left {
@@ -205,7 +265,13 @@ article {
 .article-share .about-blog > p,
 .article-share .about-blog > a,
 .article-share .about-blog > iframe {
+  margin-top: 0;
+  margin-bottom: 0;
   float: left;
+}
+
+.article-share .about-blog > p {
+  font-size: 14px;
 }
 
 .read-more a {
