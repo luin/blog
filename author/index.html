@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:wb="http://open.weibo.com/wb">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -37,7 +37,7 @@
       <a href="http://zihua.li/2014/06/implement-instagram-like-filters/">
         <h2 class="article-title">只需 4 步，手把手教你如何实现滤镜功能</h2>
       </a>
-      <p class="article-meta" title="2014-06-15T00:00:00">15 Jun 2014</p>
+      <p class="article-meta" title="2014-06-15T00:00:00+02:00">15 Jun 2014</p>
     </header>
     <div class="typo article-body">
       <p>滤镜对于照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手之作显得别有风味，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都有滤镜功能，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统地讲解滤镜是如何实现的。</p>
@@ -57,7 +57,7 @@
       <a href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/">
         <h2 class="article-title">Good Practices to Structure an Express App</h2>
       </a>
-      <p class="article-meta" title="2014-05-21T00:00:00">21 May 2014</p>
+      <p class="article-meta" title="2014-05-21T00:00:00+02:00">21 May 2014</p>
     </header>
     <div class="typo article-body">
       <p>Having heavily used the <a href="http://expressjs.com">Express</a> framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.</p>
@@ -79,7 +79,7 @@
       <a href="http://zihua.li/2014/03/test-private-methods-in-nodejs/">
         <h2 class="article-title">在 Node.js 中测试模块的内部成员</h2>
       </a>
-      <p class="article-meta" title="2014-03-27T00:00:00">27 Mar 2014</p>
+      <p class="article-meta" title="2014-03-27T00:00:00+01:00">27 Mar 2014</p>
     </header>
     <div class="typo article-body">
       <p>模块（Module）的内部成员是指没有通过 <code>module.exports</code> 导出的变量或函数。如下面的示例模块：</p>
@@ -108,7 +108,7 @@
       <a href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/">
         <h2 class="article-title">Express 框架中间件的依赖问题与解决方案</h2>
       </a>
-      <p class="article-meta" title="2014-03-11T00:00:00">11 Mar 2014</p>
+      <p class="article-meta" title="2014-03-11T00:00:00+01:00">11 Mar 2014</p>
     </header>
     <div class="typo article-body">
       <p>作为 Node 社区最受欢迎的框架，<a href="http://expressjs.com">Express</a> 在沿用 <a href="http://www.senchalabs.org/connect/">Connect</a> 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。</p>
@@ -141,7 +141,7 @@
       <a href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/">
         <h2 class="article-title">纯 CSS 实现高度与宽度成比例的效果</h2>
       </a>
-      <p class="article-meta" title="2013-12-09T00:00:00">09 Dec 2013</p>
+      <p class="article-meta" title="2013-12-09T00:00:00+01:00">09 Dec 2013</p>
     </header>
     <div class="typo article-body">
       <div class="clearfix">
@@ -156,8 +156,8 @@
 <p>item 元素的 CSS 定义如下：</p>
 <div class="highlight"><pre><span class="nc">.item</span> <span class="p">{</span>
   <span class="k">float</span><span class="o">:</span> <span class="k">left</span><span class="p">;</span>
-  <span class="k">margin</span><span class="o">:</span> <span class="m">10px</span> <span class="m">2</span><span class="o">%</span><span class="p">;</span>
-  <span class="k">width</span><span class="o">:</span> <span class="m">21</span><span class="o">%</span><span class="p">;</span>
+  <span class="k">margin</span><span class="o">:</span> <span class="m">10px</span> <span class="m">2%</span><span class="p">;</span>
+  <span class="k">width</span><span class="o">:</span> <span class="m">21%</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
 

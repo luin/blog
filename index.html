@@ -32,8 +32,150 @@
   </section>
   <section class="l-content">
     <div class="inner">
+  <article class="index-article">
+    <header>
+      <a href="http://zihua.li/2014/06/implement-instagram-like-filters/">
+        <h2 class="article-title">只需 4 步，手把手教你如何实现滤镜功能</h2>
+      </a>
+      <p class="article-meta" title="2014-06-15T00:00:00+02:00">15 Jun 2014</p>
+    </header>
+    <div class="typo article-body">
+      <p>滤镜对于照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手之作显得别有风味，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都有滤镜功能，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统地讲解滤镜是如何实现的。</p>
+<h2>什么是滤镜</h2>
+<p>滤镜最初是指安装在相机镜头前过滤自然光的附加镜头，用来实现调色和添加效果。一些数字图像处理软件（最著名的如 Adobe Photoshop）提供了一些特定的预设工具用来实现相机滤镜的效果，这些工具也就自然而然地被称作“滤镜”。软件实现的滤镜可以模拟大部分的镜头滤镜，如色温变换滤镜（LB）和强调滤镜等，但由于无法再现拍摄环境，软件滤镜无法复原照片中未包含的信息，进而也难以实现偏光镜和紫外线滤色镜（UV）的效果。</p>
+<p><img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lens-collection.jpg" alt="相机滤镜" class="fill" /></p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2014/06/implement-instagram-like-filters/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2014/06/implement-instagram-like-filters/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article">
+    <header>
+      <a href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/">
+        <h2 class="article-title">Good Practices to Structure an Express App</h2>
+      </a>
+      <p class="article-meta" title="2014-05-21T00:00:00+02:00">21 May 2014</p>
+    </header>
+    <div class="typo article-body">
+      <p>Having heavily used the <a href="http://expressjs.com">Express</a> framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.</p>
+<h2>1. RESTful Routes</h2>
+<p>While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.</p>
+<p>When writing code like <code>app.get('/users', require('./routes').getUsers)</code>, you are actually making your application fragmented instead of modular because the coupling between a URL and it's route is in fact relatively high.</p>
+<p>For example, when making some changes on the <a href="http://expressjs.com/4x/api.html#req.params">named parameter</a> of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time to find them and change them both during development.</p>
+<p>To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article">
+    <header>
+      <a href="http://zihua.li/2014/03/test-private-methods-in-nodejs/">
+        <h2 class="article-title">在 Node.js 中测试模块的内部成员</h2>
+      </a>
+      <p class="article-meta" title="2014-03-27T00:00:00+01:00">27 Mar 2014</p>
+    </header>
+    <div class="typo article-body">
+      <p>模块（Module）的内部成员是指没有通过 <code>module.exports</code> 导出的变量或函数。如下面的示例模块：</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">A</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// 执行某些操作</span>
+<span class="p">};</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">B</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">A</span><span class="p">();</span>
+<span class="p">};</span>
+</pre></div>
+
+
+<p>其中函数 <code>A</code> 就是该模块的内部成员，而命名函数表达式（Named Function Expression） <code>B</code> 则是该模块的公开成员。绝大多数情况下，单元测试只关注模块的公开成员，这是因为公开成员代表着模块的接口与功能，而内部成员则与模块的具体实现相关。对模块的内部成员进行测试，意味着测试代码需要了解模块的实现细节，导致测试代码与实现代码高度耦合，进而阻碍日后对代码的重构，这显然违背了单元测试的本意。而且实践 TDD 时，测试先于实现，更谈不上对模块的实现细节进行测试了。</p>
+<p>然而凡事都有例外，实践时并不能百分之百地保证测试代码不需要直接访问模块内部成员。下面本文将就两种情况对如何测试模块内部成员进行介绍。</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/test-private-methods-in-nodejs/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/test-private-methods-in-nodejs/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article">
+    <header>
+      <a href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/">
+        <h2 class="article-title">Express 框架中间件的依赖问题与解决方案</h2>
+      </a>
+      <p class="article-meta" title="2014-03-11T00:00:00+01:00">11 Mar 2014</p>
+    </header>
+    <div class="typo article-body">
+      <p>作为 Node 社区最受欢迎的框架，<a href="http://expressjs.com">Express</a> 在沿用 <a href="http://www.senchalabs.org/connect/">Connect</a> 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。</p>
+<p>下面是使用路由中间件从数据库载入用户资料的示例，这段代码来自 <a href="http://tjholowaychuk.com">TJ</a>（Express 的作者）的一个 <a href="http://www.screenr.com/elL">Screencast</a>：</p>
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">loadUser</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">User</span><span class="p">.</span><span class="nx">findById</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">userId</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="k">return</span> <span class="nx">next</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+    <span class="nx">req</span><span class="p">.</span><span class="nx">currentUser</span> <span class="o">=</span> <span class="nx">user</span><span class="p">;</span>
+    <span class="nx">next</span><span class="p">();</span>
+  <span class="p">});</span>
+<span class="p">};</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">,</span> <span class="nx">loadUser</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;dashboard&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">user</span><span class="o">:</span> <span class="nx">req</span><span class="p">.</span><span class="nx">currentUser</span> <span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+
+
+<p>在上面的代码中，我们定义了路由中间件 <code>loadUser</code>。<code>loadUser</code> 从数据库中读取用户数据后，将 <code>user</code> 对象通过 <code>req</code> 的 <code>currentUser</code> 属性传递给下一个路由中间件。这种通过 <code>req</code> 对象的属性传递数据的模式在 Express 中很常见。当项目比较小的时候这种模式非常方便易用，可是随着项目不断发展，这种模式会暴露出不少问题，至于具体有哪些问题，请继续往下看。</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
+  <article class="index-article">
+    <header>
+      <a href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/">
+        <h2 class="article-title">纯 CSS 实现高度与宽度成比例的效果</h2>
+      </a>
+      <p class="article-meta" title="2013-12-09T00:00:00+01:00">09 Dec 2013</p>
+    </header>
+    <div class="typo article-body">
+      <div class="clearfix">
+  <div class="left">
+    最近在做一个产品列表页面，布局如右图所示。页面中有若干个 item，其中每个 item 都向左浮动，并包含在自适应浏览器窗口宽度的父元素中。
+  </div>
+  <aside class="right pull-right">
+    <img src="http://zihua.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" />
+  </aside>
+</div>
+
+<p>item 元素的 CSS 定义如下：</p>
+<div class="highlight"><pre><span class="nc">.item</span> <span class="p">{</span>
+  <span class="k">float</span><span class="o">:</span> <span class="k">left</span><span class="p">;</span>
+  <span class="k">margin</span><span class="o">:</span> <span class="m">10px</span> <span class="m">2%</span><span class="p">;</span>
+  <span class="k">width</span><span class="o">:</span> <span class="m">21%</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+
+<p>这时遇到的一个需求：<strong>在保持 item 元素宽高比恒定（如高是宽的 1.618 倍）的情况下，使得 item 元素可以和父元素同比缩放。</strong> 我们知道，如果当 item 元素是图片，同时需要保持的宽高比恰好为图片本身的宽高比时，可以设置 item 的 <code>height</code> 为 <code>auto</code> 即可轻松实现这个需求。然而当 item 元素不是图片或者要保持的宽高比和图片本身的宽高比不同时，这个需求显得很难直接用 CSS 实现。</p>
+<p>为此我放弃 CSS，直接用 JavaScript 绑定 <code>window</code> 的 <code>onresize</code> 事件来动态获取每个 item 的宽度，从而计算并设置其高度。</p>
+<p>我一直在使用这个解决方案，直到今天调整样式时，突然想到这个需求竟然是可以只使用 CSS 解决的。</p>
+
+    </div>
+    <div class="read-more clearfix">
+      <a class="button radius secondary small right" href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/">阅读全文</a>
+      <a class="button radius secondary small right" href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/#disqus_thread">评论</a>
+    </div>
+    <div class="hr"></div>
+  </article>
 <p class="paginator">
-    1 / 1
+    1 / 6
+        <a class="next-page" href="http://zihua.li/page/2/">&gt;</a>
 </p>
 
 <script type="text/javascript">

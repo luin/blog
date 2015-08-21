@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:wb="http://open.weibo.com/wb">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -37,7 +37,7 @@
       <a href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/">
         <h2 class="article-title">Express 框架中间件的依赖问题与解决方案</h2>
       </a>
-      <p class="article-meta" title="2014-03-11T00:00:00">11 Mar 2014</p>
+      <p class="article-meta" title="2014-03-11T00:00:00+01:00">11 Mar 2014</p>
     </header>
     <div class="typo article-body">
       <p>作为 Node 社区最受欢迎的框架，<a href="http://expressjs.com">Express</a> 在沿用 <a href="http://www.senchalabs.org/connect/">Connect</a> 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。</p>

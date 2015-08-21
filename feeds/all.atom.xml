@@ -1,2 +1,519 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2015-08-22T00:55:40Z</updated></feed>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Zihua Li</title><link href="http://zihua.li/" rel="alternate"></link><link href="http://zihua.li/feeds/all.atom.xml" rel="self"></link><id>http://zihua.li/</id><updated>2014-06-15T00:00:00+02:00</updated><entry><title>只需 4 步，手把手教你如何实现滤镜功能</title><link href="http://zihua.li/2014/06/implement-instagram-like-filters/" rel="alternate"></link><updated>2014-06-15T00:00:00+02:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-06-15:2014/06/implement-instagram-like-filters/</id><summary type="html">&lt;p&gt;滤镜对于照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手之作显得别有风味，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都有滤镜功能，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统地讲解滤镜是如何实现的。&lt;/p&gt;
+&lt;h2&gt;什么是滤镜&lt;/h2&gt;
+&lt;p&gt;滤镜最初是指安装在相机镜头前过滤自然光的附加镜头，用来实现调色和添加效果。一些数字图像处理软件（最著名的如 Adobe Photoshop）提供了一些特定的预设工具用来实现相机滤镜的效果，这些工具也就自然而然地被称作“滤镜”。软件实现的滤镜可以模拟大部分的镜头滤镜，如色温变换滤镜（LB）和强调滤镜等，但由于无法再现拍摄环境，软件滤镜无法复原照片中未包含的信息，进而也难以实现偏光镜和紫外线滤色镜（UV）的效果。&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lens-collection.jpg" alt="相机滤镜" class="fill" /&gt;&lt;/p&gt;
+
+
+&lt;h2&gt;实现滤镜的步骤&lt;/h2&gt;
+&lt;p&gt;就模拟镜头滤镜而言，实现软件滤镜无外乎是对照片中的色彩进行映射的过程。然而软件滤镜并不止于此，复杂的软件滤镜还需要为照片增加光线变化（如 LOMO 的暗角效果）、材质和相框等，最近美图秀秀针对国内环境问题推出的“去雾霾”滤镜正是复杂的软件滤镜的一种体现。不过再复杂的软件滤镜，实现起来也不外乎如下几个步骤。&lt;/p&gt;
+&lt;h3&gt;1. 颜色映射&lt;/h3&gt;
+&lt;p&gt;昏黄的颜色让人联想到古老与质朴，淡绿的颜色让人感到柔和与舒适：颜色是一张照片的灵魂，而实现滤镜最重要的一步就是颜色映射。颜色映射是指将原来照片中的每一种颜色，通过某种映射方法转换成另一种颜色。最常见也最简单的映射方法是查表法。&lt;/p&gt;
+&lt;p&gt;查表法的原理是在一张表中为每种颜色记录一个对应的映射目标颜色，当用查表法对一张照片做颜色映射时，只需要遍历照片的每个像素点，然后在表中找到该像素颜色对应的目标颜色，最后将该像素设置为目标颜色即可。查表法实现的前提是颜色的映射与周围的颜色无关，即一种颜色无论周围的颜色为何、无论其位于照片的哪个位置，其目标颜色都应该是相同的。&lt;/p&gt;
+&lt;p&gt;RGB 可以表示的颜色数量为 &lt;code&gt;256*256*256 = 16,777,216&lt;/code&gt;，如果要记录每种颜色的映射结果，那么颜色表需要 一千六百多万条记录，这显然无法应用到实际的工程中。为了简化起见，一般每相近的 4 种颜色采用一条记录存储，这样颜色表只需要 &lt;code&gt;64 * 64 * 64 = 262,144&lt;/code&gt; 条记录。&lt;/p&gt;
+&lt;p&gt;这里以 &lt;a href="https://plus.google.com/105075060804712942346/posts"&gt;Lev Zelensky&lt;/a&gt; 首先发表的一个基准颜色表为例：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lookup-table.png" alt="基准颜色表" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;上表将 262,144 种颜色分为 8 个块，每块 &lt;code&gt;64 * 64&lt;/code&gt; 格，每一格的颜色都不同。进行颜色映射时，首先使用数字图像处理软件对该基准颜色表应用要模拟的滤镜来生成映射表（如下图），然后对要处理的照片的每个像素，从基准颜色表中找到该像素颜色的位置，然后在映射表的相应位置就可以得到目的颜色。&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/lookup-table-yellow.png" alt="昏黄滤镜映射表" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;Lev Zelensky 为 iOS/OS X 上著名的图像处理库 &lt;a href="https://github.com/BradLarson/GPUImage"&gt;GPUImage&lt;/a&gt; 加入了 &lt;a href="https://github.com/BradLarson/GPUImage/blob/master/framework/Source/GPUImageLookupFilter.h"&gt;&lt;code&gt;GPUImageLookupFilter)&lt;/code&gt;&lt;/a&gt; 方法来实现上述过程。&lt;/p&gt;
+&lt;h3&gt;2. 叠加材质&lt;/h3&gt;
+&lt;p&gt;只进行颜色映射就可以实现大部分简单的滤镜，然而复杂的滤镜需要更多的步骤来完成。其中最为典型的就是 &lt;a href="http://en.wikipedia.org/wiki/Lomography"&gt;LOMO&lt;/a&gt; 效果了。要实现 LOMO 效果，除了通过颜色映射让颜色更加鲜艳外，还需要为照片增加四周的暗角。首先需要一张暗角素材：&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://zihua.li/images/2014-06-15_implement-instagram-like-filters/overlay.png" alt="暗角素材" class="fill" /&gt;&lt;/p&gt;
+&lt;p&gt;然后将该素材叠在照片上，并应用 &lt;a href="http://en.wikipedia.org/wiki/Blend_modes#Overlay"&gt;Overlay&lt;/a&gt; 混合算法。&lt;/p&gt;
+&lt;p&gt;要注意的是根据材质不同，可以选择不同的混合算法。只是对暗角这一材质而言，Overlay 可以带来最好的效果。另外一点就是先进行颜色映射还是先叠加材质并没有固定的规则，需要根据实际效果进行选择。就 LOMO 暗角而言，先叠加材质的效果更好。&lt;/p&gt;
+&lt;h3&gt;3. 应用相框&lt;/h3&gt;
+&lt;p&gt;严格来说相框并不属于滤镜的一部分，但是考虑到好的相框可以为照片提色不少，这里也顺便提一句。根据相框的不同，应用的照片上的方法也不同，有的相框可以直接盖在照片上，有的则需要按照某种混合算法和照片进行混合，但无论哪种方式，应用相框都算是整个滤镜最简单的部分了。与相框类似的就是照片装饰物，比如一颗桃心或用户可以自定义的文字，实现照片装饰物并没有任何技术难度，唯一要记住的点就是不要胡乱的为你的滤镜加入装饰物，否则会让滤镜落入俗套。&lt;/p&gt;
+&lt;h3&gt;4. 反复&lt;/h3&gt;
+&lt;p&gt;最终的滤镜效果可能需要反复应用上面的步骤才能实现，比如 Instagram 的滤镜很多都是应用了多种材质才得以完成。这一过程需要设计者的保留充分的耐心，一点一点地琢磨，一款优秀的滤镜才能得以诞生。&lt;/p&gt;</summary></entry><entry><title>Good Practices to Structure an Express App</title><link href="http://zihua.li/2014/05/good-practices-to-structure-an-express-app/" rel="alternate"></link><updated>2014-05-21T00:00:00+02:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-05-21:2014/05/good-practices-to-structure-an-express-app/</id><summary type="html">&lt;p&gt;Having heavily used the &lt;a href="http://expressjs.com"&gt;Express&lt;/a&gt; framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow. Here they are.&lt;/p&gt;
+&lt;h2&gt;1. RESTful Routes&lt;/h2&gt;
+&lt;p&gt;While there are many ways we can set up routes, the most important thing to keep in mind is to put the URL definition and its routes (i.e. middlewares) in the same place.&lt;/p&gt;
+&lt;p&gt;When writing code like &lt;code&gt;app.get('/users', require('./routes').getUsers)&lt;/code&gt;, you are actually making your application fragmented instead of modular because the coupling between a URL and it's route is in fact relatively high.&lt;/p&gt;
+&lt;p&gt;For example, when making some changes on the &lt;a href="http://expressjs.com/4x/api.html#req.params"&gt;named parameter&lt;/a&gt; of the URL, you have to alter the route accordingly. If the url and the route definition are in different places, it takes more time to find them and change them both during development.&lt;/p&gt;
+&lt;p&gt;To modularize my Express app, what I do instead is to separate the routes by resources. In RESTful programming, a resource is similar to an object instance in an object-oriented programming language. The coupling between resources is low and each resource is relatively self-contained, which means they can be separated naturally.&lt;/p&gt;
+
+
+&lt;p&gt;Since Express can mount apps as middlewares, I create an app for each resource, and put them in their own modules. I put these modules in a sub-folder (e.g. &lt;code&gt;/routes&lt;/code&gt;). Here's the structure of a typical Express project following this convention:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;project
+  |- routes
+  |   |- index.js
+  |   |- users.js
+  |   |- projects.js
+  |   |- tasks.js
+  |- app.js
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;code&gt;routes/index.js&lt;/code&gt; is used to load all the routes:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;routes&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;node-require-directory&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="nx"&gt;__dirname&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nb"&gt;Object&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;routes&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;forEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt; &lt;span class="o"&gt;===&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;use&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;routes&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Then it's easy to load all the routes in the &lt;code&gt;app.js&lt;/code&gt; by just requiring the &lt;code&gt;routes/index.js&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;require(&amp;#39;./routes&amp;#39;)(app);
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Notice that the mount path of a route is the basename of its source file. So we can define the user resource in the file &lt;code&gt;routes/users.js&lt;/code&gt; like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/:userId&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// do something&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;It would be mounted as &lt;code&gt;/users/:userId&lt;/code&gt; instead of &lt;code&gt;/:userId&lt;/code&gt; because &lt;code&gt;app.js&lt;/code&gt; used &lt;code&gt;/users&lt;/code&gt; as the path prefix. Awesome!&lt;/p&gt;
+&lt;h2&gt;2. Global variables&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Global variables are evil.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Global variables are variables that are accessible from every scope in your project, even in different modules.&lt;/p&gt;
+&lt;p&gt;Many people think that global variables are evil and refuse to use them in their projects. But I believe that rational use of them can make your project more efficient to develop. For instance, database connections (or models if you are using ORM or ODM) are very well suited to be defined as global variables because they are used pervasively in a typical Express project.&lt;/p&gt;
+&lt;p&gt;The simplest way to create a global variable is to declare a variable without the &lt;code&gt;var&lt;/code&gt; keyword. However, I strongly oppose this way because of its potential ambiguity. It is not clear whether a variable was intended as a global variable or if the developer forgot the &lt;code&gt;var&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Instead, I declare a global variable by adding it to the &lt;code&gt;GLOBAL&lt;/code&gt; object:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&amp;gt; GLOBAL.str = &amp;#39;this is a global variable&amp;#39;;
+&amp;#39;this is a global variable&amp;#39;
+&amp;gt; str
+&amp;#39;this is a global variable&amp;#39;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;I am a huge fan of ORM/ODM, and &lt;a href="http://mongoosejs.com"&gt;Mongoose&lt;/a&gt; and &lt;a href="http://sequelizejs.com"&gt;Sequelize&lt;/a&gt; are often used in my Express projects. When I use them, I would be bound to expose the ORM/ODM models as global variables so that I can access them everywhere:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;find&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt; &lt;span class="nx"&gt;email&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;email&lt;/span&gt; &lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// ...&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In the code above, the global variable &lt;code&gt;User&lt;/code&gt; is a Mongoose model.&lt;/p&gt;
+&lt;h2&gt;3. Dependency Injection&lt;/h2&gt;
+&lt;p&gt;Middleware is a low-level concept of the &lt;a href="http://www.senchalabs.org/connect/"&gt;Connect&lt;/a&gt;, and it's not applicable to every scenario we come across when coding on a higher level. For instance, if you want to pass variables between middlewares, you have to tack on properties to &lt;code&gt;req&lt;/code&gt;, which seems odd and uncontrollable(that you couldn't point out easily which middleware add what properties to &lt;code&gt;req&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;To avoid this problem, I wrote a library to bring dependency injection to the Express. Visit it's &lt;a href="https://github.com/luin/express-di"&gt;GitHub page&lt;/a&gt; to learn about what is it and how to use it.&lt;/p&gt;
+&lt;p&gt;I always create a &lt;code&gt;factories&lt;/code&gt; folder to store all the dependencies in my Express app like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;project
+  |- factories
+  |   |- user.js
+  |   |- index.js
+  |- app.js
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Just like routes, &lt;code&gt;factories/index.js&lt;/code&gt; is used to load all the factories:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;factories&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;node-require-directory&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;&lt;span class="nx"&gt;__dirname&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nb"&gt;Object&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;keys&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;factories&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;forEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt; &lt;span class="o"&gt;===&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;factories&lt;/span&gt;&lt;span class="cp"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="cp"&gt;]&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;And in the &lt;code&gt;app.js&lt;/code&gt;, we can &lt;code&gt;require&lt;/code&gt; all the factories like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;require(&amp;#39;./factories&amp;#39;)(app);
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;4. Configuration&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://github.com/lorenwest/node-config"&gt;Node-config&lt;/a&gt; is an awesome configuration system for Node.js. It loads different configurations according to the runtime environments (specified by &lt;code&gt;NODE_ENV&lt;/code&gt;), and It's easy to use the configuration in the code, just &lt;code&gt;var config = require('config')&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In my Express app, there's a &lt;code&gt;config&lt;/code&gt; folder to hold all the configuration files. However, considering a config can vary between deploys, the only file to check into version control  is a sample config file named &lt;code&gt;_sample.yaml&lt;/code&gt;. When deploying the app, just copy &lt;code&gt;_sample.yaml&lt;/code&gt; to &lt;code&gt;$NODE_ENV.yaml&lt;/code&gt;, usually &lt;code&gt;production.yaml&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;What's more, when using an automatic deployment script, it's not easy to change the configuration file. Luckily, Node-config supports environment variables and command line arguments as well.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;I created a small reference app to codify a standard Express app structure. You can see it &lt;a href="https://github.com/luin/express-mongoose"&gt;here&lt;/a&gt;.&lt;/p&gt;</summary></entry><entry><title>在 Node.js 中测试模块的内部成员</title><link href="http://zihua.li/2014/03/test-private-methods-in-nodejs/" rel="alternate"></link><updated>2014-03-27T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-03-27:2014/03/test-private-methods-in-nodejs/</id><summary type="html">&lt;p&gt;模块（Module）的内部成员是指没有通过 &lt;code&gt;module.exports&lt;/code&gt; 导出的变量或函数。如下面的示例模块：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;A&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// 执行某些操作&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;其中函数 &lt;code&gt;A&lt;/code&gt; 就是该模块的内部成员，而命名函数表达式（Named Function Expression） &lt;code&gt;B&lt;/code&gt; 则是该模块的公开成员。绝大多数情况下，单元测试只关注模块的公开成员，这是因为公开成员代表着模块的接口与功能，而内部成员则与模块的具体实现相关。对模块的内部成员进行测试，意味着测试代码需要了解模块的实现细节，导致测试代码与实现代码高度耦合，进而阻碍日后对代码的重构，这显然违背了单元测试的本意。而且实践 TDD 时，测试先于实现，更谈不上对模块的实现细节进行测试了。&lt;/p&gt;
+&lt;p&gt;然而凡事都有例外，实践时并不能百分之百地保证测试代码不需要直接访问模块内部成员。下面本文将就两种情况对如何测试模块内部成员进行介绍。&lt;/p&gt;
+
+
+&lt;h3&gt;1. 引入的外部模块&lt;/h3&gt;
+&lt;p&gt;当要测试的模块包含依赖外部资源的操作（如请求网络数据）时，我们需要 &lt;a href="http://en.wikipedia.org/wiki/Test_stub"&gt;Stub&lt;/a&gt; 该操作。考虑下面的代码：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;// 文件名：get_url_content.js&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;request&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;request&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;callback&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;request&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;callback&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;该模块通过引入 &lt;a href="https://github.com/mikeal/request"&gt;Request&lt;/a&gt; 库，提供了一个获取网页内容的接口。显然在测试时我们需要对 &lt;code&gt;request.get&lt;/code&gt; 进行 Stub。然而因为 &lt;code&gt;request&lt;/code&gt; 并未被导出（即为内部成员），无法直接被外界访问，所以在测试代码中直接操作 &lt;code&gt;request.get&lt;/code&gt; 看上去很难实现。不过特殊的是，使用 &lt;code&gt;require&lt;/code&gt; 函数引入外部模块时，Node.js 会根据模块的实际文件路径进行缓存，同一路径的模块只会加载一次。这就意味着同一进程的多个模块引入同一外部模块时，得到的是同一对象。即如果在测试代码中同样引入 Request 模块并对其 &lt;code&gt;get&lt;/code&gt; 方法进行 Stub，就如同在要测试的模块中对 &lt;code&gt;request.get&lt;/code&gt; 进行 Stub。于是测试代码可以写成：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;sinon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;sinon&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;getUrlContent&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;./get_url_content&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;request&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;request&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;describe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;getUrlContent(url, callback)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;http://example.com&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;source code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="nx"&gt;beforeEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;sinon&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;stub&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;request&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;get&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;withArgs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;yields&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+
+  &lt;span class="nx"&gt;it&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;should return the source code&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;done&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;getUrlContent&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;url&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;result&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;result&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;should&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;eql&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+      &lt;span class="nx"&gt;done&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+
+  &lt;span class="nx"&gt;afterEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;request&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;restore&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面的代码使用了 &lt;a href="http://sinonjs.org"&gt;Sinon&lt;/a&gt; 库实现 Stub。Sinon 是一个非常好用的测试辅助框架，提供了对 Spy, Stub 和 Mock 的支持。&lt;/p&gt;
+&lt;h2&gt;2. 对内部定义的成员测试&lt;/h2&gt;
+&lt;p&gt;如果要测试的内部成员是在模块中定义的而非通过 &lt;code&gt;require&lt;/code&gt; 加载而来，对其测试就变得相对困难了。让我们再回头看文章开头的例子：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;// 文件名：module_b.js&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;A&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// 执行某些操作&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;module&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;exports&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;如果要对函数 &lt;code&gt;A&lt;/code&gt; 进行测试，因为 &lt;code&gt;A&lt;/code&gt; 并未导出，所以在测试代码中通过 &lt;code&gt;require&lt;/code&gt; 引入该模块是无法直接访问到 &lt;code&gt;A&lt;/code&gt; 的，更谈不上测试。这时可以使用 &lt;a href="https://github.com/jhnns/rewire"&gt;Rewire 库&lt;/a&gt; 提供的 &lt;code&gt;rewire&lt;/code&gt; 方法来代替 &lt;code&gt;require&lt;/code&gt; 以实现访问内部成员的目的。&lt;code&gt;rewire&lt;/code&gt; 的工作方式和 &lt;code&gt;require&lt;/code&gt; 几乎相同，只不过前者额外为被引入的模块提供两个方法 &lt;code&gt;__get__&lt;/code&gt; 和 &lt;code&gt;__set__&lt;/code&gt;，分别用来读取和写入该模块的内部成员。&lt;/p&gt;
+&lt;p&gt;首先使用 &lt;code&gt;npm install rewire&lt;/code&gt; 来安装 Rewire，然后在测试代码中使用 &lt;code&gt;rewire&lt;/code&gt; 来引入要测试的模块（即上面的 module_b.js）：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;rewire&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rewire&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;rewire&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;./module_b&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;A&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;__get__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;A&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面的代码中，我们使用 &lt;code&gt;B.__get__('A')&lt;/code&gt; 就可以获得 B 模块中的内部成员 &lt;code&gt;A&lt;/code&gt;，进而可以对 &lt;code&gt;A&lt;/code&gt; 进行测试。使用 Rewire 使得测试模块内部成员变得非常简单，但是务必要注意永远不要让其出现在非测试代码中，因为 Rewire 会破坏 Node.js 的模块系统，从而导致代码混乱。&lt;/p&gt;</summary></entry><entry><title>Express 框架中间件的依赖问题与解决方案</title><link href="http://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares/" rel="alternate"></link><updated>2014-03-11T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2014-03-11:2014/03/using-dependency-injection-to-optimise-express-middlewares/</id><summary type="html">&lt;p&gt;作为 Node 社区最受欢迎的框架，&lt;a href="http://expressjs.com"&gt;Express&lt;/a&gt; 在沿用 &lt;a href="http://www.senchalabs.org/connect/"&gt;Connect&lt;/a&gt; 的 middleware 机制的同时，还提供了在定义路由时使用的 route-specific middleware（下面称“路由中间件”）。路由中间件与 Connect 的 middleware 十分相似，可以用来执行预载入资源或校验请求等操作。然而由于路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。&lt;/p&gt;
+&lt;p&gt;下面是使用路由中间件从数据库载入用户资料的示例，这段代码来自 &lt;a href="http://tjholowaychuk.com"&gt;TJ&lt;/a&gt;（Express 的作者）的一个 &lt;a href="http://www.screenr.com/elL"&gt;Screencast&lt;/a&gt;：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;session&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;在上面的代码中，我们定义了路由中间件 &lt;code&gt;loadUser&lt;/code&gt;。&lt;code&gt;loadUser&lt;/code&gt; 从数据库中读取用户数据后，将 &lt;code&gt;user&lt;/code&gt; 对象通过 &lt;code&gt;req&lt;/code&gt; 的 &lt;code&gt;currentUser&lt;/code&gt; 属性传递给下一个路由中间件。这种通过 &lt;code&gt;req&lt;/code&gt; 对象的属性传递数据的模式在 Express 中很常见。当项目比较小的时候这种模式非常方便易用，可是随着项目不断发展，这种模式会暴露出不少问题，至于具体有哪些问题，请继续往下看。&lt;/p&gt;
+
+
+&lt;p&gt;现在我们需要限制只有管理员可以访问 dashboard 页面，代码如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;session&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;!==&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nb"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;access denied&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;loadUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;admin&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;我们又定义了一个路由中间件 &lt;code&gt;role()&lt;/code&gt;，当用户的角色不是管理员时该中间件就会传出异常。虽然需求已经满足，但是上面这段代码存在两个问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;如果要使用 &lt;code&gt;role()&lt;/code&gt; 中间件，就必须在前面引入 &lt;code&gt;loadUser&lt;/code&gt; 中间件，即实际上 &lt;code&gt;loadUser&lt;/code&gt; 是 &lt;code&gt;role()&lt;/code&gt; 的一个隐含依赖，然而“中间件”的语义无法表现出依赖关系，导致代码可读性大大降低。&lt;/li&gt;&lt;/li&gt;
+&lt;li&gt;在渲染 dashboard 页面时我们使用了 &lt;code&gt;req.currentUser&lt;/code&gt; 对象，然而我们并不明确地知道 &lt;code&gt;currentUser&lt;/code&gt; 这个属性是前面的哪个路由中间件（&lt;code&gt;loadUser&lt;/code&gt; 还是 &lt;code&gt;role()&lt;/code&gt;）加到 &lt;code&gt;req&lt;/code&gt; 上的，代码可读性较差，对重构亦不友好。路由中间件的定义和路由的定义存放在不同的文件时这个问题更加明显。&lt;/li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;随着网站的复杂，单个路由上的路由中间件的数量增多，上述两个问题会越来越严重。如下面这个有些极端的例子：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;b&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;age&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;20&lt;/span&gt; &lt;span class="p"&gt;};&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware3&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;middleware4&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;b&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;age&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;18&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nb"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;access denied&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;middleware4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;index&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;在上面的例子中，我们定义了 4 个路由中间件，其中可以分析出，&lt;code&gt;middleware4&lt;/code&gt; 依赖于 &lt;code&gt;middleware2&lt;/code&gt;，&lt;code&gt;middleware1&lt;/code&gt; 为 &lt;code&gt;req&lt;/code&gt; 加上了 &lt;code&gt;a&lt;/code&gt; 属性，此外 &lt;code&gt;middleware3&lt;/code&gt; 并没有用到。可以看到此时我们的代码已经混乱不堪了：开发者很难看出到底是哪个中间件向 &lt;code&gt;req&lt;/code&gt; 添加了什么属性，更难轻易指出中间件的依赖关系。当我们要定义另外一个路由时，如果我们想使用 &lt;code&gt;req.a&lt;/code&gt;，就不得不找到前面这 4 个路由中间件的定义挨个看 &lt;code&gt;req.a&lt;/code&gt; 是在哪定义的，如果这些中间件定义在不同的文件中，那么这一过程无疑非常痛苦。&lt;/p&gt;
+&lt;h2&gt;解决方案：依赖注入&lt;/h2&gt;
+&lt;p&gt;使用过 &lt;a href="http://angularjs.org"&gt;Angular&lt;/a&gt; 框架的人可能会对其中的依赖注入模式印象深刻。依赖注入是一种解决代码依赖的软件设计模式，具体可以查阅维基百科或设计模式相关的书籍。&lt;/p&gt;
+&lt;p&gt;在 Angular 中，一个 Controller 一般会需要若干个依赖，比如 &lt;code&gt;$http&lt;/code&gt;（用来读取网络资源）或 &lt;code&gt;$location&lt;/code&gt;（用来获取、设置当前网页的 URL）。比起在 Controller 中手工引入并创建这些依赖，Angular 借助依赖注入模式使得我们可以直接在 Controller 函数中通过形参声明所需要的依赖，而 Angular 会根据形参列表将对应的依赖作为实参传入。如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;Controller&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;$http&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;$location&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="c1"&gt;// 此处可以直接使用 $http 和 $location 两个依赖&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;实践表明这种模式在处理依赖关系时非常方便。受此启发，我开发了 &lt;a href="https://github.com/luin/express-di"&gt;express-di&lt;/a&gt; 插件，能够把依赖注入模式引入到 Express 中以解决路由中间件的依赖问题。使用方法非常简单，首先使用 npm 来安装：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;npm install --save express-di
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;而后在 Express 项目中引入 express-di 就可以了：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="c1"&gt;// Require express-di&lt;/span&gt;
+&lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express-di&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;此时你的 Express 项目中的所有路由中间件都支持依赖注入了！让我们回过头来看看有了 express-di 后我们能够把上面那个 loadUser 的例子改成什么样：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;currentUser&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;User&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;findById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;session&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;userId&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;role&lt;/span&gt; &lt;span class="o"&gt;!==&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nb"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;access denied&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+  &lt;span class="p"&gt;};&lt;/span&gt;
+&lt;span class="p"&gt;};&lt;/span&gt;
+
+&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;role&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;admin&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;currentUser&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;dashboard&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;currentUser&lt;/span&gt; &lt;span class="p"&gt;});&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这段代码和之前的代码有两个显著不同的地方：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;去除 &lt;code&gt;loadUser&lt;/code&gt; 中间件，将其本质化，即转换成它本身的角色：依赖。我们使用 express-di 提供的 &lt;code&gt;app.factory&lt;/code&gt; 方法定义依赖，该方法接收两个参数，第一个参数是依赖名称，第二个参数是依赖的定义函数，定义函数和 Connect 的 middleware 相似，唯一的不同是前者中的 &lt;code&gt;next&lt;/code&gt; 函数接受两个参数，第一个参数是 node.js 的惯例——err，当 err 为非 [cci lang="javascript"]null` 时，定义函数会和普通的路由中间件一样将 err 传出；第二个参数是该依赖对应的值。&lt;/li&gt;&lt;/li&gt;
+&lt;li&gt;将路由中间件的形参从 &lt;code&gt;(req, res, next)&lt;/code&gt; 转变为依赖声明。如 &lt;code&gt;role()&lt;/code&gt; 中间件中声明了 &lt;code&gt;currentUser&lt;/code&gt; 和 &lt;code&gt;next&lt;/code&gt; 两个依赖，而最后一个中间件（即负责渲染视图的函数）则声明了 &lt;code&gt;currentUser&lt;/code&gt; 和 &lt;code&gt;res&lt;/code&gt; 两个依赖。&lt;/li&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;可以明显看到，express-di 模块通过将路由中间件中作为依赖的部分提取出来进行语义化，从而解决了前文中提到的问题。另外 express-di 模块预定义了 3 个依赖，分别为 &lt;code&gt;req&lt;/code&gt;, &lt;code&gt;res&lt;/code&gt; 和 &lt;code&gt;next&lt;/code&gt;，使得其可以完美兼容传统的路由中间件的定义，不会有任何兼容问题。&lt;/p&gt;
+&lt;h3&gt;对子 App 的支持&lt;/h3&gt;
+&lt;p&gt;当项目比较大的时候，我们经常会将项目拆分成多个 express app，如：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;mainApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;subApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;use&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上面代码中，&lt;code&gt;subApp&lt;/code&gt; 是 &lt;code&gt;mainApp&lt;/code&gt; 的子 App。express-di 对这种使用方法提供了非常好的支持，子 App 会继承父 App 定义的依赖，同时子 App 定义的依赖不会影响到父 App，例子如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;express-di&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;mainApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;subApp&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;express&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;use&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;parents&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;parents&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;factory&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;children&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;next&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;children&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="nx"&gt;mainApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/parents&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;children&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;children&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+
+&lt;span class="nx"&gt;subApp&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/children&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;parents&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;res&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;json&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;parents&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;上述代码执行后，访问 /parents 时程序会报错，提示 "Unrecognized dependency: children"，而访问 /children 时，页面会打印出 "parents"。&lt;/p&gt;
+&lt;h3&gt;性能与缓存&lt;/h3&gt;
+&lt;p&gt;express-di 模块会在程序启动阶段解析依赖，启动后就和普通的 Express 项目没有区别了，性能并不受影响。同时单个请求中的同一个依赖会被缓存起来，只执行一次，所以使用 express-di 反而可能会比使用传统模式写出来的代码拥有更好的性能。&lt;/p&gt;
+&lt;h3&gt;单元测试&lt;/h3&gt;
+&lt;p&gt;当你通过依赖注入模式将依赖引入路由后，你会发现在单元测试时可以非常方便地将 mock 对象传入路由，而这正是依赖注入模式的另一个好处。&lt;/p&gt;
+&lt;h2&gt;结论&lt;/h2&gt;
+&lt;p&gt;我在最近的几个 Express 项目中使用了 express-di 模块，并惊喜地发现这个模块使项目代码的可读性和可维护性大大增加。而且因为 express-di 兼容传统的路由定义方法，你可以非常方便地在现有的项目中引入 express-di，从而使新定义的路由能享受依赖注入带来的便利，同时又无需对老的代码做任何修整。&lt;/p&gt;
+&lt;p&gt;项目地址在：&lt;a href="https://github.com/luin/express-di"&gt;https://github.com/luin/express-di&lt;/a&gt;。欢迎 star 或提 issue！&lt;/p&gt;</summary><category term="dependency"></category><category term="injection"></category><category term="express"></category><category term="express-di"></category><category term="middleware"></category><category term="node.js"></category></entry><entry><title>纯 CSS 实现高度与宽度成比例的效果</title><link href="http://zihua.li/2013/12/keep-height-relevant-to-width-using-css/" rel="alternate"></link><updated>2013-12-09T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2013-12-09:2013/12/keep-height-relevant-to-width-using-css/</id><summary type="html">&lt;div class="clearfix"&gt;
+  &lt;div class="left"&gt;
+    最近在做一个产品列表页面，布局如右图所示。页面中有若干个 item，其中每个 item 都向左浮动，并包含在自适应浏览器窗口宽度的父元素中。
+  &lt;/div&gt;
+  &lt;aside class="right pull-right"&gt;
+    &lt;img src="http://zihua.li/images/keep-height-relevant-to-width-using-css.png" width="190" height="200" /&gt;
+  &lt;/aside&gt;
+&lt;/div&gt;
+
+&lt;p&gt;item 元素的 CSS 定义如下：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;2%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;21%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这时遇到的一个需求：&lt;strong&gt;在保持 item 元素宽高比恒定（如高是宽的 1.618 倍）的情况下，使得 item 元素可以和父元素同比缩放。&lt;/strong&gt; 我们知道，如果当 item 元素是图片，同时需要保持的宽高比恰好为图片本身的宽高比时，可以设置 item 的 &lt;code&gt;height&lt;/code&gt; 为 &lt;code&gt;auto&lt;/code&gt; 即可轻松实现这个需求。然而当 item 元素不是图片或者要保持的宽高比和图片本身的宽高比不同时，这个需求显得很难直接用 CSS 实现。&lt;/p&gt;
+&lt;p&gt;为此我放弃 CSS，直接用 JavaScript 绑定 &lt;code&gt;window&lt;/code&gt; 的 &lt;code&gt;onresize&lt;/code&gt; 事件来动态获取每个 item 的宽度，从而计算并设置其高度。&lt;/p&gt;
+&lt;p&gt;我一直在使用这个解决方案，直到今天调整样式时，突然想到这个需求竟然是可以只使用 CSS 解决的。&lt;/p&gt;
+
+
+&lt;p&gt;首先需要知道，一个元素的 &lt;code&gt;padding&lt;/code&gt;，如果值是一个百分比，那这个百分比是相对于其父元素的宽度而言的，即使对于 &lt;code&gt;padding-bottom&lt;/code&gt; 和 &lt;code&gt;padding-top&lt;/code&gt; 也是如此。&lt;/p&gt;
+&lt;p&gt;另外，在计算 Overflow 时，是将元素的内容区域（即 &lt;code&gt;width&lt;/code&gt; / &lt;code&gt;height&lt;/code&gt; 对应的区域）和 Padding 区域一起计算的。换句话说，即使将元素的 &lt;code&gt;overflow&lt;/code&gt; 设置为 &lt;code&gt;hidden&lt;/code&gt;，“溢出”到 Padding 区域的内容也会照常显示。&lt;/p&gt;
+&lt;p&gt;综上两条所述，我们可以使用 &lt;code&gt;padding-bottom&lt;/code&gt; 来代替 &lt;code&gt;height&lt;/code&gt; 来实现高度与宽度成比例的效果。因为 item 元素的宽度是其父元素宽度的 21%，所以我们将 &lt;code&gt;padding-bottom&lt;/code&gt; 设置为它的 1.618 倍，即 33.98%。同时将其 &lt;code&gt;height&lt;/code&gt; 设置为 &lt;code&gt;0&lt;/code&gt; 以使元素的“高度”等于 &lt;code&gt;padding-bottom&lt;/code&gt; 的值，从而实现需要的效果。&lt;/p&gt;
+&lt;p&gt;最后 item 元素的 CSS 样式为：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nc"&gt;.item&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="k"&gt;float&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;left&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;margin&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;10px&lt;/span&gt; &lt;span class="m"&gt;5%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;padding-bottom&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;33.98%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;21%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="k"&gt;height&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;页面效果见 &lt;a href="http://jsfiddle.net/luin/25BbH/7/"&gt;http://jsfiddle.net/luin/25BbH/7/&lt;/a&gt;，拖动窗口调整页面宽度，item 元素始终保持恒定的宽高比。&lt;/p&gt;
+&lt;p&gt;同样，这个解决方案也自然支持前文说的“当 item 元素是图片但要保持的宽高比和图片本身的宽高比不同”的情况，具体见我在 Ruby China 上的一篇回复：&lt;a href="http://ruby-china.org/topics/17011#reply15"&gt;图片 CSS：怎样才能“响应式+固定宽高比例”？&lt;/a&gt;&lt;/p&gt;</summary><category term="css"></category><category term="ratio"></category></entry><entry><title>我的 Vim 常用插件和键位映射配置</title><link href="http://zihua.li/2013/11/my-vim-configuration-plugin/" rel="alternate"></link><updated>2013-11-17T00:00:00+01:00</updated><author><name>Zihua Li</name></author><id>tag:zihua.li,2013-11-17:2013/11/my-vim-configuration-plugin/</id><summary type="html">&lt;p&gt;写给那些从来不使用别人的 Vim 的人&lt;/p&gt;
+&lt;p&gt;记得刚接触 Mac 时，我是用 &lt;a href="http://panic.com/coda/" target="_blank"&gt;Coda&lt;/a&gt; 写代码的，写了很长很长时间。之后 &lt;a href="http://www.sublimetext.com" target="_blank"&gt;Sublime Text&lt;/a&gt; 大火，便也尝试了几个月。到了如今，已经不知不觉地当了两年的 Vim 党。&lt;/p&gt;
+&lt;p&gt;Vim 是个神奇的编辑器，不论编辑哪种语言的代码，总能找到一些插件来提升编码体验。就算是用了挺久的 Vim，也时不时地会听到别人说起一些自己从没用过但是很实用的技巧。虽然有时也会怀念 Coda 漂亮的界面和方便的远程文件管理，会怀念 Sublime Text  功能强大却又容易上手的设计理念。但是从没有一种理由让我换用其它编辑器，因为总会有一个 Vim 插件能够填补你内心深处的不满足。&lt;/p&gt;
+&lt;p&gt;我主要用 Vim 写些网页前后端代码，下面我将分享一些我在用的 Vim 插件和键位映射配置，完整的 .vimrc 文件可以在&lt;a href="https://github.com/luin/dotfiles/blob/master/vimrc" target="_blank"&gt;这里&lt;/a&gt;看到。&lt;/p&gt;
+
+
+&lt;h3&gt;插件&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/gmarik/vundle" target="_blank"&gt;Vundle&lt;/a&gt;
+Vundle 是一个 Vim 的插件管理工具，它使得安装插件不过是在 .vimrc 文件中增加一行描述那么简单。Vundle 吸引我的最重要的原因是让我可以将插件和其对应的配置（如键位映射）写在一起，这样当要删除某个插件时，也能很方便地将对应的配置删除。&lt;/p&gt;
+&lt;p&gt;比如下面的 .vimrc 片段中，&lt;code&gt;Bundle&lt;/code&gt; 语句告诉了 Vundle 要安装的插件名，而我将每个插件的配置写在了相应的 Bundle 的下面。这样当我要删除 Lokaltog/vim-easymotion 插件时，就可以很方便地将其对应的配置 &lt;code&gt;let g:EasyMotion_leader_key = 'f'&lt;/code&gt; 删除，避免了因为插件描述和其配置分隔两处造成的不同步现象。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Bundle &lt;span class="s1"&gt;&amp;#39;Lokaltog/vim-easymotion&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:EasyMotion_leader_key &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;f&amp;#39;&lt;/span&gt;
+
+Bundle &lt;span class="s1"&gt;&amp;#39;bling/vim-airline&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:airline_left_sep &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;
+&lt;span class="k"&gt;let&lt;/span&gt; &lt;span class="k"&gt;g&lt;/span&gt;:airline_right_sep &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/Lokaltog/vim-easymotion" target="_blank"&gt;Easymotion&lt;/a&gt;
+&lt;code&gt;f&amp;lt;char&amp;gt;&lt;/code&gt; 可以实现定位到一行中的某个字符，如 &lt;code&gt;fa&lt;/code&gt; 会定位到当前光标到行末出现的第一个 "a"。然而如果存在多个 "a"，就得通过 &lt;code&gt;f&amp;lt;number&amp;gt;a&lt;/code&gt; 来完成定位。而使用 Easymotion 后，只需要敲击 &lt;code&gt;&amp;lt;leader&amp;gt;&amp;lt;leader&amp;gt;fa&lt;/code&gt;，则该行及该行以下所有的 "a" 都将被高亮并标记序号，此时再按相应的序号即可定位到指定的 "a"。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;leader&amp;gt;&amp;lt;leader&amp;gt;&lt;/code&gt; 是 Easymotion 默认的引导键，也可以自定义。比如我将其定义为 "f"，这样用 "f" 定位字符只需要按 &lt;code&gt;ff&amp;lt;char&amp;gt;&lt;/code&gt; 即可，非常方便。&lt;/p&gt;
+&lt;p&gt;Easymotion 不仅支持 &lt;code&gt;f&lt;/code&gt;，还支持其它定位功能键，如 &lt;code&gt;w&lt;/code&gt;、&lt;code&gt;t&lt;/code&gt;。不过我 99% 的时间都只用其和 "f" 来配合。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/bling/vim-airline" target="_blank"&gt;Airline&lt;/a&gt;
+Airline 和 Powerline 类似，都是在 Vim 底部显示一个很好看的状态条，可以自定义状态条中的显示项目。不同的是 Airline 更加轻量，而且支持一些特殊插件的状态显示。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/scrooloose/nerdtree" target="_blank"&gt;The NERD tree&lt;/a&gt;
+The NERD tree 是 Vim 中的资源管理器，它是我最常用的插件之一。The NERD tree 能够查看文件夹下文件列表（包括标记文件类型状态等），执行复制、移动和删除文件（夹）等操作。&lt;/p&gt;
+&lt;p&gt;我将 Shift + m 映射为切换 The NERD tree 窗口（&lt;code&gt;map &amp;lt;S-m&amp;gt; &amp;lt;plug&amp;gt;NERDTreeTabsToggle&amp;lt;CR&amp;gt;&lt;/code&gt;）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/scrooloose/syntastic" target="_blank"&gt;Syntastic&lt;/a&gt;
+Syntastic 是一个语法检查工具，它通过外部语法检查器来校验代码，并将结果显示在 Vim 的状态栏中。Syntastic 是一个神级的插件，它可以极大地减少编码出错的概率，对于脚本语言开发者来说绝对是一个福音。&lt;/p&gt;
+&lt;p&gt;对我而言，Syntastic 最大的作用就是校验 JavaScript 代码。我通过配置 Syntastic 使用代码质量检查工具 JSHint 来检查代码错误，同时控制代码质量。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/vim-scripts/bufexplorer.zip" target="_blank"&gt;bufexplorer&lt;/a&gt;
+bufexplorer 可以加快切换 buffer 的速度。我通过 &lt;code&gt;noremap &amp;lt;silent&amp;gt; &amp;lt;CR&amp;gt; :BufExplorer&amp;lt;CR&amp;gt;&lt;/code&gt; 将回车键映射为显示 buffer 列表，同时在 buffer 列表中还可以使用回车键选择想要编辑的 buffer，非常方便。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/vim-scripts/nerdtree-ack" target="_blank"&gt;NERDtree + ack.vim&lt;/a&gt;
+这个插件的名字很直白，就是 The NERD tree 和 &lt;a href="https://github.com/mileszs/ack.vim" target="_blank"&gt;ack&lt;/a&gt; 两个插件的合体。这个插件为 The NERD tree 的文件菜单中加入了搜索功能，可以实现搜索整个文件夹，不用再单独调用 grep 之类的命令了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/terryma/vim-multiple-cursors" target="_blank"&gt;vim-multiple-cursors&lt;/a&gt;
+Sublime Text 支持多个光标选择功能，在重构时非常有用。这个插件将 Sublime Text 中的这个邪恶功能引入了 Vim。想要修改变量名时，只需要将光标放在变量名内，然后多次敲击 Ctrl + n，即可将多个同名变量选中，此时再按 s 就能同时将这些变量重命名了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/tpope/vim-commentary" target="_blank"&gt;Commentary&lt;/a&gt;
+Commentary 可以帮你注释代码。只需要选中要注释的内容，然后敲击 gcc 即可将这段内容注释（Commentary 会根据当前的 filetype 使用不同的注释符号），再次敲击 gcc 即可还原注释。我做了如下映射：&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;nmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; gcc
+vmap &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;BS&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; gc
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;即在 normal 模式下，敲击退格键可以注释当前行，在 visual 模式下，敲击退格键可以注释选中的内容。平时无聊时，我就会不停地按退格键来注释/还原注释，还是挺能消磨时间的 :P。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/terryma/vim-expand-region" target="_blank"&gt;vim-expand-region&lt;/a&gt;
+这个插件用来扩展选择的内容。比方说当前光标在一对双引号中，双引号包含在一对括号中，此时敲击 &lt;code&gt;+&lt;/code&gt; 可以选中双引号中的内容，再敲击 &lt;code&gt;+&lt;/code&gt; 可以选中括号中的内容。我将其绑定为最大的空格键以显示我对这个插件的虔诚。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;键位映射&lt;/h3&gt;
+
+&lt;p&gt;每个 Vim 使用者都有自己的键位映射，通过映射键位可以在一些小的地方大大提高 Vim 的使用效率。下面列举几个我的映射配置。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;将分号和冒号互换&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;nnoremap&lt;/span&gt; ; :
+&lt;span class="nb"&gt;nnoremap&lt;/span&gt; : ;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;这样输入 &lt;code&gt;:w&lt;/code&gt; 这样的命令时可以就少敲一个键了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;使用左右光标键切换 buffer&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;noremap&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="k"&gt;silent&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;Left&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; :&lt;span class="k"&gt;bp&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="nb"&gt;noremap&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="k"&gt;silent&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;Right&lt;span class="p"&gt;&amp;gt;&lt;/span&gt; :&lt;span class="k"&gt;bn&lt;/span&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;使用 &lt;code&gt;\&lt;/code&gt; 键打开当前编辑的文件&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;nnoremap&lt;/span&gt; \ :&lt;span class="p"&gt;!&lt;/span&gt;open &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;C&lt;span class="p"&gt;-&lt;/span&gt;R&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;%&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&amp;lt;&lt;/span&gt;CR&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;粘贴时不置换“剪贴板”&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;xnoremap &lt;span class="k"&gt;p&lt;/span&gt; pgvy
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;我经常复制一段内容，在 visual 模式下选中一段文本并粘贴来实现替换，此时“剪贴板”中的内容会被替换成被删掉的文本，如果想粘贴第二次就很不方便了。这个映射解决了这个问题。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</summary><category term="plugin"></category><category term="vim"></category></entry></feed>
