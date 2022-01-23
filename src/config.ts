@@ -10,6 +10,7 @@ const config = {
     // { title: "Projects", link: "/projects" },
     { title: "About Me", link: "/about-me" },
   ],
+  googleAnalyticsTrackingId: "UA-46124852-1",
 };
 
 export default config;

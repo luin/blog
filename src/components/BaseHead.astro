@@ -44,6 +44,17 @@ const pageTitle = title ? `${title} - ${config.name}` : config.name;
   href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;700&display=swap"
 />
 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+{config.googleAnalyticsTrackingId &&
+<script async src={`https://www.googletagmanager.com/gtag/js?id=${config.googleAnalyticsTrackingId}`}></script>
+<script define:vars={{googleAnalyticsTrackingId: config.googleAnalyticsTrackingId}}>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', googleAnalyticsTrackingId);
+</script>}
+
 <style global>
   @import "../styles/blog.css";
 </style>
