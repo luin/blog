@@ -1,6 +1,7 @@
 ---
 import Layout from "layout:Base";
 import BlogPost from "../components/BlogPost.astro";
+import Banner from "../components/Banner.astro";
 
 const { content } = Astro.props;
 const { title, description, publishDate, author, heroImage, permalink, alt } =
@@ -10,5 +11,6 @@ const { title, description, publishDate, author, heroImage, permalink, alt } =
 <Layout {title} {description} {permalink}>
   <BlogPost {title} {author} {heroImage} {publishDate} {alt}>
     <slot />
+  <Banner></Banner>
   </BlogPost>
 </Layout>

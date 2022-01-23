@@ -8,6 +8,7 @@ export interface Props {
 
 import Layout from "./Base.astro";
 import Article from "component:Article";
+import Banner from "component:Banner";
 
 const { lang, title, description, permalink } = Astro.props;
 ---
@@ -15,5 +16,6 @@ const { lang, title, description, permalink } = Astro.props;
 <Layout {lang} {title} {description} {permalink}>
   <Article>
     <slot />
+    <Banner />
   </Article>
 </Layout>
