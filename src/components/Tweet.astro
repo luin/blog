@@ -24,7 +24,7 @@ const { id } = Astro.props;
 let data;
 const fetchedFile = path.join(
   dirname(fileURLToPath(import.meta.url)),
-  `../fetched/tweets/${id}.json`
+  `../../fixtures/tweets/${id}.json`
 );
 try {
   const content = await fs.readFile(fetchedFile, "utf-8");
