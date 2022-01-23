@@ -1,0 +1,19 @@
+---
+export interface Props {
+  lang?: string;
+  title?: string;
+  description?: string;
+  permalink?: string;
+}
+
+import Layout from "./Base.astro";
+import Article from "component:Article";
+
+const { lang, title, description, permalink } = Astro.props;
+---
+
+<Layout {lang} {title} {description} {permalink}>
+  <Article>
+    <slot />
+  </Article>
+</Layout>

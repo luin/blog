@@ -8,7 +8,7 @@ const config = {
   nav: [
     // { title: "Posts", link: "/posts" },
     // { title: "Projects", link: "/projects" },
-    { title: "About Me", link: "/about-me" },
+    { title: "关于我", link: "/about-me" },
   ],
   googleAnalyticsTrackingId: "UA-46124852-1",
 };
