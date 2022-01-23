@@ -7,7 +7,9 @@ import BaseFooter from "component:BaseFooter";
     <div class="wrapper">
       <div class="logo">
         <a href="/">
+        <div class="logo-bio">
           <img width="80" height="80" src="/assets/bio.jpg" />
+          </div>
         </a>
       </div>
       <slot />
@@ -47,13 +49,17 @@ import BaseFooter from "component:BaseFooter";
     justify-content: center;
     margin: calc(-2em - 40px) auto 1em;
 
-    :global(img) {
-      border-radius: 50%;
-      border: 2px solid var(--color-content-bg);
-      transition: border-color 0.4s;
+    .logo-bio {
+      background: #bed6f2;
+      border-radius: 32%;
+      height: 80px;
+      width: 80px;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
 
       &:hover {
-        border-color: var(--color-bg);
+        box-shadow: 0px 0px 15px 0px rgba(29, 28, 26, 0.05);
       }
     }
   }
