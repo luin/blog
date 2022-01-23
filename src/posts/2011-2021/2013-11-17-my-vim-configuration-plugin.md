@@ -6,7 +6,7 @@ tags:
 toc: false
 ---
 
-写给那些从来不使用别人的 Vim 的人
+写给那些从来不使用别人的 Vim 的人。
 
 记得刚接触 Mac 时，我是用  <a href="http://panic.com/coda/" target="_blank">Coda</a>  写代码的，写了很长很长时间。之后  <a href="http://www.sublimetext.com" target="_blank">Sublime Text</a>  大火，便也尝试了几个月。到了如今，已经不知不觉地当了两年的 Vim 党。
 

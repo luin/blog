@@ -1,5 +1,7 @@
 ---
 title: "在 Node.js 中测试模块的内部成员"
+description:
+  模块（Module）的内部成员是指没有通过 module.exports 导出的变量或函数。本文将分别根据两种情况对如何测试模块内部成员进行介绍。
 tags:
   - Node.js
   - testing

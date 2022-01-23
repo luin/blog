@@ -1,5 +1,6 @@
 ---
 title: "实现 vertical-align 的几种办法"
+description: "本文将介绍几种在 CSS 中实现垂直居中的几种方法。"
 tags:
   - HTML
   - JavaScript

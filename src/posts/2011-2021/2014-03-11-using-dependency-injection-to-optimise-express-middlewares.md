@@ -1,5 +1,7 @@
 ---
 title: "Express 框架中间件的依赖问题与解决方案"
+description: |
+  Express 路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。
 tags:
   - dependency
   - injection

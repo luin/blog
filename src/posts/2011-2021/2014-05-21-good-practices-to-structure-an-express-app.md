@@ -1,5 +1,7 @@
 ---
 title: "Good Practices to Structure an Express App"
+description: |
+  Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow.
 tags:
   - Node.js
 ---
