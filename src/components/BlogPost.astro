@@ -1,0 +1,179 @@
+---
+export interface Props {
+  title: string;
+  publishDate: string;
+  heroImage: string;
+  alt: string;
+}
+
+import Author from "./Author.astro";
+import Hint from "./Hint.astro";
+import config from "../config.ts";
+
+const { title, publishDate, heroImage, alt } = Astro.props;
+
+const yearsTilNow =
+  (new Date().valueOf() - new Date(publishDate).valueOf()) /
+  (365 * 24 * 3600 * 1000);
+---
+
+<div class="layout">
+  <article class="content">
+    <div>
+      <header>
+        {heroImage && (
+          <img
+            width="720"
+            height="420"
+            class="hero-image"
+            loading="lazy"
+            src={heroImage}
+            alt={alt}
+          />
+        )}
+        <p class="publish-date">{publishDate}</p>
+        <h1 class="title">{title}</h1>
+        {config.twitter && (
+          <Author
+            name={`@${config.twitter}`}
+            href={`https://twitter.com/${config.twitter}`}
+          />
+        )}
+      </header>
+      <main class="post-content">
+        {yearsTilNow > 2 ? (
+          <Hint title="请甄别文章的时效性。" type="warning">
+            <p>
+              这篇文章最后更新于 <strong>{Math.round(yearsTilNow)} 年前</strong>
+              ，其中所记录的信息可能已经不再合理或有效。如有任何建议，欢迎
+              <a href={`mailto:${config.email}`}>与我联系</a>。
+            </p>
+          </Hint>
+        ) : null}
+        <slot />
+      </main>
+    </div>
+  </article>
+</div>
+
+<style lang="scss">
+  .hero-image {
+    width: 100vw;
+    object-fit: cover;
+    object-position: center;
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+    max-width: 1280px;
+  }
+
+  @media (max-width: 50em) {
+    .hero-image {
+      height: 260px;
+      margin-top: 0;
+      margin-bottom: 2rem;
+    }
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 4px solid var(--theme-divider);
+  }
+
+  .title,
+  .author,
+  .publish-date {
+    margin: 0;
+  }
+
+  .publish-date,
+  .author {
+    color: var(--theme-text-lighter);
+  }
+
+  .title {
+    font-size: 2.25rem;
+    font-weight: 700;
+  }
+
+  :where(.post-content) {
+    :global(img) {
+      display: block;
+      max-width: 100%;
+      margin: 2em auto;
+    }
+
+    :global(figcaption) {
+      color: var(--color-muted);
+      font-size: 14px;
+      text-align: center;
+      margin: -2em 0 2em;
+    }
+
+    :global(h1),
+    :global(h2),
+    :global(h3) {
+      margin: 2em 0 0.4em;
+    }
+
+    :global(h2) {
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+
+    :global(h3) {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    :global(blockquote) {
+      margin: 2em 2em 2em;
+      background: transparent url("/assets/quote.svg") 2em top no-repeat;
+      border-left: 2px solid var(--color-divider);
+      padding: 50px 0 0 2em;
+      padding-top: 50px;
+    }
+
+    :global(p),
+    :global(div),
+    :global(ul),
+    :global(ol),
+    :global(pre) {
+      margin-bottom: 0.8em;
+      margin-top: 0.8em;
+    }
+
+    :global(pre) {
+      margin-left: calc(-1 * var(--spacing-content-horizontal-padding));
+      margin-right: calc(-1 * var(--spacing-content-horizontal-padding));
+      padding: 1em var(--spacing-content-horizontal-padding);
+      position: relative;
+      background-color: var(--theme-code-bg);
+      color: var(--theme-code-text);
+      line-height: 1.3;
+
+      overflow-y: hidden;
+      overflow-x: auto;
+
+      > :global(*) {
+        font-size: 0.9em;
+      }
+    }
+
+    :global(li) {
+      margin-top: 0em;
+
+      :global(pre) {
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 6px;
+      }
+    }
+  }
+</style>

@@ -1,0 +1,22 @@
+{
+  "name": "@example/blog",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "format": "npx prettier -w .",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "astro": "^0.22.17",
+    "prettier-plugin-astro": "^0.0.12",
+    "sass": "^1.49.0"
+  },
+  "dependencies": {
+    "@rebelchris/astro-static-tweet": "^0.0.6",
+    "dotenv": "^14.2.0",
+    "twitter-api-client": "^1.5.1"
+  }
+}

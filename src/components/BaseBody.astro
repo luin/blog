@@ -1,0 +1,40 @@
+---
+---
+
+<body>
+  <div class="wrapper">
+    <div class="logo">
+      <a href="/">
+        <img width="80" src="/assets/bio.jpg" />
+      </a>
+    </div>
+    <slot />
+  </div>
+</body>
+
+<style lang="scss">
+  .wrapper {
+    background-color: var(--color-content-background);
+    border-radius: 6px;
+    margin: 80px auto;
+    max-width: 48em;
+    padding: 2em var(--spacing-content-horizontal-padding);
+    width: 100%;
+  }
+
+  .logo {
+    display: flex;
+    justify-content: center;
+    margin: calc(-2em - 40px) auto 1em;
+
+    :global(img) {
+      border-radius: 50%;
+      border: 2px solid var(--color-content-background);
+      transition: border-color 0.4s;
+
+      &:hover {
+        border-color: var(--color-bg);
+      }
+    }
+  }
+</style>

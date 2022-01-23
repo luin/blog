@@ -1,0 +1,14 @@
+---
+import Layout from "layout:Base";
+import BlogPost from "../components/BlogPost.astro";
+
+const { content } = Astro.props;
+const { title, description, publishDate, author, heroImage, permalink, alt } =
+  content;
+---
+
+<Layout {title} {description} {permalink}>
+  <BlogPost {title} {author} {heroImage} {publishDate} {alt}>
+    <slot />
+  </BlogPost>
+</Layout>

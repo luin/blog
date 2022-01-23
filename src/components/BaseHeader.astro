@@ -1,0 +1,36 @@
+---
+import config from "config";
+---
+
+<header class="content">
+  <section class="intro">
+    <h1 class="site-name">{config.name}</h1>
+    <nav>
+      {config.nav.map(({ title, link }) => <a href={link}>{title}</a>)}
+    </nav>
+  </section>
+</header>
+
+<style lang="scss">
+  .intro {
+    padding-bottom: 2em;
+    margin-bottom: 2em;
+    border-bottom: 4px solid var(--theme-divider);
+    text-align: center;
+
+    :global(nav a) {
+      margin: 0 1em;
+    }
+  }
+
+  .site-name {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 0.3em;
+  }
+
+  .latest {
+    font-size: 2.5rem;
+    font-weight: 700;
+  }
+</style>

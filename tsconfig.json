@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "config": ["src/config.ts"],
+      "component:*": ["src/components/*.astro"],
+      "layout:*": ["src/layouts/*.astro"]
+    }
+  }
+}
