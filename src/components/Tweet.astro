@@ -12,12 +12,19 @@ interface Props {
 }
 
 const env = JSON.parse(JSON.stringify(process.env));
-const twitterClient = new TwitterClient({
-  apiKey: env["TWITTER_API_KEY"],
-  apiSecret: env["TWITTER_API_SECRET"],
-  accessToken: env["TWITTER_ACCESS_TOKEN"],
-  accessTokenSecret: env["TWITTER_ACCESS_TOKEN_SECRET"],
-});
+
+let twitterClient = null;
+const getClient = () => {
+  if (!twitterClient) {
+    twitterClient = new TwitterClient({
+      apiKey: env["TWITTER_API_KEY"],
+      apiSecret: env["TWITTER_API_SECRET"],
+      accessToken: env["TWITTER_ACCESS_TOKEN"],
+      accessTokenSecret: env["TWITTER_ACCESS_TOKEN_SECRET"],
+    });
+  }
+  return twitterClient;
+};
 
 const { id } = Astro.props;
 
@@ -30,7 +37,7 @@ try {
   const content = await fs.readFile(fetchedFile, "utf-8");
   data = JSON.parse(content);
 } catch (err) {
-  data = await twitterClient.tweets.statusesShow({
+  data = await getClient().tweets.statusesShow({
     id: id,
     tweet_mode: "extended",
   });
