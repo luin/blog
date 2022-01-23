@@ -18,7 +18,7 @@ export async function getStaticPaths({ rss }) {
     items: posts.map((post) => ({
       title: post.title,
       description: post.description,
-      link: post.permalink,
+      link: post.path,
       pubDate: post.publishDate,
     })),
     // Optional: Customize where the file is written to.
