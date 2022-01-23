@@ -1,0 +1,20 @@
+---
+import Mark from "./Mark.astro";
+import config from "config";
+const year = new Date().getFullYear();
+---
+
+<footer class="base-footer">
+  <p class="greeting"><Mark>Have a lovely day.</Mark></p>
+  <p class="copyright">© {year}, <a href={config.site}>Zihua Li</a>.</p>
+</footer>
+
+<style lang="scss">
+  .base-footer {
+    color: var(--color-naked-text);
+
+    :global(mark) {
+      color: var(--color-naked-text);
+    }
+  }
+</style>

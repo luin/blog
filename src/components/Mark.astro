@@ -1,0 +1,24 @@
+<mark><slot /></mark>
+
+<style>
+  mark {
+    position: relative;
+    background-color: transparent;
+    overflow: visible;
+    white-space: nowrap;
+  }
+
+  mark::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: auto;
+    left: -2px;
+    right: -2px;
+    bottom: 0.12em;
+    z-index: -1;
+    height: 0.5em;
+    border-radius: 0.5em;
+    background-color: var(--color-mark);
+  }
+</style>

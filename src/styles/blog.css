@@ -1,9 +1,11 @@
 :root {
-  --color-bg: #ebe7e0;
-  --color-content-background: #fcfbf9;
+  --color-bg: #F4EEE2;
+  --color-content-bg: #fcfbf9;
   --color-divider: #1e1d1c;
   --color: #000;
+  --color-naked-text: rgba(32,0,40,0.72);
   --color-muted: #96948f;
+  --color-mark: rgb(250, 227, 189);
 }
 
 :root {
