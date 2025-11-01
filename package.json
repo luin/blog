@@ -1,21 +1,40 @@
 {
-  "name": "@example/blog",
-  "version": "0.0.1",
+  "name": "zihua-blog",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "format": "npx prettier -w .",
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
-  },
-  "devDependencies": {
-    "astro": "^0.22.17",
-    "prettier-plugin-astro": "^0.0.12",
-    "sass": "^1.49.0"
+    "dev": "next dev",
+    "prebuild": "node scripts/generate-rss.js",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "export": "next build"
   },
   "dependencies": {
-    "dotenv": "^14.2.0",
-    "twitter-api-client": "^1.5.1"
+    "next": "14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@next/mdx": "^14.2.5",
+    "@mdx-js/loader": "^3.0.1",
+    "@mdx-js/react": "^3.0.1",
+    "@types/mdx": "^2.0.13",
+    "gray-matter": "^4.0.3",
+    "reading-time": "^1.5.0",
+    "remark": "^15.0.1",
+    "remark-html": "^16.0.1",
+    "date-fns": "^3.6.0",
+    "feed": "^4.2.2",
+    "glob": "^10.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.5",
+    "prettier": "^3.3.3",
+    "sass": "^1.77.8",
+    "typescript": "^5.5.3"
   }
 }

@@ -7,8 +7,6 @@ const config = {
   twitter: "luinlee",
   github: "luin",
   nav: [
-    // { title: "Posts", link: "/posts" },
-    // { title: "Projects", link: "/projects" },
     { title: "关于我", link: "/about-me" },
   ],
   googleAnalyticsTrackingId: "UA-46124852-1",

@@ -1,3 +1,35 @@
+/* Mark component styles */
+mark {
+  position: relative;
+  background-color: transparent;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+mark::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: auto;
+  left: -2px;
+  right: -2px;
+  bottom: 0.12em;
+  z-index: -1;
+  height: 0.5em;
+  border-radius: 0.5em;
+  background-color: var(--color-mark);
+}
+
+/* Footer component styles */
+.base-footer {
+  color: var(--color-naked-text);
+  padding: 0 var(--spacing-content-horizontal-padding);
+}
+
+.base-footer mark {
+  color: var(--color-naked-text);
+}
+
 :root {
   --color-bg: #F4EEE2;
   --color-content-bg: #fcfbf9;

@@ -1,0 +1,31 @@
+.hint {
+  border-radius: 4px;
+  padding: 1em 1.4em;
+  font-size: 14px;
+  margin: 2em 0;
+}
+
+.calloutTitle {
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 0.2em;
+}
+
+.hint p {
+  margin-top: 0;
+}
+
+.hint p:last-child {
+  margin-bottom: 0;
+}
+
+.hint[data-hint-type="info"] {
+  color: #333;
+  background-color: #efefef;
+}
+
+.hint[data-hint-type="warning"] {
+  color: #322306;
+  background-color: #fceccd;
+}
