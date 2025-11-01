@@ -4,7 +4,7 @@
         <title>子骅的个人站</title>
         <link>https://zihua.li</link>
         <description>Web developer and designer, technical book author. I build tools that help people do things better.</description>
-        <lastBuildDate>Sat, 01 Nov 2025 13:18:27 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 01 Nov 2025 13:50:01 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>zh-CN</language>
@@ -12,42 +12,42 @@
         <item>
             <title><![CDATA[不会日语，毕业之后去日本工作的有趣体验]]></title>
             <link>https://zihua.li/2020/06/first-job-in-japan</link>
-            <guid>https://zihua.li/2020/06/first-job-in-japan</guid>
+            <guid isPermaLink="false">https://zihua.li/2020/06/first-job-in-japan</guid>
             <pubDate>Sun, 07 Jun 2020 16:00:00 GMT</pubDate>
             <description><![CDATA[2013 年从北航本科毕业后，我去了日本工作。想想真的是一个很有趣的经历。]]></description>
         </item>
         <item>
             <title><![CDATA[写一个开源的 macOS 程序可以赚多少钱？]]></title>
             <link>https://zihua.li/2020/04/open-source-app-earn</link>
-            <guid>https://zihua.li/2020/04/open-source-app-earn</guid>
+            <guid isPermaLink="false">https://zihua.li/2020/04/open-source-app-earn</guid>
             <pubDate>Sun, 19 Apr 2020 16:00:00 GMT</pubDate>
             <description><![CDATA[五年前，我在 GitHub 开源了一个 macOS 上的 Redis 管理工具，取名 Medis，同时把它放到了 App Store 以 30 元一个的价格出售。换句话说，你既可以直接免费下载使用，也可以花 30 元购买，两者功能一样，全凭自愿。]]></description>
         </item>
         <item>
             <title><![CDATA[纯 CSS 实现打地鼠游戏]]></title>
             <link>https://zihua.li/2015/01/implement-pure-css-game</link>
-            <guid>https://zihua.li/2015/01/implement-pure-css-game</guid>
+            <guid isPermaLink="false">https://zihua.li/2015/01/implement-pure-css-game</guid>
             <pubDate>Fri, 16 Jan 2015 16:00:00 GMT</pubDate>
             <description><![CDATA[只借助 CSS 而不使用 JavaScript 来实现一个网页游戏并不需要什么新潮的技术，简单的几个选择器组合就能创造出意想不到的效果，再配合上 CSS3 的“绘图”能力，甚至可以做出不逊于 JavaScript 实现的网页游戏。]]></description>
         </item>
         <item>
             <title><![CDATA[Code Game 对技术的选取]]></title>
             <link>https://zihua.li/2014/11/talk-about-codegame</link>
-            <guid>https://zihua.li/2014/11/talk-about-codegame</guid>
+            <guid isPermaLink="false">https://zihua.li/2014/11/talk-about-codegame</guid>
             <pubDate>Thu, 06 Nov 2014 16:00:00 GMT</pubDate>
             <description><![CDATA[这篇日志将以偏技术的角度介绍我最近在做的业余项目 Code Game，其中我会解释 Code Game 对某些技术是如何进行取舍的，包括为什么不使用 CoffeeScript 以及选择 Myth 代替 Less/Sass 的原因。]]></description>
         </item>
         <item>
             <title><![CDATA[只需 4 步，手把手教你如何实现滤镜功能]]></title>
             <link>https://zihua.li/2014/06/implement-instagram-like-filters</link>
-            <guid>https://zihua.li/2014/06/implement-instagram-like-filters</guid>
+            <guid isPermaLink="false">https://zihua.li/2014/06/implement-instagram-like-filters</guid>
             <pubDate>Sat, 14 Jun 2014 16:00:00 GMT</pubDate>
             <description><![CDATA[滤镜对于照片而言，起到的是雪中送炭和锦上添花的作用。优秀的滤镜，能让随手之作显得别有风味，又能为已经绝色的照片画龙点睛。现在几乎凡是和照片相关的应用程序都有滤镜功能，而相较而言介绍滤镜原理和实现的文章又少之又少，为此我专门写了这篇文章来系统地讲解滤镜是如何实现的。]]></description>
         </item>
         <item>
             <title><![CDATA[Good Practices to Structure an Express App]]></title>
             <link>https://zihua.li/2014/05/good-practices-to-structure-an-express-app</link>
-            <guid>https://zihua.li/2014/05/good-practices-to-structure-an-express-app</guid>
+            <guid isPermaLink="false">https://zihua.li/2014/05/good-practices-to-structure-an-express-app</guid>
             <pubDate>Tue, 20 May 2014 16:00:00 GMT</pubDate>
             <description><![CDATA[Having heavily used the Express framework for 3 years, I’ve discovered a few patterns and conventions to structure an Express app. These patterns make my code significantly cleaner and easier to follow.
 ]]></description>
@@ -55,14 +55,14 @@
         <item>
             <title><![CDATA[在 Node.js 中测试模块的内部成员]]></title>
             <link>https://zihua.li/2014/03/test-private-methods-in-nodejs</link>
-            <guid>https://zihua.li/2014/03/test-private-methods-in-nodejs</guid>
+            <guid isPermaLink="false">https://zihua.li/2014/03/test-private-methods-in-nodejs</guid>
             <pubDate>Wed, 26 Mar 2014 16:00:00 GMT</pubDate>
             <description><![CDATA[模块（Module）的内部成员是指没有通过 module.exports 导出的变量或函数。本文将分别根据两种情况对如何测试模块内部成员进行介绍。]]></description>
         </item>
         <item>
             <title><![CDATA[Express 框架中间件的依赖问题与解决方案]]></title>
             <link>https://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares</link>
-            <guid>https://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares</guid>
+            <guid isPermaLink="false">https://zihua.li/2014/03/using-dependency-injection-to-optimise-express-middlewares</guid>
             <pubDate>Mon, 10 Mar 2014 16:00:00 GMT</pubDate>
             <description><![CDATA[Express 路由中间件的用法非常自由，导致开发时很容易写出难以维护的代码。这篇文章就将介绍路由中间件之间高耦合的问题以及相应的解决方案。
 ]]></description>
@@ -70,153 +70,153 @@
         <item>
             <title><![CDATA[纯 CSS 实现高度与宽度成比例的效果]]></title>
             <link>https://zihua.li/2013/12/keep-height-relevant-to-width-using-css</link>
-            <guid>https://zihua.li/2013/12/keep-height-relevant-to-width-using-css</guid>
+            <guid isPermaLink="false">https://zihua.li/2013/12/keep-height-relevant-to-width-using-css</guid>
             <pubDate>Sun, 08 Dec 2013 16:00:00 GMT</pubDate>
         </item>
         <item>
             <title><![CDATA[我的 Vim 常用插件和键位映射配置]]></title>
             <link>https://zihua.li/2013/11/my-vim-configuration-plugin</link>
-            <guid>https://zihua.li/2013/11/my-vim-configuration-plugin</guid>
+            <guid isPermaLink="false">https://zihua.li/2013/11/my-vim-configuration-plugin</guid>
             <pubDate>Sat, 16 Nov 2013 16:00:00 GMT</pubDate>
             <description><![CDATA[写给那些从来不使用别人的 Vim 的人。]]></description>
         </item>
         <item>
             <title><![CDATA[减少异步嵌套，Express-promise]]></title>
             <link>https://zihua.li/2013/09/express-promise</link>
-            <guid>https://zihua.li/2013/09/express-promise</guid>
+            <guid isPermaLink="false">https://zihua.li/2013/09/express-promise</guid>
             <pubDate>Tue, 10 Sep 2013 16:00:00 GMT</pubDate>
             <description><![CDATA[在使用 Express 框架开发网站或 API 时，经常会因为 Node.js 的异步流程造成逻辑代码中嵌套回调函数过多的问题。]]></description>
         </item>
         <item>
             <title><![CDATA[开源的数据统计可视化工具：Ranaly]]></title>
             <link>https://zihua.li/2013/02/an-open-source-tool-for-data-statistics</link>
-            <guid>https://zihua.li/2013/02/an-open-source-tool-for-data-statistics</guid>
+            <guid isPermaLink="false">https://zihua.li/2013/02/an-open-source-tool-for-data-statistics</guid>
             <pubDate>Sat, 16 Feb 2013 16:00:00 GMT</pubDate>
             <description><![CDATA[不少互联网项目都需要对项目的数据，如用户数量的增长趋势、最近注册的用户列表和当前在线用户数量等进行统计，而我最近在做的项目需要将这些统计数据以图表的形式展现出来。]]></description>
         </item>
         <item>
             <title><![CDATA[最近入手的数码产品]]></title>
             <link>https://zihua.li/2012/11/my-last-digital-acquisition</link>
-            <guid>https://zihua.li/2012/11/my-last-digital-acquisition</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/11/my-last-digital-acquisition</guid>
             <pubDate>Sun, 18 Nov 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[博客很久没有更新了，最近计划出版一本 Redis 的入门书籍，所以时间都放到写书上了。]]></description>
         </item>
         <item>
             <title><![CDATA[人生苦短，我用双拼]]></title>
             <link>https://zihua.li/2012/08/learning-shuangpin-to-save-your-time</link>
-            <guid>https://zihua.li/2012/08/learning-shuangpin-to-save-your-time</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/08/learning-shuangpin-to-save-your-time</guid>
             <pubDate>Sat, 18 Aug 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[这篇文章写给使用全拼的人（怎么知道我用的是不是全拼？答：如果你不知道你在用什么输入法，那你很可能在用全拼）。]]></description>
         </item>
         <item>
             <title><![CDATA[Web 开发者怎么学 Node.js]]></title>
             <link>https://zihua.li/2012/08/start-from-scratch-learning-node-js-for-web-developer</link>
-            <guid>https://zihua.li/2012/08/start-from-scratch-learning-node-js-for-web-developer</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/08/start-from-scratch-learning-node-js-for-web-developer</guid>
             <pubDate>Sat, 11 Aug 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[如果你是一个 Web 开发者，想必你一定听过 Node.js。]]></description>
         </item>
         <item>
             <title><![CDATA[直播: 豌豆荚Hack Day!]]></title>
             <link>https://zihua.li/2012/07/wandoujia-hack-day-live</link>
-            <guid>https://zihua.li/2012/07/wandoujia-hack-day-live</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/07/wandoujia-hack-day-live</guid>
             <pubDate>Sun, 22 Jul 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[前天和昨天参加了豌豆荚的 Hack Day，这次 Hack Day 的主题是“Hi Web, High Web! ”，要求是使用豌豆荚百宝袋创建一个 Web 应用。]]></description>
         </item>
         <item>
             <title><![CDATA[使用Redis做产品统计的两种模式]]></title>
             <link>https://zihua.li/2012/07/two-patterns-of-statistics-using-redis</link>
-            <guid>https://zihua.li/2012/07/two-patterns-of-statistics-using-redis</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/07/two-patterns-of-statistics-using-redis</guid>
             <pubDate>Fri, 13 Jul 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[产品运行过程中及时记录收集并分析统计数据对产品的持续改进有重要的指导作用。]]></description>
         </item>
         <item>
             <title><![CDATA[体验傲游浏览器 Mac 版后的吐槽]]></title>
             <link>https://zihua.li/2012/07/maxthon-mac</link>
-            <guid>https://zihua.li/2012/07/maxthon-mac</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/07/maxthon-mac</guid>
             <pubDate>Wed, 04 Jul 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[今天获得了傲游浏览器 Mac 版的内测资格，下载体验过后，决定吐槽一下。]]></description>
         </item>
         <item>
             <title><![CDATA[小谈“微创新”—中国互联网怎么了]]></title>
             <link>https://zihua.li/2012/06/talk-about-copy</link>
-            <guid>https://zihua.li/2012/06/talk-about-copy</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/06/talk-about-copy</guid>
             <pubDate>Sat, 16 Jun 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[从 Facebook 到人人网，从 Quora 到知乎，再从 Path 到朋友圈，中国互联网一直很善于模仿国外优秀的产品并御其于国门之外。]]></description>
         </item>
         <item>
             <title><![CDATA[MySQL 迁移到 Redis 记]]></title>
             <link>https://zihua.li/2012/05/mysql-to-redis</link>
-            <guid>https://zihua.li/2012/05/mysql-to-redis</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/05/mysql-to-redis</guid>
             <pubDate>Sat, 19 May 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[前些日子，一个悠闲又不悠闲的下午，我还在用 Node.js 写着某个移动互联网应用的 API 服务端。]]></description>
         </item>
         <item>
             <title><![CDATA[纪念人生中收到的第一枚假币]]></title>
             <link>https://zihua.li/2012/05/first-bogus-banknote-i-received</link>
-            <guid>https://zihua.li/2012/05/first-bogus-banknote-i-received</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/05/first-bogus-banknote-i-received</guid>
             <pubDate>Sun, 13 May 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[今天中午叫了外卖，掏钱结账时送餐的小伙拿着我给的 50 元钱看了半天跟我说是假币，我半信半疑地拿过来仔细看了看，发现确实是假的，纸张的质感差距很大。]]></description>
         </item>
         <item>
             <title><![CDATA[我常用的 Mac 和 iPhone 软件]]></title>
             <link>https://zihua.li/2012/04/most-commonly-used-software-in-mac-iphone</link>
-            <guid>https://zihua.li/2012/04/most-commonly-used-software-in-mac-iphone</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/04/most-commonly-used-software-in-mac-iphone</guid>
             <pubDate>Wed, 04 Apr 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[最近买了 Reeder 的 iOS 版，感觉甚爽，尤其是和 Read it later 配合使用，给大家推荐一下。]]></description>
         </item>
         <item>
             <title><![CDATA[让阅读更轻松，readability for node.js发布]]></title>
             <link>https://zihua.li/2012/03/node-readability-release</link>
-            <guid>https://zihua.li/2012/03/node-readability-release</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/03/node-readability-release</guid>
             <pubDate>Fri, 30 Mar 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[Readability 是从一个开源项目发展而来的产品，该项目托管在Google Code上，不过现在已经不再维护。]]></description>
         </item>
         <item>
             <title><![CDATA[module.exports 还是 exports？]]></title>
             <link>https://zihua.li/2012/03/use-module-exports-or-exports-in-node</link>
-            <guid>https://zihua.li/2012/03/use-module-exports-or-exports-in-node</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/03/use-module-exports-or-exports-in-node</guid>
             <pubDate>Thu, 29 Mar 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[Node.js 通过实现 CommonJS 的 Modules/1.0 标准引入了模块（Module）概念，一个模块可以通过 `module.exports` 或 `exports` 将函数、变量等导出，以使其它 JavaScript 脚本通过 `require()` 函数引入并使用。]]></description>
         </item>
         <item>
             <title><![CDATA[入手神器 TL-WR703N 一日谈]]></title>
             <link>https://zihua.li/2012/03/about-tl-wr703n</link>
-            <guid>https://zihua.li/2012/03/about-tl-wr703n</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/03/about-tl-wr703n</guid>
             <pubDate>Thu, 15 Mar 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[有这样一个无线路由器：它支持 OpenWrt，支持 USB，支持 3G 拨号，能通过电脑 USB 接口充电，也可以反过来给手机充电，只有信用卡的一半大小。]]></description>
         </item>
         <item>
             <title><![CDATA[小谈网站用户验证系统的设计]]></title>
             <link>https://zihua.li/2012/03/user-authentication-design</link>
-            <guid>https://zihua.li/2012/03/user-authentication-design</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/03/user-authentication-design</guid>
             <pubDate>Sat, 10 Mar 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[现在几乎每个 Web2.0 网站都有会员管理模块，那怎样设计用户验证系统才能保证用户的账户安全呢？]]></description>
         </item>
         <item>
             <title><![CDATA[编码问题导致的 Headers already sent 错误]]></title>
             <link>https://zihua.li/2012/03/utf-8-with-bom-headers-already-sent</link>
-            <guid>https://zihua.li/2012/03/utf-8-with-bom-headers-already-sent</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/03/utf-8-with-bom-headers-already-sent</guid>
             <pubDate>Sun, 04 Mar 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[前些日子同学找我来说我帮他做的网站的注册功能失效了。]]></description>
         </item>
         <item>
             <title><![CDATA[SIM 卡剪卡想悲剧都难]]></title>
             <link>https://zihua.li/2012/03/micro-sim</link>
-            <guid>https://zihua.li/2012/03/micro-sim</guid>
+            <guid isPermaLink="false">https://zihua.li/2012/03/micro-sim</guid>
             <pubDate>Sun, 04 Mar 2012 16:00:00 GMT</pubDate>
             <description><![CDATA[最近入手了部 iPhone 4 8GB，买时联通营业厅已经不提供给老用户的 iPhone 合约机套餐了，想要套餐就得用新号。]]></description>
         </item>
         <item>
             <title><![CDATA[实现 vertical-align 的几种办法]]></title>
             <link>https://zihua.li/2011/07/implement-vertical-align</link>
-            <guid>https://zihua.li/2011/07/implement-vertical-align</guid>
+            <guid isPermaLink="false">https://zihua.li/2011/07/implement-vertical-align</guid>
             <pubDate>Wed, 06 Jul 2011 16:00:00 GMT</pubDate>
             <description><![CDATA[本文将介绍几种在 CSS 中实现垂直居中的几种方法。]]></description>
         </item>
         <item>
             <title><![CDATA[PHP 实现单例模式]]></title>
             <link>https://zihua.li/2011/06/singleton-in-php</link>
-            <guid>https://zihua.li/2011/06/singleton-in-php</guid>
+            <guid isPermaLink="false">https://zihua.li/2011/06/singleton-in-php</guid>
             <pubDate>Thu, 16 Jun 2011 16:00:00 GMT</pubDate>
             <description><![CDATA[目前的一个项目有几个模块需要实现单例模式，于是想实现一个 Singleton 基类来使这些模块通过继承该基类实现 Singleton。]]></description>
         </item>

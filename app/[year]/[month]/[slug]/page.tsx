@@ -7,11 +7,11 @@ import config from "@/lib/config";
 import { MDXContent } from "@/components/MDXContent";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     year: string;
     month: string;
     slug: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -30,8 +30,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const slug = `${params.year}/${params.month}/${params.slug}`;
-  const post = await getPostBySlug(slug);
+  const { year, month, slug } = await params;
+  const fullSlug = `${year}/${month}/${slug}`;
+  const post = await getPostBySlug(fullSlug);
 
   if (!post) {
     return {};
@@ -45,7 +46,7 @@ export async function generateMetadata({
       description: post.description,
       type: "article",
       publishedTime: post.publishDate,
-      url: `${config.site}/${slug}`,
+      url: `${config.site}/${fullSlug}`,
       images: post.heroImage ? [post.heroImage] : undefined,
     },
     twitter: {
@@ -58,8 +59,9 @@ export async function generateMetadata({
 }
 
 export default async function PostPage({ params }: PageProps) {
-  const slug = `${params.year}/${params.month}/${params.slug}`;
-  const post = await getPostBySlug(slug);
+  const { year, month, slug } = await params;
+  const fullSlug = `${year}/${month}/${slug}`;
+  const post = await getPostBySlug(fullSlug);
 
   if (!post) {
     notFound();
