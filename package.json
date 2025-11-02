@@ -1,40 +1,24 @@
 {
-  "name": "zihua-blog",
+  "name": "blog",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/generate-rss.js",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "format": "prettier --write .",
+    "lint": "eslint",
     "export": "next build"
   },
   "dependencies": {
-    "next": "16.0.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@next/mdx": "^16.0.1",
-    "@mdx-js/loader": "^3.1.0",
-    "@mdx-js/react": "^3.1.0",
-    "@types/mdx": "^2.0.13",
-    "gray-matter": "^4.0.3",
-    "reading-time": "^1.5.0",
-    "remark": "^15.0.1",
-    "remark-html": "^16.0.1",
-    "date-fns": "^4.1.0",
-    "feed": "^5.1.0",
-    "glob": "^11.0.0"
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "next": "16.0.1"
   },
   "devDependencies": {
-    "@types/node": "^24.9.2",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "eslint": "^9.39.0",
-    "eslint-config-next": "16.0.1",
-    "prettier": "^3.6.2",
-    "sass": "^1.93.3",
-    "typescript": "^5.9.3"
+    "babel-plugin-react-compiler": "1.0.0",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.1"
   }
 }

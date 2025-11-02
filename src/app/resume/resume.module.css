@@ -1,0 +1,438 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+
+body:has(.main) {
+  font-size: 16px;
+}
+
+.main {
+  background: #fffdf7;
+  border: 0.2mm solid #f0f0f0;
+  margin: 10mm auto;
+  height: 297mm;
+  width: 210mm;
+  padding: 10mm 10mm;
+  transition: border-color 0.2s;
+  font-family: var(--font-noto-serif), serif;
+  font-size: 3.4mm;
+  color: #111;
+  line-height: normal;
+}
+
+.main,
+.footer {
+  zoom: 1.2;
+}
+
+.main:hover {
+  border-color: #dedada;
+}
+
+.main p {
+  margin-block: 1em;
+  line-height: normal;
+}
+
+.main a {
+  text-decoration: underline;
+}
+
+.main h1 {
+  margin: 0;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.main h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  font-family: var(--font-funnel-display), sans-serif;
+  margin-block: 0.83em;
+}
+
+.email {
+  color: #000;
+}
+
+.main a {
+  color: inherit;
+}
+
+.article {
+  display: flex;
+  gap: 10mm;
+}
+
+.left {
+  flex: 6;
+}
+
+.right {
+  flex: 9;
+}
+
+.section {
+  margin-bottom: 2em;
+}
+
+.section h2 {
+  font-family: var(--font-funnel-display), sans-serif;
+  padding: 0.2em 0;
+  margin-bottom: -2mm;
+}
+
+.experience {
+  display: grid;
+  grid-template-areas: "title location" "subtitle subtitle" "description description" "link link";
+  grid-template-columns: max-content 1fr;
+  gap: 0.2mm;
+  margin-top: 1em;
+}
+
+.experience + .experience {
+  margin-top: 2em;
+}
+
+.experience:not(:has(.experienceDescription)) + .experience {
+  margin-top: 0.5em;
+}
+
+.experienceCompany {
+  grid-area: title;
+  font-size: larger;
+}
+
+.experienceLocation {
+  display: flex;
+  align-items: center;
+  grid-area: location;
+  justify-self: end;
+  color: #666;
+}
+
+.experienceLocationRemote::before {
+  content: "Remote";
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+  text-transform: uppercase;
+  font-size: xx-small;
+  background-color: #333;
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  margin-right: 0.5em;
+  color: #fff;
+}
+
+.experienceTitle {
+  grid-area: subtitle;
+  color: #666;
+}
+
+.experienceTitle ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.experienceDescription {
+  grid-area: description;
+  color: #000;
+  margin-top: 0.5em;
+}
+
+.experienceLink {
+  grid-area: link;
+}
+
+.publication {
+  grid-template-areas: "title" "subtitle" "description" "link";
+  grid-template-columns: 1fr;
+  display: grid;
+  gap: 0.2mm 0.8em;
+  margin-top: 1em;
+}
+
+.publication + .publication {
+  margin-top: 2em;
+}
+
+.publicationTitle {
+  font-size: larger;
+  grid-area: title;
+}
+
+.publicationSubtitle {
+  color: #666;
+  grid-area: subtitle;
+}
+
+.publicationDescription {
+  margin-top: 0.5em;
+  color: #000;
+  grid-area: description;
+}
+
+.publicationLink {
+  margin-top: 1mm;
+  color: #000;
+  grid-area: link;
+}
+
+.publicationIndex {
+  background: #333;
+  color: #fff;
+  grid-area: index;
+  height: 2em;
+  width: 2em;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.project {
+  display: grid;
+  grid-template-areas: "title link" "description description";
+  grid-template-columns: 1fr max-content;
+  gap: 0.2mm;
+  margin-top: 1em;
+}
+
+.project + .project {
+  margin-top: 2em;
+}
+
+.projectTitle {
+  font-size: larger;
+  grid-area: title;
+  font-weight: 600;
+}
+
+.projectDescription {
+  margin-top: 0.5em;
+  color: #000;
+  grid-area: description;
+}
+
+.projectLink {
+  color: #000;
+  grid-area: link;
+}
+
+.workExperience {
+  border-left: 0.5mm solid #333;
+  padding-left: 1em;
+}
+
+.workExperience .experienceCompany {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.workExperience .experienceCompany::before {
+  position: absolute;
+  left: -1.12em;
+  content: "";
+  height: 0.5em;
+  width: 0.5em;
+  background-color: #333;
+  border-radius: 50%;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.contacts {
+  display: flex;
+  flex-direction: row;
+  margin-top: -0.5em;
+  gap: 1em;
+}
+
+.contactGithub {
+  background: url(/github.svg) no-repeat left center;
+  background-size: 1em 1em;
+  padding-left: 1.3em;
+}
+
+.contactX {
+  background: url(/x.png) no-repeat left center;
+  background-size: 1em 1em;
+  padding-left: 1.3em;
+}
+
+.main ul {
+  padding-left: 2em;
+}
+
+.date::before {
+  content: " • ";
+}
+
+.experienceTitle ol,
+.publicationSubtitle ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.main p:first-child {
+  margin-top: 0;
+}
+
+.main p:last-child {
+  margin-bottom: 0;
+}
+
+.footer {
+  max-width: 210mm;
+  margin: 2em auto;
+  padding: 1.5em 2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e0e0e0;
+  font-family: var(--font-noto-serif), serif;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.footerActions {
+  display: flex;
+  gap: 1.5em;
+  align-items: center;
+}
+
+.printButton {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 0.5em 1.5em;
+  border-radius: 0.3em;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.printButton:hover {
+  background: #555;
+}
+
+.homeLink {
+  color: #333;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  border: 1px solid #333;
+  border-radius: 0.3em;
+  transition: all 0.2s ease;
+}
+
+.homeLink:hover {
+  background: #333;
+  color: white;
+}
+
+/* Print styles - ensure proper layout when printing */
+@media print {
+  html,
+  body {
+    width: 210mm;
+    height: 297mm;
+  }
+
+  .main {
+    margin: 0;
+    border: 0;
+    background: #fff;
+    width: 210mm !important;
+    height: 297mm !important;
+    padding: 10mm 10mm;
+    zoom: 1;
+  }
+
+  .main a {
+    text-decoration: none;
+  }
+
+  /* Ensure two-column layout is maintained when printing */
+  .article {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10mm !important;
+  }
+
+  .left {
+    flex: 6 !important;
+  }
+
+  .right {
+    flex: 9 !important;
+  }
+
+  /* Hide footer when printing */
+  .footer {
+    display: none;
+  }
+
+  /* Ensure proper font sizes for print */
+  .main {
+    font-size: 3.4mm !important;
+  }
+
+  /* Page break control */
+  .section {
+    page-break-inside: avoid;
+  }
+
+  .experience,
+  .project,
+  .publication {
+    page-break-inside: avoid;
+  }
+}
+
+@media (max-width: 1000px) {
+  .main,
+  .footer {
+    zoom: 1;
+  }
+}
+
+@media (max-width: 800px) {
+  .main {
+    width: 90%;
+    height: auto;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 1em;
+    text-align: center;
+    padding: 1em;
+  }
+
+  .footerActions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.8em;
+  }
+
+  .printButton,
+  .homeLink {
+    width: 100%;
+    text-align: center;
+  }
+
+  .article {
+    flex-direction: column;
+  }
+}
