@@ -398,6 +398,12 @@ body:has(.main) {
   .publication {
     page-break-inside: avoid;
   }
+
+  .contactGithub,
+  .contactX {
+    background: none !important;
+    padding-left: 0 !important;
+  }
 }
 
 @media (max-width: 1000px) {
